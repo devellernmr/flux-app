@@ -4,8 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardContent,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -40,7 +38,7 @@ export function Dashboard() {
       } = await supabase.auth.getUser();
       setUser(user);
       if (user) {
-        const { data, error } = await supabase
+        const { data, error: _error } = await supabase
           .from("projects")
           .select("*")
           .eq("owner_id", user.id)
