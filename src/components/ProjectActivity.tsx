@@ -41,9 +41,7 @@ export function ProjectActivity({ projectId }: { projectId: string }) {
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'comments' },
-        (payload) => {
-          // Quando entra um comentário novo, recarregamos a lista
-          // (Poderíamos otimizar pra checar se é desse projeto, mas fetch é rápido)
+        () => {
           fetchActivity(); 
         }
       )
