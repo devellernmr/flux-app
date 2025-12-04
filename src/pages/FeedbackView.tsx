@@ -30,7 +30,7 @@ export function FeedbackView() {
           table: "comments",
           filter: `file_id=eq.${fileId}`,
         },
-        (payload) => {
+        () => {
           fetchComments();
         }
       )

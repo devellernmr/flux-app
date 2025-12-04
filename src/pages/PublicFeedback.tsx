@@ -65,15 +65,6 @@ export function PublicFeedback() {
   };
 
   const handleApprove = async () => {
-    // 1. Atualiza status no banco (precisamos criar essa coluna 'status' na tabela files se não existir)
-    // Por enquanto vamos salvar num campo metadata ou apenas simular visualmente se não tiver a coluna.
-    // Vamos assumir que vamos criar a coluna 'status' na tabela 'files' no próximo passo.
-    
-    /* 
-       -- SQL Necessário: 
-       alter table files add column status text default 'pending'; 
-       create policy "Public can update files" on files for update using (true);
-    */
 
     const { error } = await supabase.from('files').update({ status: 'approved' }).eq('id', fileId);
     
