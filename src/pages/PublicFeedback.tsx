@@ -2,8 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, CheckCircle2, User } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { CheckCircle2, User } from "lucide-react";
 import { toast } from "sonner";
 import confetti from "canvas-confetti"; // Vamos instalar isso já já
 

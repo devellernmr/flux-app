@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback,  } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageSquare, User } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
-// import { ptBR } from "date-fns/locale"; // Se quiser datas em PT-BR instale date-fns
+import { MessageSquare } from "lucide-react";
 
 interface ActivityItem {
   id: number;

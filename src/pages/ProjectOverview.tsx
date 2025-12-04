@@ -44,7 +44,10 @@ export function ProjectOverview() {
     setLoading(false);
   }
 
-  const loadTemplate = (key: any) => { setBlocks([...BRIEFING_TEMPLATES[key].blocks]); setIsEditing(true); };
+const loadTemplate = (key: keyof typeof BRIEFING_TEMPLATES) => { setBlocks([...BRIEFING_TEMPLATES[key].blocks]); 
+    setIsEditing(true); 
+};
+
   const updateBlock = (i: number, f: any, v: any) => { const n = [...blocks]; n[i] = { ...n[i], [f]: v }; setBlocks(n); };
   const removeBlock = (i: number) => setBlocks(blocks.filter((_, x) => x !== i));
   const addBlock = () => setBlocks([...blocks, { id: Date.now().toString(), type: 'text', label: "" }]);
