@@ -1,5 +1,5 @@
 {
-    "rewrites": [
-        { "sounce": "/(.*)", "destination": "/index.html"}
-    ]
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/" }
+  ]
 }
