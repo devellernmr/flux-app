@@ -6,6 +6,9 @@ import { Toaster } from "@/components/ui/sonner"; // Importe do Toast
 import { Dashboard } from "@/pages/Dashboard";
 import { ProjectOverview } from "./pages/ProjectOverview";
 import { PublicBriefing } from "@/pages/PublicBriefing";
+import { FeedbackView } from "@/pages/FeedbackView";
+import { PublicFeedback } from "@/pages/PublicFeedback";
+
 
 // Dashboard Temporário (Para teste)
 
@@ -33,6 +36,8 @@ function App() {
         <Route path="/dashboard" element={session ? <Dashboard /> : <Navigate to="/" />} />
         <Route path="/project/:id" element={<ProjectOverview />} />
         <Route path="/share/:id" element={<PublicBriefing />} />
+        <Route path="/file/:fileId" element={<FeedbackView />} />
+        <Route path="/share/design/:fileId" element={<PublicFeedback />} />
       </Routes>
       <Toaster richColors theme="dark" /> {/* Componente que exibe as mensagens */}
     </BrowserRouter>

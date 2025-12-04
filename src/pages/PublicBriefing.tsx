@@ -4,13 +4,15 @@ import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { CheckCircle2, Loader2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { CheckCircle2, Loader2, UploadCloud } from "lucide-react";
 import { toast } from "sonner";
+import type { BriefingBlock } from "@/lib/templates";
 
 export function PublicBriefing() {
   const { id } = useParams(); 
   const [briefing, setBriefing] = useState<any>(null);
-  const [answers, setAnswers] = useState<string[]>([]);
+  const [blocks, setBlocks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [completed, setCompleted] = useState(false);
@@ -19,38 +21,41 @@ export function PublicBriefing() {
     async function fetchBriefing() {
       if (!id) return;
       const { data, error } = await supabase.from('briefings').select('*, projects(name)').eq('id', id).single();
+      
       if (error) {
-         console.error(error); // Log erro no console para debug
-         setLoading(false); // Para de carregar mesmo com erro
+         toast.error("Briefing not found");
          return;
       }
       setBriefing(data);
+      
       if (data.content) {
-          // Inicializa respostas vazias, mas respeita se já tiver algo salvo (opcional)
-          setAnswers(new Array(data.content.length).fill(""));
+          // Carrega o conteúdo do banco (que já tem a estrutura de blocos)
+          setBlocks(data.content);
       }
       setLoading(false);
     }
     fetchBriefing();
   }, [id]);
 
+  const handleInputChange = (index: number, value: string) => {
+      const newBlocks = [...blocks];
+      newBlocks[index].answer = value; // Salva a resposta dentro do próprio objeto do bloco
+      setBlocks(newBlocks);
+  };
+
   const submitBriefing = async () => {
-    if (answers.some(a => a.trim() === "")) {
-        toast.error("Please answer all questions.");
-        return;
-    }
+    // Validação simples: checa se tem alguma resposta vazia (opcional)
+    // if (blocks.some(b => !b.answer || b.answer.trim() === "")) {
+    //     toast.error("Please answer all questions.");
+    //     return;
+    // }
 
     setSubmitting(true);
     
-    const finalContent = briefing.content.map((item: any, index: number) => ({
-        question: item.question,
-        answer: answers[index]
-    }));
-
     const { error } = await supabase
         .from('briefings')
         .update({ 
-            content: finalContent,
+            content: blocks, // Salva o array inteiro atualizado com as respostas
             status: 'sent'
         })
         .eq('id', id);
@@ -66,8 +71,6 @@ export function PublicBriefing() {
 
   if (loading) return <div className="h-screen bg-[#050505] flex items-center justify-center text-white">Loading Briefing...</div>;
   
-  if (!briefing) return <div className="h-screen bg-[#050505] flex items-center justify-center text-white">Briefing not found.</div>;
-
   if (completed) return (
     <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center text-white p-4 text-center">
         <div className="bg-green-500/20 p-6 rounded-full mb-6">
@@ -75,7 +78,7 @@ export function PublicBriefing() {
         </div>
         <h1 className="text-3xl font-bold mb-2">Thank You!</h1>
         <p className="text-slate-400 max-w-md">
-            Your answers have been sent to the design team. We will start working on your project immediately.
+            Your answers have been sent to the design team.
         </p>
     </div>
   );
@@ -85,7 +88,7 @@ export function PublicBriefing() {
       <div className="max-w-2xl mx-auto space-y-8">
         
         <div className="text-center space-y-2">
-            <img src="/logo.svg" className="h-8 w-auto mx-auto mb-6 opacity-50" alt="Logo" />
+            <div className="bg-slate-800 p-2 rounded text-xs font-bold text-slate-300 inline-block mb-4">FLUXO</div>
             <h1 className="text-3xl font-bold">Project Briefing</h1>
             <p className="text-slate-400">for {briefing?.projects?.name}</p>
         </div>
@@ -93,31 +96,56 @@ export function PublicBriefing() {
         <Card className="bg-[#0F1216] border-slate-800 text-white">
             <CardHeader>
                 <CardTitle>Please answer carefully</CardTitle>
-                <CardDescription>These answers will guide the entire design process.</CardDescription>
+                <CardDescription>These answers will guide the design process.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-8">
-                {briefing.content.map((item: any, index: number) => (
+                {blocks.map((block: BriefingBlock & { answer?: string }, index) => (
                     <div key={index} className="space-y-3">
                         <label className="block text-base font-medium text-slate-200">
                             <span className="text-blue-500 mr-2">{index + 1}.</span>
-                            {item.question}
+                            {block.label}
                         </label>
-                        <Textarea 
-                            placeholder="Type your answer here..."
-                            className="bg-[#050505] border-slate-800 min-h-[100px] text-white focus:ring-blue-600"
-                            value={answers[index]}
-                            onChange={(e) => {
-                                const newAns = [...answers];
-                                newAns[index] = e.target.value;
-                                setAnswers(newAns);
-                            }}
-                        />
+                        
+                        {/* Renderiza o input baseado no TIPO do bloco */}
+                        {block.type === 'textarea' ? (
+                            <Textarea 
+                                placeholder={block.placeholder || "Type your answer here..."}
+                                className="bg-[#050505] border-slate-800 min-h-[100px] text-white focus:ring-blue-600"
+                                value={block.answer || ''}
+                                onChange={(e) => handleInputChange(index, e.target.value)}
+                            />
+                        ) : block.type === 'select' ? (
+                            <select
+                                className="w-full bg-[#050505] border border-slate-800 rounded-md p-3 text-white focus:outline-none focus:border-blue-600"
+                                value={block.answer || ''}
+                                onChange={(e) => handleInputChange(index, e.target.value)}
+                            >
+                                <option value="" disabled>Select an option...</option>
+                                {block.options?.map(opt => (
+                                    <option key={opt} value={opt}>{opt}</option>
+                                ))}
+                            </select>
+                        ) : block.type === 'upload' ? (
+                           <div className="border-2 border-dashed border-slate-800 rounded-lg p-6 text-center hover:bg-slate-900/50 transition-colors cursor-pointer">
+                               <UploadCloud className="h-8 w-8 text-slate-500 mx-auto mb-2" />
+                               <p className="text-sm text-slate-400">Upload functionality coming soon</p>
+                               {/* (Futuramente implementaremos o upload aqui) */}
+                           </div>
+                        ) : (
+                            <Input 
+                                type="text"
+                                placeholder={block.placeholder || "Type your answer here..."}
+                                className="bg-[#050505] border-slate-800 text-white focus:ring-blue-600 h-12"
+                                value={block.answer || ''}
+                                onChange={(e) => handleInputChange(index, e.target.value)}
+                            />
+                        )}
                     </div>
                 ))}
 
                 <Button 
                     size="lg" 
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold h-12 text-lg"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold h-12 text-lg mt-8"
                     onClick={submitBriefing}
                     disabled={submitting}
                 >
