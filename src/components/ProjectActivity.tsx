@@ -25,7 +25,7 @@ export function ProjectActivity({ projectId }: { projectId: string }) {
   const fetchActivity = async () => {
     // Busca comentários de TODOS os arquivos deste projeto
     // O truque é usar o !inner para filtrar pela tabela relacionada
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('comments')
       .select('*, files!inner(project_id, name)')
       .eq('files.project_id', projectId)
