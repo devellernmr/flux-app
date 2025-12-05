@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
-import { useNavigate, useParams, Link } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -113,7 +113,6 @@ const PRESET_TEMPLATES: any = {
 
 export function ProjectOverview() {
   const { id } = useParams();
-  const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
   const [project, setProject] = useState<any>(null);
   const [loading, setLoading] = useState(true);
