@@ -6,8 +6,7 @@ import {
   Card,
   CardHeader,
   CardTitle,
-  CardDescription,
-  CardContent,
+  CardDescription
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -22,7 +21,6 @@ import {
 } from "@/components/ui/dialog";
 import {
   Folder,
-  Settings,
   Loader2,
   Sparkles,
   ArrowLeft,
@@ -34,13 +32,11 @@ import {
   Layout,
   Menu,
   X,
-  Share2,
   CheckCircle2,
   Trash2,
   Save,
   ExternalLink,
   AlertTriangle,
-  MessageSquare,
   PanelRightClose,
   PanelRightOpen,
 } from "lucide-react";
