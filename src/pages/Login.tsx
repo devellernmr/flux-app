@@ -27,7 +27,7 @@ export function Login() {
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
+
     if (isSignUp) {
       const { error } = await supabase.auth.signUp({
         email,
@@ -36,7 +36,9 @@ export function Login() {
       if (error) {
         toast.error("Erro ao criar conta", { description: error.message });
       } else {
-        toast.success("Conta criada!", { description: "Verifique seu e-mail ou faça login." });
+        toast.success("Conta criada!", {
+          description: "Verifique seu e-mail ou faça login.",
+        });
       }
     } else {
       // Login
@@ -44,17 +46,17 @@ export function Login() {
         email,
         password,
       });
-      if (error) toast.error("Credenciais inválidas", { description: error.message });
+      if (error)
+        toast.error("Credenciais inválidas", { description: error.message });
     }
     setLoading(false);
   };
 
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center bg-[#050505] text-white relative overflow-hidden font-sans p-4">
-      
       <div className="absolute inset-0 pointer-events-none opacity-30">
-         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px]" />
-         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-900/10 rounded-full blur-[120px]" />
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px]" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-900/10 rounded-full blur-[120px]" />
       </div>
 
       <div className="absolute top-0 left-0 w-full flex justify-between items-center p-6 md:p-8 z-20">
@@ -64,8 +66,8 @@ export function Login() {
           <span className="text-sm text-gray-400 hidden sm:inline-block">
             {isSignUp ? "Already have an account?" : "Don't have an account?"}
           </span>
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             size="sm"
             className="text-blue-500 hover:text-blue-400 hover:bg-blue-900/20"
             onClick={() => setIsSignUp(!isSignUp)}
@@ -81,12 +83,14 @@ export function Login() {
             {isSignUp ? "Create an account." : "Welcome to Fluxs."}
           </h1>
           <p className="text-gray-400">
-            {isSignUp ? "Start your 7-day free trial." : "Please enter your details."}
+            {isSignUp
+              ? "Start your 7-day free trial."
+              : "Please enter your details."}
           </p>
         </div>
 
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           className="w-full h-12 bg-transparent border-gray-700 hover:bg-gray-800 text-white mb-6"
           onClick={handleGoogleLogin}
         >
@@ -106,23 +110,23 @@ export function Login() {
         <form onSubmit={handleEmailAuth} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
-            <Input 
-              id="email" 
-              type="email" 
-              placeholder="name@company.com" 
+            <Input
+              id="email"
+              type="email"
+              placeholder="name@company.com"
               className="bg-[#0F1216] border-gray-800 focus:ring-blue-600 h-11 text-white placeholder:text-gray-600"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
-            <Input 
-              id="password" 
-              type="password" 
-              placeholder="••••••••" 
+            <Input
+              id="password"
+              type="password"
+              placeholder="••••••••"
               className="bg-[#0F1216] border-gray-800 focus:ring-blue-600 h-11 text-white placeholder:text-gray-600"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -133,23 +137,27 @@ export function Login() {
           {!isSignUp && (
             <div className="flex items-center justify-between text-sm">
               <label className="flex items-center space-x-2 cursor-pointer">
-                <input type="checkbox" className="rounded bg-gray-800 border-gray-700 text-blue-600 focus:ring-0" />
+                <input
+                  type="checkbox"
+                  className="rounded bg-gray-800 border-gray-700 text-blue-600 focus:ring-0"
+                />
                 <span className="text-gray-400">Remember for 30 days</span>
               </label>
-              <a href="#" className="text-gray-400 hover:text-white">Forgot password?</a>
+              <a href="#" className="text-gray-400 hover:text-white">
+                Forgot password?
+              </a>
             </div>
           )}
 
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-semibold mt-6"
             disabled={loading}
           >
-            {loading ? "Loading..." : (isSignUp ? "Create Account" : "Sign In")}
+            {loading ? "Loading..." : isSignUp ? "Create Account" : "Sign In"}
           </Button>
         </form>
       </div>
-
     </div>
   );
 }

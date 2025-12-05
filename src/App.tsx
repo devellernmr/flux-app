@@ -9,7 +9,6 @@ import { PublicBriefing } from "@/pages/PublicBriefing";
 import { FeedbackView } from "@/pages/FeedbackView";
 import { PublicFeedback } from "@/pages/PublicFeedback";
 
-
 // Dashboard Temporário (Para teste)
 
 function App() {
