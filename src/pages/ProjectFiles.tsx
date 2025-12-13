@@ -37,7 +37,7 @@ interface FileGroup {
 }
 
 export function ProjectFiles({ projectId }: { projectId: string }) {
-  const [files, setFiles] = useState<FileData[]>([]);
+  const [setFiles] = useState<FileData[]>([]);
   const [briefingFiles, setBriefingFiles] = useState<FileData[]>([]);
   const [designGroups, setDesignGroups] = useState<FileGroup[]>([]);
 
@@ -365,9 +365,6 @@ export function ProjectFiles({ projectId }: { projectId: string }) {
                   const isBriefingFile = file.name
                     .toLowerCase()
                     .includes("briefing");
-                  const versionNumber =
-                    group.files.filter((f) => !f.name.includes("Briefing"))
-                      .length - index;
 
                   let badgeLabel = "";
                   if (isBriefingFile) badgeLabel = "Cliente / Briefing";

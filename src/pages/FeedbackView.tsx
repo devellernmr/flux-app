@@ -11,7 +11,6 @@ import {
   Plus,
   Minus,
   LayoutList,
-  MousePointer2,
   ChevronDown,
 } from "lucide-react";
 import { toast } from "sonner";

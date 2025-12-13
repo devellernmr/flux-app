@@ -63,6 +63,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import type { Variants } from "framer-motion"; 
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -359,18 +360,19 @@ export function ProjectOverview() {
   >("active");
   const [projectDueDate, setProjectDueDate] = useState<string>("");
   const [savingSettings, setSavingSettings] = useState(false);
-  const [archiving, setArchiving] = useState(false);
+  const [archiving] = useState(false);
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1, // Atraso entre cada item
-        delayChildren: 0.2,
-      },
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: { // Use 'visible' ou 'show', tanto faz, mas seja consistente
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.2,
     },
-  };
+  },
+};
+
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20, scale: 0.95 },
@@ -635,11 +637,6 @@ export function ProjectOverview() {
     toast.success("Briefing resetado!");
   };
 
-  const copyText = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast.success("Texto copiado!");
-  };
-
   const saveProjectSettings = async () => {
     if (!id) return;
     try {
@@ -823,7 +820,7 @@ export function ProjectOverview() {
       </div>
     </div>
   );
-
+A
   if (loading)
     return (
       <div className="min-h-screen bg-[#050505] flex items-center justify-center">
