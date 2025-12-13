@@ -59,10 +59,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import type { Variants } from "framer-motion";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-
 import { ProjectFiles } from "./ProjectFiles";
 import { ProjectActivity } from "@/components/ProjectActivity";
 import { ProjectRoadmap } from "./ProjectRoadmap";
