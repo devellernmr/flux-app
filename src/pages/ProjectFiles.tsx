@@ -37,7 +37,7 @@ interface FileGroup {
 }
 
 export function ProjectFiles({ projectId }: { projectId: string }) {
-  const [setFiles] = useState<FileData[]>([]);
+  const [files, setFiles] = useState<FileData[]>([]);
   const [briefingFiles, setBriefingFiles] = useState<FileData[]>([]);
   const [designGroups, setDesignGroups] = useState<FileGroup[]>([]);
 
@@ -188,6 +188,7 @@ export function ProjectFiles({ projectId }: { projectId: string }) {
 
       toast.success(type === "design" ? "Nova versão!" : "Arquivo salvo!");
       fetchFiles();
+      console.log("Total files loaded:", files.length);
     } catch (error: any) {
       toast.error("Erro no upload: " + error.message);
     } finally {

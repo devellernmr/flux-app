@@ -45,7 +45,8 @@ import {
   Lock,
 } from "lucide-react";
 import { toast } from "sonner";
-import { motion, AnimatePresence, Variants } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import type { Variants } from "framer-motion";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 

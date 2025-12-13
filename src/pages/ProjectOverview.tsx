@@ -1,10 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
-import {
-  useParams,
-  useNavigate,
-  Link,
-} from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -63,7 +59,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import type { Variants } from "framer-motion"; 
+import type { Variants } from "framer-motion";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -362,21 +358,22 @@ export function ProjectOverview() {
   const [savingSettings, setSavingSettings] = useState(false);
   const [archiving] = useState(false);
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: { // Use 'visible' ou 'show', tanto faz, mas seja consistente
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.2,
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      // Use 'visible' ou 'show', tanto faz, mas seja consistente
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2,
+      },
     },
-  },
-};
-
+  };
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20, scale: 0.95 },
-    show: {
+    visible: {
+      // FILHO: Mude de 'show' para 'visible' para bater com o pai
       opacity: 1,
       y: 0,
       scale: 1,
@@ -820,7 +817,7 @@ const containerVariants = {
       </div>
     </div>
   );
-A
+
   if (loading)
     return (
       <div className="min-h-screen bg-[#050505] flex items-center justify-center">
@@ -1490,7 +1487,7 @@ A
                             {blocks.map((block: any, i) => (
                               <motion.div
                                 key={block.id}
-                                variants={itemVariants}
+                                variants={itemVariants as any}
                                 className="group relative p-5 md:p-6 rounded-2xl bg-zinc-950/40 border border-zinc-800/40 hover:border-zinc-700/60 transition-all hover:shadow-lg hover:shadow-black/40 overflow-hidden"
                               >
                                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
