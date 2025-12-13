@@ -45,7 +45,7 @@ import {
   Lock,
 } from "lucide-react";
 import { toast } from "sonner";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, Variants } from "framer-motion";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -111,23 +111,24 @@ const PLANS: {
 ];
 
 // --- VARIANTES DE ANIMAÇÃO ---
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
-  visible: {
+  visible: { // Mude "show" para "visible" se quiser seguir o padrão, ou mantenha "show"
     opacity: 1,
     transition: {
-      staggerChildren: 0.08,
+      staggerChildren: 0.1,
+      delayChildren: 0.2,
     },
   },
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 20, scale: 0.95 },
-  visible: {
-    opacity: 1,
-    y: 0,
+  visible: { 
+    opacity: 1, 
+    y: 0, 
     scale: 1,
-    transition: { type: "spring", stiffness: 300, damping: 24 },
+    transition: { type: "spring", stiffness: 300, damping: 24 } 
   },
 };
 
