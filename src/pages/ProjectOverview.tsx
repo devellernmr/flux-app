@@ -4,7 +4,6 @@ import {
   useParams,
   useNavigate,
   Link,
-  useSearchParams,
 } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
@@ -47,16 +46,11 @@ import {
   MoreVertical,
   Share2,
   UploadCloud,
-  Lightbulb,
   FileText,
   LayoutDashboard,
   Users,
   MessageCircle,
   CheckCircle2,
-  Check,
-  Map,
-  Circle,
-  History as HistoryIcon,
   Image as ImageIcon,
 } from "lucide-react";
 import {
@@ -80,7 +74,6 @@ import { TeamManager } from "@/components/TeamManager";
 
 function BriefingSuccessAction({
   onCopyLink,
-  onShare,
 }: {
   onCopyLink: () => void;
   onShare?: () => void;

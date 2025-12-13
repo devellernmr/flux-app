@@ -11,8 +11,6 @@ import {
   Sparkles,
   UploadCloud,
   FileText,
-  X,
-  Image as ImageIcon,
   Check,
   Eye,
   Trash2,
