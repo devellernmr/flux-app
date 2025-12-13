@@ -1,102 +1,323 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
-import { Avatar, AvatarFallback,  } from "@/components/ui/avatar";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageSquare } from "lucide-react";
-
-interface ActivityItem {
-  id: number;
-  text: string;
-  user_name: string;
-  created_at: string;
-  files: {
-    name: string;
-  };
-}
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Send,
+  Loader2,
+  Clock,
+  User,
+  FileUp,
+  CheckCircle2,
+  MousePointer2,
+} from "lucide-react";
+import { toast } from "sonner";
+import { motion } from "framer-motion";
+import { formatDistanceToNow } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 export function ProjectActivity({ projectId }: { projectId: string }) {
-  const [activities, setActivities] = useState<ActivityItem[]>([]);
+  const [activity, setActivity] = useState<any[]>([]);
+  const [newComment, setNewComment] = useState("");
+  const [sending, setSending] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [user, setUser] = useState<any>(null);
 
-  useEffect(() => {
-    fetchActivity();
-    setupRealtime();
+  const fetchActivity = useCallback(async () => {
+    if (!projectId) return;
+
+    try {
+      const { data: chatData, error: chatError } = await supabase
+        .from("project_comments")
+        .select("*")
+        .eq("project_id", projectId);
+
+      if (chatError) throw chatError;
+
+      const { data: files } = await supabase
+        .from("files")
+        .select("id, name")
+        .eq("project_id", projectId);
+
+      let feedbackData: any[] = [];
+
+      if (files && files.length > 0) {
+        const fileIds = files.map((f) => f.id);
+        const { data: feedbacks, error: feedError } = await supabase
+          .from("comments")
+          .select("*, files(name)")
+          .in("file_id", fileIds);
+
+        if (!feedError && feedbacks) {
+          feedbackData = feedbacks.map((f) => ({
+            ...f,
+            type: "feedback_entry",
+            fileName: f.files?.name,
+          }));
+        }
+      }
+
+      const allActivity = [...(chatData || []), ...feedbackData].sort(
+        (a, b) =>
+          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      );
+
+      setActivity(allActivity);
+    } catch (error) {
+      console.error("Erro ao carregar atividade:", error);
+    }
   }, [projectId]);
 
-  const fetchActivity = async () => {
-    // Busca comentários de TODOS os arquivos deste projeto
-    // O truque é usar o !inner para filtrar pela tabela relacionada
-    const { data } = await supabase
-      .from('comments')
-      .select('*, files!inner(project_id, name)')
-      .eq('files.project_id', projectId)
-      .order('created_at', { ascending: false }) // Mais recentes no topo
-      .limit(20);
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data } = await supabase.auth.getUser();
+      setUser(data.user);
+    };
+    fetchUser();
+    fetchActivity();
 
-    if (data) setActivities(data as any);
-  };
-
-  const setupRealtime = () => {
     const channel = supabase
-      .channel('project-activity')
+      .channel(`activity-${projectId}`)
       .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'comments' },
-        () => {
-          fetchActivity(); 
-        }
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "project_comments",
+          filter: `project_id=eq.${projectId}`,
+        },
+        () => fetchActivity()
+      )
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "comments" },
+        () => fetchActivity()
       )
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [projectId, fetchActivity]);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      setTimeout(() => {
+        scrollRef.current?.scrollTo({
+          top: scrollRef.current.scrollHeight,
+          behavior: "smooth",
+        });
+      }, 100);
+    }
+  }, [activity]);
+
+  const handleSend = async () => {
+    if (!newComment.trim() || !user) return;
+    const textToSend = newComment;
+    setNewComment("");
+    setSending(true);
+
+    try {
+      const { error } = await supabase.from("project_comments").insert({
+        project_id: projectId,
+        content: textToSend,
+        user_id: user.id,
+        type: "chat",
+      });
+
+      if (error) throw error;
+      await fetchActivity();
+    } catch (error: any) {
+      toast.error("Erro ao enviar.");
+      setNewComment(textToSend);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const getLogIcon = (type: string) => {
+    switch (type) {
+      case "upload":
+        return <FileUp className="h-3 w-3" />;
+      case "approve":
+        return <CheckCircle2 className="h-3 w-3" />;
+      default:
+        return <Clock className="h-3 w-3" />;
+    }
   };
 
   return (
-    <div className="h-full flex flex-col bg-slate-900/50 border-l border-slate-800">
-      <div className="p-4 border-b border-slate-800 bg-slate-900">
-        <h3 className="font-semibold text-white flex items-center gap-2">
-          <MessageSquare className="h-4 w-4 text-blue-500" />
-          Atividade Recente
-        </h3>
-        <p className="text-xs text-slate-500">Histórico de comentários e feedbacks</p>
+    <div className="flex flex-col h-full bg-zinc-950/20 rounded-2xl overflow-hidden relative backdrop-blur-sm border border-zinc-800/50 shadow-inner">
+      {/* HEADER */}
+      <div className="px-4 py-3 border-b border-zinc-800/50 bg-zinc-950/40 flex items-center justify-between shrink-0 backdrop-blur-md">
+        <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-widest font-mono">
+          Timeline Unificada
+        </span>
+        <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)] animate-pulse" />
       </div>
 
-      <ScrollArea className="flex-1 p-4">
-        <div className="space-y-6">
-          {activities.length === 0 ? (
-            <p className="text-center text-xs text-slate-600 mt-10">Nenhuma atividade ainda.</p>
-          ) : (
-            activities.map((item) => (
-              <div key={item.id} className="flex gap-3 relative group">
-                {/* Linha vertical conectando (estilo timeline) */}
-                <div className="absolute left-[14px] top-8 bottom-[-24px] w-[1px] bg-slate-800 group-last:hidden"></div>
+      {/* LISTA DE MENSAGENS */}
+      <div
+        className="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-zinc-800 relative"
+        ref={scrollRef}
+      >
+        {activity.length === 0 ? (
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-zinc-600 space-y-3 opacity-60 pointer-events-none pb-12">
+            <div className="h-14 w-14 rounded-2xl bg-zinc-900/50 border border-zinc-800 flex items-center justify-center rotate-3 shadow-lg">
+              <User className="h-6 w-6 -rotate-3 text-zinc-500" />
+            </div>
+            <p className="text-xs font-medium tracking-wide">
+              Nenhuma atividade ainda.
+            </p>
+          </div>
+        ) : (
+          activity.map((item) => {
+            const isMe = item.user_id === user?.id;
+            const isLog =
+              item.type !== "chat" &&
+              item.type !== "feedback_entry" &&
+              item.type !== null;
 
-                <Avatar className="h-7 w-7 border border-slate-700">
-                  <AvatarFallback className="bg-slate-800 text-[10px] text-slate-300">
-                    {item.user_name?.slice(0, 2).toUpperCase() || "CL"}
-                  </AvatarFallback>
-                </Avatar>
-                
-                <div className="flex-1 space-y-1">
-                  <div className="flex justify-between items-start">
-                    <p className="text-xs font-bold text-slate-200">{item.user_name || "Cliente"}</p>
-                    <span className="text-[10px] text-slate-500">
-                      {new Date(item.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+            if (isLog) {
+              return (
+                <div
+                  key={item.id}
+                  className="flex items-center gap-3 justify-center opacity-70 my-6"
+                >
+                  <div className="h-px w-8 bg-gradient-to-r from-transparent to-zinc-800" />
+                  <div className="flex items-center gap-1.5 text-[10px] text-zinc-500 uppercase font-bold tracking-widest px-3 py-1 rounded-full bg-zinc-900/50 border border-zinc-800/50">
+                    {getLogIcon(item.type)} {item.content}
+                  </div>
+                  <div className="h-px w-8 bg-gradient-to-l from-transparent to-zinc-800" />
+                </div>
+              );
+            }
+
+            if (item.type === "feedback_entry") {
+              return (
+                <motion.div
+                  key={item.id}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="flex flex-col gap-1.5 my-3 pl-2"
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="p-1 rounded bg-pink-500/10 border border-pink-500/20">
+                      <MousePointer2 className="h-3 w-3 text-pink-500" />
+                    </div>
+                    <span className="text-[10px] text-zinc-500 font-medium">
+                      {isMe ? "Você" : "Cliente"} comentou em{" "}
+                      <span className="text-zinc-300 font-semibold">
+                        {item.fileName || "um arquivo"}
+                      </span>
                     </span>
                   </div>
-                  
-                  <div className="bg-slate-800 p-2 rounded-lg rounded-tl-none border border-slate-700/50">
-                    <p className="text-xs text-slate-300 leading-relaxed">{item.text}</p>
+                  <div className="bg-zinc-900/60 border border-zinc-800 border-l-2 border-l-pink-500 p-3 rounded-r-xl rounded-bl-xl text-sm text-zinc-300 italic relative shadow-sm">
+                    "{item.content}"
+                    <span className="absolute -bottom-5 right-0 text-[9px] text-zinc-600">
+                      {item.created_at &&
+                        formatDistanceToNow(new Date(item.created_at), {
+                          addSuffix: true,
+                          locale: ptBR,
+                        })}
+                    </span>
                   </div>
-                  
-                  <p className="text-[10px] text-slate-500 pl-1">
-                    em <span className="text-blue-400">{item.files?.name}</span>
-                  </p>
+                </motion.div>
+              );
+            }
+
+            return (
+              <motion.div
+                key={item.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`flex gap-3 ${
+                  isMe ? "flex-row-reverse" : "flex-row"
+                }`}
+              >
+                <Avatar className="h-8 w-8 border border-zinc-800 ring-2 ring-zinc-950 shrink-0 shadow-sm">
+                  <AvatarFallback
+                    className={`text-[10px] font-bold ${
+                      isMe
+                        ? "bg-blue-600 text-white"
+                        : "bg-zinc-800 text-zinc-400"
+                    }`}
+                  >
+                    {isMe ? "EU" : "US"}
+                  </AvatarFallback>
+                </Avatar>
+
+                <div
+                  className={`flex flex-col max-w-[85%] ${
+                    isMe ? "items-end" : "items-start"
+                  }`}
+                >
+                  <div className="flex items-center gap-2 mb-1 px-1">
+                    <span className="text-[10px] font-bold text-zinc-400">
+                      {isMe ? "Você" : "Usuário"}
+                    </span>
+                    <span className="text-[9px] text-zinc-600">
+                      {item.created_at &&
+                        formatDistanceToNow(new Date(item.created_at), {
+                          addSuffix: true,
+                          locale: ptBR,
+                        })}
+                    </span>
+                  </div>
+
+                  <div
+                    className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed shadow-md border relative group transition-all duration-200
+                      ${
+                        isMe
+                          ? "bg-blue-600 text-white border-blue-500/50 rounded-tr-none shadow-blue-900/10 hover:bg-blue-500"
+                          : "bg-zinc-900 text-zinc-200 border-zinc-800 rounded-tl-none hover:bg-zinc-800 hover:border-zinc-700"
+                      }`}
+                  >
+                    {item.content}
+                  </div>
                 </div>
-              </div>
-            ))
-          )}
+              </motion.div>
+            );
+          })
+        )}
+        {/* Espaçador invisível para garantir que a última mensagem não fique escondida atrás do input */}
+        <div className="h-2" />
+      </div>
+
+      {/* INPUT AREA */}
+      <div className="p-4 bg-zinc-950/60 border-t border-zinc-800/50 shrink-0 z-10 backdrop-blur-xl">
+        <div className="relative flex items-end gap-2 bg-zinc-900/50 p-1.5 rounded-2xl border border-zinc-800 focus-within:border-zinc-700 focus-within:ring-1 focus-within:ring-zinc-800 transition-all shadow-inner">
+          <Textarea
+            placeholder="Digite uma mensagem..."
+            className="min-h-[44px] max-h-32 bg-transparent border-none focus:ring-0 resize-none text-sm py-3 px-3 scrollbar-hide placeholder:text-zinc-600 text-zinc-200 w-full"
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSend();
+              }
+            }}
+          />
+          <Button
+            size="icon"
+            className={`h-9 w-9 shrink-0 rounded-xl transition-all duration-300 mb-0.5 mr-0.5 shadow-lg ${
+              newComment.trim()
+                ? "bg-blue-600 text-white hover:bg-blue-500 hover:scale-105 hover:shadow-blue-500/20"
+                : "bg-zinc-800 text-zinc-500 cursor-not-allowed"
+            }`}
+            onClick={handleSend}
+            disabled={sending || !newComment.trim()}
+          >
+            {sending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Send className="h-4 w-4" />
+            )}
+          </Button>
         </div>
-      </ScrollArea>
+      </div>
     </div>
   );
 }

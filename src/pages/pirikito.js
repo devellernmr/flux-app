@@ -52,10 +52,6 @@ import {
   LayoutDashboard,
   Users,
   MessageCircle,
-  CheckCircle2,
-  Check,
-  Map,
-  Circle,
   History as HistoryIcon,
   Image as ImageIcon,
 } from "lucide-react";
@@ -74,54 +70,8 @@ import { ptBR } from "date-fns/locale";
 
 import { ProjectFiles } from "./ProjectFiles";
 import { ProjectActivity } from "@/components/ProjectActivity";
-import { ProjectRoadmap } from "./ProjectRoadmap";
 
 import { TeamManager } from "@/components/TeamManager";
-
-function BriefingSuccessAction({
-  onCopyLink,
-  onShare,
-}: {
-  onCopyLink: () => void;
-  onShare?: () => void;
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="mb-10 p-8 rounded-3xl border border-emerald-500/20 bg-emerald-500/5 text-center relative overflow-hidden group shadow-2xl shadow-emerald-900/10"
-    >
-      <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/5 to-transparent pointer-events-none" />
-      <div className="absolute -top-24 -right-24 w-48 h-48 bg-emerald-500/20 blur-3xl rounded-full pointer-events-none" />
-
-      <div className="relative z-10 flex flex-col items-center gap-5">
-        <div className="h-16 w-16 rounded-full bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 shadow-[0_0_30px_rgba(16,185,129,0.2)]">
-          <CheckCircle2 className="h-8 w-8 text-emerald-400" />
-        </div>
-
-        <div className="space-y-2">
-          <h3 className="text-2xl font-bold text-white tracking-tight">
-            Briefing Salvo com Sucesso!
-          </h3>
-          <p className="text-zinc-400 max-w-md mx-auto text-sm leading-relaxed">
-            O conteúdo está pronto. Agora envie o link para o cliente preencher
-            ou revisar as informações.
-          </p>
-        </div>
-
-        <div className="flex flex-col sm:flex-row gap-3 mt-2 w-full justify-center">
-          <Button
-            onClick={onCopyLink}
-            className="bg-emerald-500 hover:bg-emerald-600 text-white h-12 px-8 rounded-xl shadow-lg shadow-emerald-900/20 transition-all hover:scale-105 active:scale-95 font-medium"
-          >
-            <Copy className="mr-2 h-4 w-4" />
-            Copiar Link do Briefing
-          </Button>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
 
 // --- TIPAGEM E TEMPLATES ---
 export type BriefingBlockType = "text" | "textarea" | "select" | "upload";
@@ -135,6 +85,14 @@ export type BriefingBlock = {
   answer?: string;
 };
 
+const TIPS = [
+  "Dica: Arraste arquivos para a área de upload para ganhar tempo.",
+  "Produtividade: Mantenha o briefing sempre atualizado.",
+  "Fluxo: Convide membros da equipe na aba 'Membros'.",
+  "Você sabia? O status do projeto notifica o cliente automaticamente.",
+];
+
+// Seus templates originais (mantidos intactos, tipagem atualizada)
 const BRIEFING_TEMPLATES = {
   custom: {
     name: "Começar do Zero",
@@ -338,6 +296,7 @@ export function ProjectOverview() {
   const [user, setUser] = useState<any>(null);
   const [project, setProject] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [index, setIndex] = useState(0);
 
   // UI STATES
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -349,9 +308,8 @@ export function ProjectOverview() {
 
   // BRIEFING STATES
   const [briefingStatus, setBriefingStatus] = useState<
-    "empty" | "draft" | "sent" | "awaiting_response" | "approved"
+    "empty" | "draft" | "sent" | "approved"
   >("empty");
-
   const [blocks, setBlocks] = useState<BriefingBlock[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
@@ -389,7 +347,6 @@ export function ProjectOverview() {
     },
   };
 
-  // 1. USEEFFECT PRINCIPAL E REALTIME (CORRIGIDO)
   useEffect(() => {
     const fetchData = async () => {
       const {
@@ -417,56 +374,18 @@ export function ProjectOverview() {
           .select("*")
           .eq("project_id", Number(id))
           .maybeSingle();
-
         if (brief) {
-          // Cenário 1: Já existe um briefing oficial na tabela 'briefings'
           setBriefingStatus(brief.status as any);
           if (brief.content && brief.content.length > 0)
             setBlocks(brief.content);
-        } else if (proj.description && proj.description.length > 10) {
-          // TENTA QUEBRAR O TEXTO EM PERGUNTAS INDIVIDUAIS
-          const lines = proj.description
-            .split("\n")
-            .filter((line: string) => line.trim().length > 0);
-
-          const aiBlocks = lines.map((line: string, index: number) => {
-            // Remove numeração (ex: "1. Qual o objetivo?" vira "Qual o objetivo?")
-            const cleanLabel = line.replace(/^\d+[\.\)]\s*/, "").trim();
-
-            return {
-              id: `ai-q-${index}`,
-              type: "textarea", // Assume que toda pergunta pede uma resposta longa
-              label: cleanLabel,
-              placeholder: "Responda aqui...",
-              answer: "", // Começa vazio para o cliente responder
-            };
-          });
-
-          // Se por acaso a quebra falhar e der array vazio, usa o fallback do blocão
-          if (aiBlocks.length === 0) {
-            setBlocks([
-              {
-                id: "ai-fallback",
-                type: "textarea",
-                label: "Estratégia IA",
-                answer: proj.description,
-              },
-            ]);
-          } else {
-            setBlocks(aiBlocks);
-          }
-
-          setBriefingStatus("draft");
-          setIsEditing(true);
         }
       }
       setLoading(false);
     };
     fetchData();
 
-    // CONFIGURAÇÃO DO REALTIME
     const channel = supabase
-      .channel(`project-updates-${id}`)
+      .channel("briefing-updates")
       .on(
         "postgres_changes",
         {
@@ -475,22 +394,7 @@ export function ProjectOverview() {
           table: "briefings",
           filter: `project_id=eq.${id}`,
         },
-        (payload: any) => {
-          console.log("⚡ Alteração recebida:", payload);
-
-          // 1. Atualiza o status instantaneamente
-          if (payload.new?.status) {
-            setBriefingStatus(payload.new.status);
-            if (payload.new.status === "sent") {
-              toast.success("O cliente respondeu o briefing!");
-            }
-          }
-
-          // 2. Atualiza as respostas instantaneamente
-          if (payload.new?.content) {
-            setBlocks(payload.new.content);
-          }
-        }
+        () => fetchData()
       )
       .subscribe();
 
@@ -499,22 +403,12 @@ export function ProjectOverview() {
     };
   }, [id]);
 
-  // 2. FUNÇÃO APPROVE BRIEFING (CORRIGIDA E POSICIONADA)
-  const approveBriefing = async () => {
-    if (!id) return;
-
-    const { error } = await supabase
-      .from("briefings")
-      .update({ status: "approved" })
-      .eq("project_id", Number(id));
-
-    if (error) {
-      toast.error("Erro ao aprovar.");
-    } else {
-      toast.success("Briefing aprovado! Iniciando desenvolvimento.");
-      setBriefingStatus("approved");
-    }
-  };
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setIndex((prev) => (prev + 1) % TIPS.length);
+    }, 5000); // Troca a cada 5 segundos
+    return () => clearInterval(timer);
+  }, []);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -576,8 +470,7 @@ export function ProjectOverview() {
       const payload = {
         project_id: projectIdNumber,
         content: blocks,
-        status: "awaiting_response", // Cliente ainda não respondeu
-
+        status: "sent",
         template_type: "custom", // <--- ADICIONADO: Valor padrão para satisfazer a constraint NOT NULL
         // Removido updated_at/created_at pois geralmente o banco gerencia isso ou não existe a coluna
       };
@@ -609,7 +502,7 @@ export function ProjectOverview() {
       }
 
       toast.success("Briefing Salvo com Sucesso!");
-      setBriefingStatus("awaiting_response");
+      setBriefingStatus("sent");
       setIsEditing(false);
     } catch (err: any) {
       console.error("Erro detalhado:", err);
@@ -721,6 +614,7 @@ export function ProjectOverview() {
           <span className="text-sm font-medium">Voltar para Projetos</span>
         </button>
       </Link>
+
       <div className="space-y-6">
         {/* GRUPO: PROJETO */}
         <div className="space-y-1">
@@ -871,14 +765,10 @@ export function ProjectOverview() {
         </DialogContent>
       </Dialog>
 
-      {/* SETTINGS DIALOG */}
       <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
         <DialogContent className="bg-[#0A0A0A] border-zinc-800 text-white sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Configurações do Projeto</DialogTitle>
-            <DialogDescription hidden>
-              Ajuste os detalhes do projeto.
-            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 pt-2">
             <div className="space-y-1">
@@ -994,7 +884,6 @@ export function ProjectOverview() {
         )}
       </AnimatePresence>
 
-      {/* --- ACTIVITY DRAWER MOBILE (XL DOWN) --- */}
       <AnimatePresence>
         {isMobileActivityOpen && (
           <>
@@ -1053,7 +942,7 @@ export function ProjectOverview() {
       </aside>
 
       {/* MAIN CONTENT */}
-      <main className="flex-1 flex flex-col h-screen overflow-hidden relative z-10 ">
+      <main className="flex-1 flex flex-col h-screen overflow-hidden relative z-10">
         <header className="h-16 md:h-20 border-b border-zinc-900 bg-[#050505]/80 backdrop-blur-xl flex items-center justify-between px-4 md:px-8 sticky top-0 z-30 transition-all">
           <div className="flex items-center gap-3 overflow-hidden">
             <Button
@@ -1091,7 +980,6 @@ export function ProjectOverview() {
             </div>
           </div>
 
-          {/* AÇÕES DESKTOP */}
           <div className="hidden md:flex gap-3 items-center">
             <div className="hidden lg:flex items-center gap-2 mr-4 px-3 py-1.5 rounded-full bg-zinc-900/50 border border-zinc-800">
               <Calendar className="h-3.5 w-3.5 text-zinc-500" />
@@ -1209,11 +1097,11 @@ export function ProjectOverview() {
           </div>
         </div>
 
-        {/* --- SCROLLABLE CONTENT --- */}
         <div className="flex-1 overflow-y-auto p-4 md:p-10 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-zinc-800">
           <div className="max-w-[1800px] mx-auto flex gap-10 items-start h-full pt-2">
             <div className="flex-1 min-w-0">
               <AnimatePresence mode="wait">
+                {/* --- ABA DASHBOARD (VISÃO GERAL) --- */}
                 {/* --- ABA DASHBOARD (VISÃO GERAL) --- */}
                 {activeTab === "dashboard" && (
                   <motion.div
@@ -1222,7 +1110,7 @@ export function ProjectOverview() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.2 }}
-                    className="space-y-8 pb-8"
+                    className="space-y-8"
                   >
                     <div>
                       <h2 className="text-2xl font-semibold text-white tracking-tight">
@@ -1232,7 +1120,13 @@ export function ProjectOverview() {
                         Resumo e atividades recentes do projeto.
                       </p>
                     </div>
-                    <div className="grid grid-cols-1 mb-10 lg:grid-cols-2 2xl:grid-cols-3 gap-4">
+
+                    {/* 
+           CORREÇÃO DE LAYOUT: 
+           - 'lg:grid-cols-2' garante que em telas médias (com sidebar aberta) os cards não fiquem espremidos.
+           - '2xl:grid-cols-3' só usa 3 colunas se a tela for realmente grande.
+        */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4">
                       {/* CARD 1: PRAZO */}
                       <motion.div
                         whileHover={{
@@ -1337,12 +1231,10 @@ export function ProjectOverview() {
                           </div>
 
                           <h3 className="text-xl font-bold text-white mb-3 capitalize">
-                            {briefingStatus === "approved"
-                              ? "Aprovado"
-                              : briefingStatus === "sent"
+                            {briefingStatus === "sent"
                               ? "Respondido"
-                              : briefingStatus === "awaiting_response"
-                              ? "Aguardando Resposta"
+                              : briefingStatus === "approved"
+                              ? "Aprovado"
                               : briefingStatus === "draft"
                               ? "Rascunho"
                               : "Não Iniciado"}
@@ -1354,15 +1246,11 @@ export function ProjectOverview() {
                               initial={{ width: 0 }}
                               animate={{
                                 width:
-                                  briefingStatus === "approved"
+                                  briefingStatus === "sent"
                                     ? "100%"
-                                    : briefingStatus === "sent"
-                                    ? "100%"
-                                    : briefingStatus === "awaiting_response"
-                                    ? "50%"
                                     : briefingStatus === "draft"
-                                    ? "40%"
-                                    : "0%",
+                                    ? "80%"
+                                    : "5%",
                               }}
                               className={`h-full relative ${
                                 briefingStatus === "approved"
@@ -1437,16 +1325,51 @@ export function ProjectOverview() {
                         </div>
                       </motion.div>
                     </div>
-                    <ProjectRoadmap
-                      briefingStatus={briefingStatus}
-                      projectStatus={projectStatus as any} // 'as any' garante compatibilidade dos tipos de string
-                    />
+                        <div className="relative w-full h-20 mt-6 rounded-2xl border border-zinc-800 bg-gradient-to-r from-zinc-900/50 to-zinc-950/50 flex items-center px-6 gap-4 overflow-hidden">
+        {/* Ícone fixo */}
+        <div className="h-10 w-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center shrink-0">
+            <Sparkles className="h-4 w-4 text-yellow-500/70" />
+        </div>
+
+        {/* Texto Trocando */}
+        <div className="relative h-6 flex-1 overflow-hidden">
+            <AnimatePresence mode="wait">
+                <motion.p
+                    key={index}
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: -20, opacity: 0 }}
+                    className="text-sm text-zinc-400 font-medium absolute w-full truncate"
+                >
+                    {TIPS[index]}
+                </motion.p>
+            </AnimatePresence>
+        </div>
+
+        {/* Barra de progresso do timer */}
+        <div className="absolute bottom-0 left-0 h-[2px] bg-zinc-800 w-full">
+            <motion.div 
+                key={index}
+                initial={{ width: "0%" }}
+                animate={{ width: "100%" }}
+                transition={{ duration: 5, ease: "linear" }}
+                className="h-full bg-yellow-500/30"
+            />
+        </div>
+    </div>
                   </motion.div>
                 )}
 
                 {/* --- ABA BRIEFING --- */}
                 {activeTab === "briefing" && (
-                  <div className="max-w-4xl mx-auto">
+                  <motion.div
+                    key="briefing"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {/* ... SEU CÓDIGO DO BRIEFING AQUI (mantenha o que já existia) ... */}
                     <div className="mb-6 md:mb-8 flex items-end justify-between">
                       <div>
                         <h2 className="text-2xl md:text-3xl font-semibold text-white tracking-tight">
@@ -1457,26 +1380,16 @@ export function ProjectOverview() {
                         </p>
                       </div>
                     </div>
-
-                    {/* SEÇÃO PRINCIPAL: Card de Conteúdo */}
                     <div className="bg-zinc-900/20 border border-zinc-800/60 rounded-3xl p-4 md:p-10 backdrop-blur-sm relative overflow-hidden shadow-xl shadow-black/20">
-                      {/* 
-          CENÁRIO 1: MODO VISUALIZAÇÃO (Já Salvo)
-          Exibe: Ação de Sucesso (Topo) + Respostas (Baixo)
-      */}
                       {(briefingStatus === "sent" ||
-                        briefingStatus === "approved" ||
-                        briefingStatus === "awaiting_response") &&
+                        briefingStatus === "approved") &&
                       !isEditing ? (
                         <div className="space-y-8">
-                          {/* COMPONENTE DE SUCESSO AQUI */}
-                          <BriefingSuccessAction onCopyLink={copyLink} />
-                          {/* Divisor Visual */}
-                          <div className="flex justify-between items-center border-b border-zinc-800/50 pb-6 pt-2">
+                          <div className="flex justify-between items-center border-b border-zinc-800/50 pb-6">
                             <div className="flex items-center gap-3">
                               <div className="h-2.5 w-2.5 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.6)] animate-pulse" />
-                              <h3 className="font-medium text-zinc-200 text-sm tracking-wide uppercase">
-                                Respostas do Cliente
+                              <h3 className="font-medium text-zinc-200 text-sm tracking-wide">
+                                RESPOSTAS
                               </h3>
                             </div>
                             <Button
@@ -1489,18 +1402,17 @@ export function ProjectOverview() {
                               <span className="hidden sm:inline">Editar</span>
                             </Button>
                           </div>
-
-                          {/* Lista de Respostas (Opacidade reduzida para foco no topo) */}
                           <motion.div
                             variants={containerVariants}
                             initial="hidden"
                             animate="show"
-                            className="grid gap-6 opacity-90 hover:opacity-100 transition-opacity duration-300"
+                            className="grid gap-6"
                           >
                             {blocks.map((block: any, i) => (
                               <motion.div
                                 key={block.id}
                                 variants={itemVariants}
+                                key={block.id}
                                 className="group relative p-5 md:p-6 rounded-2xl bg-zinc-950/40 border border-zinc-800/40 hover:border-zinc-700/60 transition-all hover:shadow-lg hover:shadow-black/40 overflow-hidden"
                               >
                                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
@@ -1513,13 +1425,12 @@ export function ProjectOverview() {
                                     {block.label}
                                   </h3>
                                 </div>
-
-                                {/* Conteúdo da Resposta */}
                                 <div className="pl-0 md:pl-10 relative z-10">
                                   {block.type === "upload" ? (
                                     block.answer ? (
                                       <div className="flex items-center gap-3 p-3 rounded-lg bg-zinc-900 border border-zinc-800 max-w-sm">
                                         <div className="h-10 w-10 bg-zinc-800 rounded flex items-center justify-center text-blue-500">
+                                          {/* Verifica extensão básica para ícone */}
                                           {block.answer.match(
                                             /\.(jpg|jpeg|png|gif)$/i
                                           ) ? (
@@ -1538,14 +1449,14 @@ export function ProjectOverview() {
                                             rel="noopener noreferrer"
                                             className="text-xs text-blue-500 hover:underline truncate block"
                                           >
-                                            Baixar
+                                            Clique para baixar/visualizar
                                           </a>
                                         </div>
                                       </div>
                                     ) : (
                                       <span className="italic text-zinc-600 flex items-center gap-2">
                                         <UploadCloud className="h-4 w-4" />{" "}
-                                        Nenhum arquivo.
+                                        Nenhum arquivo enviado.
                                       </span>
                                     )
                                   ) : (
@@ -1558,22 +1469,19 @@ export function ProjectOverview() {
                                     </p>
                                   )}
                                 </div>
+                                {block.answer && block.type !== "upload" && (
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => copyText(block.answer)}
+                                    className="opacity-100 md:opacity-0 group-hover:opacity-100 absolute top-4 right-4 h-8 w-8 text-zinc-500 hover:text-white hover:bg-zinc-800 transition-all rounded-lg z-20"
+                                  >
+                                    <Copy className="h-4 w-4" />
+                                  </Button>
+                                )}
                               </motion.div>
                             ))}
                           </motion.div>
-                          {/* No final da exibição das respostas, adicione: */}
-
-                          {briefingStatus === "sent" && (
-                            <div className="mt-8 pt-6 border-t border-zinc-800 flex justify-end">
-                              <Button
-                                onClick={approveBriefing}
-                                className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-6"
-                              >
-                                <CheckCircle2 className="mr-2 h-4 w-4" />
-                                Aprovar e Iniciar Desenvolvimento
-                              </Button>
-                            </div>
-                          )}
                         </div>
                       ) : (
                         <div className="space-y-6">
@@ -1602,7 +1510,6 @@ export function ProjectOverview() {
                               />
                             </div>
                           )}
-
                           {(isEditing ||
                             briefingStatus === "draft" ||
                             briefingStatus === "sent") && (
@@ -1620,8 +1527,6 @@ export function ProjectOverview() {
                                   Limpar Tudo
                                 </Button>
                               </div>
-
-                              {/* Loop dos Blocos de Edição (Inputs) */}
                               {blocks.map((block, i) => (
                                 <div
                                   key={block.id}
@@ -1629,7 +1534,7 @@ export function ProjectOverview() {
                                 >
                                   <div className="flex items-center gap-2 w-full md:w-auto">
                                     <span className="text-xs text-zinc-600 font-mono pt-0 md:pt-3">
-                                      {i + 1 < 10 ? `0${i + 1}` : i + 1}
+                                      0{i + 1}
                                     </span>
                                     <Button
                                       variant="ghost"
@@ -1640,7 +1545,6 @@ export function ProjectOverview() {
                                       <Trash2 className="h-3 w-3" />
                                     </Button>
                                   </div>
-
                                   <div className="flex-1 space-y-3 w-full">
                                     <Input
                                       value={block.label}
@@ -1650,8 +1554,18 @@ export function ProjectOverview() {
                                       className="bg-transparent border-none text-sm font-medium px-0 h-auto focus-visible:ring-0 text-zinc-200 placeholder:text-zinc-700"
                                       placeholder="Digite a pergunta aqui..."
                                     />
-                                    {/* ... Resto dos inputs de edição (Placeholder, Select Type) ... */}
-                                    {/* (Mantido igual ao original para economizar espaço aqui, mas use o código do paste.txt) */}
+                                    <Input
+                                      value={block.placeholder || ""}
+                                      onChange={(e) =>
+                                        updateBlock(
+                                          i,
+                                          "placeholder",
+                                          e.target.value
+                                        )
+                                      }
+                                      className="bg-zinc-900/50 border-zinc-800 text-xs h-8 text-zinc-400 placeholder:text-zinc-700"
+                                      placeholder="Texto de ajuda/exemplo para o cliente..."
+                                    />
                                     <div className="flex flex-wrap gap-2 items-center opacity-100 md:opacity-50 group-hover:opacity-100 transition-opacity">
                                       <select
                                         value={block.type}
@@ -1673,7 +1587,12 @@ export function ProjectOverview() {
                                           Upload de Arquivo
                                         </option>
                                       </select>
-                                      {/* Input de placeholder... */}
+                                      {block.type === "upload" && (
+                                        <span className="text-[10px] text-blue-400 bg-blue-400/10 px-2 py-1 rounded border border-blue-400/20 flex items-center gap-1">
+                                          <UploadCloud className="h-3 w-3" />{" "}
+                                          Cliente poderá enviar arquivos
+                                        </span>
+                                      )}
                                     </div>
                                   </div>
                                   <Button
@@ -1686,8 +1605,6 @@ export function ProjectOverview() {
                                   </Button>
                                 </div>
                               ))}
-
-                              {/* Botões de Ação do Editor */}
                               <div className="flex flex-col md:flex-row justify-between pt-6 gap-3">
                                 <Button
                                   variant="outline"
@@ -1720,7 +1637,7 @@ export function ProjectOverview() {
                         </div>
                       )}
                     </div>
-                  </div>
+                  </motion.div>
                 )}
 
                 {/* --- ABA FILES --- */}

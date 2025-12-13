@@ -3,3 +3,30 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Custom Scrollbar for Webkit (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 8px; /* Largura da barra vertical */
+  height: 8px; /* Altura da barra horizontal */
+}
+
+::-webkit-scrollbar-track {
+  background: transparent; /* Fundo do trilho transparente */
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #27272a; /* Cor do "polegar" (zinc-800) */
+  border-radius: 9999px; /* Arredondado */
+  border: 2px solid transparent; /* Espaço para parecer "flutuante" */
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #3f3f46; /* Cor ao passar o mouse (zinc-700) */
+}
+
+/* Para Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #27272a transparent;
+}
