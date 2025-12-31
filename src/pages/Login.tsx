@@ -20,19 +20,35 @@ export function Login() {
   const [password, setPassword] = useState("");
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
-  // Efeito de "Spotlight" sutil que segue o mouse no lado direito
+  const searchParams = new URLSearchParams(window.location.search);
+  const redirect = searchParams.get("redirect") ?? undefined;
+
   const handleMouseMove = (e: React.MouseEvent) => {
     const { clientX, clientY } = e;
     setMousePosition({ x: clientX, y: clientY });
   };
 
+  const resolveRedirect = () => {
+    if (redirect && redirect.startsWith("http")) {
+      return redirect;
+    }
+    return `${window.location.origin}/dashboard`;
+  };
+
   const handleGoogleLogin = async () => {
     setLoading(true);
+
+    const redirectTo = resolveRedirect();
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/dashboard` },
+      options: { redirectTo },
     });
-    if (error) toast.error("Erro no Google", { description: error.message });
+
+    if (error) {
+      toast.error("Erro no Google", { description: error.message });
+    }
+
     setLoading(false);
   };
 
@@ -40,23 +56,32 @@ export function Login() {
     e.preventDefault();
     setLoading(true);
 
-    if (isSignUp) {
-      const { error } = await supabase.auth.signUp({ email, password });
-      if (error)
-        toast.error("Erro ao criar conta", { description: error.message });
-      else
-        toast.success("Conta criada!", {
-          description: "Verifique seu e-mail.",
+    try {
+      if (isSignUp) {
+        const { error } = await supabase.auth.signUp({ email, password });
+        if (error) {
+          toast.error("Erro ao criar conta", { description: error.message });
+        } else {
+          toast.success("Conta criada!", {
+            description: "Verifique seu e-mail.",
+          });
+        }
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
         });
-    } else {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (error)
-        toast.error("Credenciais inválidas", { description: error.message });
+
+        if (error) {
+          toast.error("Credenciais inválidas", { description: error.message });
+        } else {
+          const redirectTo = resolveRedirect();
+          window.location.href = redirectTo;
+        }
+      }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (

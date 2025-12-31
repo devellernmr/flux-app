@@ -320,6 +320,37 @@ const BRIEFING_TEMPLATES = {
   },
 };
 
+type MemberColor = "blue" | "pink" | "emerald" | "amber" | "violet";
+
+const MEMBER_COLORS: MemberColor[] = [
+  "blue",
+  "pink",
+  "emerald",
+  "amber",
+  "violet",
+];
+
+export function getDefaultColor(email: string): MemberColor {
+  const hash = email.split("").reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+  return MEMBER_COLORS[hash % MEMBER_COLORS.length];
+}
+
+export const colorMap: Record<MemberColor, { bg: string; ring: string }> = {
+  blue: { bg: "bg-blue-500/20", ring: "ring-blue-500/50" },
+  pink: { bg: "bg-pink-500/20", ring: "ring-pink-500/50" },
+  emerald: { bg: "bg-emerald-500/20", ring: "ring-emerald-500/50" },
+  amber: { bg: "bg-amber-500/20", ring: "ring-amber-500/50" },
+  violet: { bg: "bg-violet-500/20", ring: "ring-violet-500/50" },
+};
+
+type ProjectMember = {
+  id: string;
+  user_id: string;
+  role: string;
+  email: string;
+  color: MemberColor | null;
+};
+
 export function ProjectOverview() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -355,6 +386,7 @@ export function ProjectOverview() {
   const [projectDueDate, setProjectDueDate] = useState<string>("");
   const [savingSettings, setSavingSettings] = useState(false);
   const [archiving] = useState(false);
+  const [members, setMembers] = useState<ProjectMember[]>([]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -382,16 +414,36 @@ export function ProjectOverview() {
   // 1. USEEFFECT PRINCIPAL E REALTIME (CORRIGIDO)
   useEffect(() => {
     const fetchData = async () => {
+      if (!id) return;
+      const { data: membersData, error: membersError } = await supabase
+        .from("team_members_with_email")
+        .select("id, user_id, role, email, color")
+        .eq("project_id", id);
+
+      if (membersError) {
+        console.error("Erro ao buscar membros overview:", membersError);
+      } else {
+        const normalized = (membersData || []).map((m) => ({
+          ...m,
+          color: (m.color as MemberColor | null) ?? getDefaultColor(m.email),
+        }));
+        console.log("membersData overview:", normalized);
+        setMembers(normalized);
+      }
+
       const {
         data: { user },
       } = await supabase.auth.getUser();
       setUser(user);
+
       if (user && id) {
+        // 3) Projeto
         const { data: proj } = await supabase
           .from("projects")
           .select("*")
           .eq("id", id)
           .single();
+
         if (proj) {
           setProject(proj);
           setProjectName(proj.name || "");
@@ -402,6 +454,7 @@ export function ProjectOverview() {
           );
         }
 
+        // 4) Briefing
         const { data: brief } = await supabase
           .from("briefings")
           .select("*")
@@ -409,30 +462,29 @@ export function ProjectOverview() {
           .maybeSingle();
 
         if (brief) {
-          // Cenário 1: Já existe um briefing oficial na tabela 'briefings'
+          // Já existe briefing oficial
           setBriefingStatus(brief.status as any);
-          if (brief.content && brief.content.length > 0)
+          if (brief.content && brief.content.length > 0) {
             setBlocks(brief.content);
-        } else if (proj.description && proj.description.length > 10) {
-          // TENTA QUEBRAR O TEXTO EM PERGUNTAS INDIVIDUAIS
+          }
+        } else if (proj?.description && proj.description.length > 10) {
+          // Gerar blocos iniciais a partir da descrição do projeto
           const lines = proj.description
             .split("\n")
             .filter((line: string) => line.trim().length > 0);
 
           const aiBlocks = lines.map((line: string, index: number) => {
-            // Remove numeração (ex: "1. Qual o objetivo?" vira "Qual o objetivo?")
             const cleanLabel = line.replace(/^\d+[\.\)]\s*/, "").trim();
 
             return {
               id: `ai-q-${index}`,
-              type: "textarea", // Assume que toda pergunta pede uma resposta longa
+              type: "textarea",
               label: cleanLabel,
               placeholder: "Responda aqui...",
-              answer: "", // Começa vazio para o cliente responder
+              answer: "",
             };
           });
 
-          // Se por acaso a quebra falhar e der array vazio, usa o fallback do blocão
           if (aiBlocks.length === 0) {
             setBlocks([
               {
@@ -450,43 +502,11 @@ export function ProjectOverview() {
           setIsEditing(true);
         }
       }
+
       setLoading(false);
     };
+
     fetchData();
-
-    // CONFIGURAÇÃO DO REALTIME
-    const channel = supabase
-      .channel(`project-updates-${id}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "briefings",
-          filter: `project_id=eq.${id}`,
-        },
-        (payload: any) => {
-          console.log("⚡ Alteração recebida:", payload);
-
-          // 1. Atualiza o status instantaneamente
-          if (payload.new?.status) {
-            setBriefingStatus(payload.new.status);
-            if (payload.new.status === "sent") {
-              toast.success("O cliente respondeu o briefing!");
-            }
-          }
-
-          // 2. Atualiza as respostas instantaneamente
-          if (payload.new?.content) {
-            setBlocks(payload.new.content);
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, [id]);
 
   // 2. FUNÇÃO APPROVE BRIEFING (CORRIGIDA E POSICIONADA)
@@ -546,7 +566,7 @@ export function ProjectOverview() {
 
     const projectIdNumber = Number(id);
     if (isNaN(projectIdNumber)) {
-      toast.error(`ID inválido: ${id}`);
+      console.error("ID inválido para project:", id);
       return;
     }
 
@@ -785,6 +805,106 @@ export function ProjectOverview() {
             </button>
           ))}
         </div>
+
+        <div className="w-full bg-zinc-950/70 border border-zinc-800 rounded-2xl p-4 flex flex-col gap-3">
+          {/* Título + CTA */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="h-7 w-7 rounded-lg bg-blue-600/15 border border-blue-500/40 flex items-center justify-center">
+                <Users className="h-4 w-4 text-blue-400" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[12px] font-semibold text-zinc-100">
+                  Time do projeto
+                </span>
+                <span className="text-[11px] text-zinc-500">
+                  {members.length === 0
+                    ? "Só você neste projeto"
+                    : `${members.length} membro${
+                        members.length > 1 ? "s" : ""
+                      } ativo${members.length > 1 ? "s" : ""}`}
+                </span>
+              </div>
+            </div>
+
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setActiveTab("members")}
+              className="h-8 px-3 text-[11px] border-zinc-700 text-zinc-200 hover:text-white hover:border-blue-500/70 hover:bg-blue-500/10"
+            >
+              Gerenciar
+            </Button>
+          </div>
+
+          {/* Estado vazio */}
+          {members.length === 0 ? (
+            <div className="mt-1 rounded-xl border border-dashed border-zinc-800 bg-zinc-900/40 px-3 py-2.5 text-[11px] text-zinc-500 leading-relaxed">
+              Convide clientes e membros do time pela aba{" "}
+              <span className="text-zinc-200 font-medium">Membros</span> para
+              colaborar neste projeto.
+            </div>
+          ) : (
+            <>
+              {/* Avatares compactos */}
+              <div className="flex -space-x-2 overflow-hidden">
+                {members.slice(0, 4).map((m) => (
+                  <div
+                    key={m.id}
+                    className="h-7 w-7 rounded-full bg-zinc-900 border border-zinc-700 flex items-center justify-center text-[10px] font-medium text-zinc-100"
+                    title={m.email}
+                  >
+                    {m.email.substring(0, 2).toUpperCase()}
+                  </div>
+                ))}
+                {members.length > 4 && (
+                  <div className="h-7 w-7 rounded-full bg-zinc-900 border border-zinc-700 flex items-center justify-center text-[10px] text-zinc-400">
+                    +{members.length - 4}
+                  </div>
+                )}
+              </div>
+
+              {/* Lista enxuta */}
+              <div className="space-y-1.5 max-h-24 overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent">
+                {members.slice(0, 3).map((m) => {
+                  const color =
+                    (m.color as MemberColor) ?? getDefaultColor(m.email);
+                  const { bg, ring } = colorMap[color];
+
+                  return (
+                    <div
+                      key={m.id}
+                      className="flex items-center justify-between rounded-lg bg-zinc-900/70 border border-zinc-800 px-2.5 py-1.5"
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div
+                          className={`h-5 w-5 rounded-full flex items-center justify-center text-[9px] text-zinc-50 ring-1 ${bg} ${ring}`}
+                        >
+                          {m.email.substring(0, 2).toUpperCase()}
+                        </div>
+                        <span className="truncate text-[11px] text-zinc-100">
+                          {m.email}
+                        </span>
+                      </div>
+                      <span className="ml-2 text-[10px] uppercase text-zinc-400 border border-zinc-700/70 rounded-full px-2 py-0.5">
+                        {m.role}
+                      </span>
+                    </div>
+                  );
+                })}
+
+                {members.length > 3 && (
+                  <button
+                    onClick={() => setActiveTab("members")}
+                    className="w-full text-left text-[11px] text-blue-400 hover:text-blue-300 mt-0.5"
+                  >
+                    Ver todos os membros →
+                  </button>
+                )}
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </nav>
   );
@@ -912,6 +1032,7 @@ export function ProjectOverview() {
                 />
               </div>
             </div>
+
             <div className="flex justify-between pt-6 border-t border-zinc-900 mt-2">
               <Button
                 variant="ghost"

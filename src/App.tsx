@@ -10,6 +10,7 @@ import { ProjectOverview } from "@/pages/ProjectOverview";
 import { PublicBriefing } from "@/pages/PublicBriefing";
 import { FeedbackView } from "@/pages/FeedbackView";
 import { PublicFeedback } from "@/pages/PublicFeedback";
+import { InvitePage } from "@/pages/invite/[token]";
 
 // ============ PROTECTED ROUTE COMPONENT ============
 interface ProtectedRouteProps {
@@ -94,6 +95,9 @@ function App() {
 
         {/* Catch all */}
         <Route path="*" element={<Navigate to="/" replace />} />
+
+        {/*Invite */}
+        <Route path="/invite/:token" element={<InvitePage />} />
       </Routes>
 
       {/* Toast Notifications */}

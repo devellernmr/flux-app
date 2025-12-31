@@ -114,7 +114,8 @@ const PLANS: {
 // --- VARIANTES DE ANIMAÇÃO ---
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
-  visible: { // Mude "show" para "visible" se quiser seguir o padrão, ou mantenha "show"
+  visible: {
+    // Mude "show" para "visible" se quiser seguir o padrão, ou mantenha "show"
     opacity: 1,
     transition: {
       staggerChildren: 0.1,
@@ -125,11 +126,11 @@ const containerVariants: Variants = {
 
 const itemVariants: Variants = {
   hidden: { opacity: 0, y: 20, scale: 0.95 },
-  visible: { 
-    opacity: 1, 
-    y: 0, 
+  visible: {
+    opacity: 1,
+    y: 0,
     scale: 1,
-    transition: { type: "spring", stiffness: 300, damping: 24 } 
+    transition: { type: "spring", stiffness: 300, damping: 24 },
   },
 };
 
@@ -349,15 +350,47 @@ export function Dashboard() {
         setSettingsAvatar(user.user_metadata?.avatar_url || "");
 
         // Buscar Projetos
-        const { data: projectsData } = await supabase
+        // 1) Projetos que eu sou dono
+        const { data: ownProjects, error: ownError } = await supabase
           .from("projects")
           .select("*")
           .eq("owner_id", user.id)
           .order("created_at", { ascending: false });
 
-        if (projectsData) {
-          setProjects(projectsData);
+        if (ownError) {
+          console.error(ownError);
         }
+
+        // 2) Projetos em que eu sou membro (via team_members)
+        const { data: memberRows, error: memberError } = await supabase
+          .from("team_members")
+          .select("project:projects(*)")
+          .eq("user_id", user.id);
+
+        if (memberError) {
+          console.error(memberError);
+        }
+
+        const memberProjects =
+          memberRows?.map((row: any) => row.project).filter(Boolean) ?? [];
+
+        // 3) Unir, remover duplicados e ordenar
+        const allProjectsMap = new Map<string, any>();
+
+        (ownProjects ?? []).forEach((p: any) => allProjectsMap.set(p.id, p));
+        memberProjects.forEach((p: any) => allProjectsMap.set(p.id, p));
+        const allProjects = Array.from(allProjectsMap.values())
+          .map((p: any) => ({
+            ...p,
+            isShared: p.owner_id !== user.id, // true se não é dono
+          }))
+          .sort(
+            (a, b) =>
+              new Date(b.created_at).getTime() -
+              new Date(a.created_at).getTime()
+          );
+
+        setProjects(allProjects);
       }
     };
 
@@ -371,7 +404,7 @@ export function Dashboard() {
 
   const handleCreateProject = async () => {
     // Dupla verificação de segurança
-    
+
     try {
       const { data, error } = await supabase
         .from("projects")
@@ -402,7 +435,7 @@ export function Dashboard() {
     }
   };
 
- const handleDeleteProject = async () => {
+  const handleDeleteProject = async () => {
     if (!projectToDelete) return;
     setIsDeleting(true); // <--- Liga o loader
 
@@ -415,23 +448,21 @@ export function Dashboard() {
       if (error) throw error;
 
       toast.success("Excluído.");
-      
+
       // Atualiza visualmente a lista
       setProjects(projects.filter((p) => p.id !== projectToDelete.id));
-      
+
       // Atualiza o plano (sem reload)
-      await refreshPlan(); 
-      
+      await refreshPlan();
+
       // FECHA O MODAL E LIMPA O ESTADO
       setProjectToDelete(null); // <--- Isso fecha o dialog de confirmação
-
     } catch (error: any) {
       toast.error("Erro ao excluir.");
     } finally {
       setIsDeleting(false); // <--- Desliga o loader (garantido)
     }
   };
-
 
   const handleUpdateProfile = async () => {
     setIsSavingSettings(true);
@@ -911,7 +942,6 @@ export function Dashboard() {
                                   }
                                 )}
                               </p>
-
                               <div className="mt-4 pt-4 border-t border-zinc-800/50 flex items-center justify-between text-xs">
                                 <span className="flex items-center gap-1.5 text-zinc-400">
                                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)] animate-pulse"></span>
@@ -920,6 +950,13 @@ export function Dashboard() {
                                 <span className="text-zinc-600 group-hover:text-blue-400 transition-colors font-medium flex items-center gap-1 opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 duration-300">
                                   Abrir <span className="text-[10px]">→</span>
                                 </span>
+                                <h3 className="font-medium text-zinc-200 group-hover:text-white truncate mb-1 pr-4 transition-colors flex items-center gap-2">
+                                  {project.isShared && (
+                                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-blue-500/10 text-blue-300 border border-blue-500/40 whitespace-nowrap">
+                                      Em equipe
+                                    </span>
+                                  )}
+                                </h3>
                               </div>
                             </div>
                           </Link>
