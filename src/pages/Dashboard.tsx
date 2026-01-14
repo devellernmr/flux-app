@@ -1,16 +1,10 @@
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
-import { useNavigate, Link } from "react-router-dom";
+import { supabase, getFunctionUrl } from "@/lib/supabase";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  CardDescription,
-} from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+
 import {
   Dialog,
   DialogContent,
@@ -20,44 +14,48 @@ import {
   DialogTrigger,
   DialogDescription,
 } from "@/components/ui/dialog";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Plus,
-  Folder,
-  LogOut,
-  Settings,
   Loader2,
-  Trash2,
-  AlertTriangle,
   Menu,
   Sparkles,
   Search,
-  Grid,
-  User,
-  Save,
-  Mail,
-  CreditCard,
-  Check,
-  PanelRightClose,
-  Lightbulb,
-  Calendar,
   Lock,
+  User as UserIcon,
+  AlertTriangle,
+  PanelRightClose,
+  Folder,
+  Settings,
+  LogOut,
+  Mail,
+  Check,
+  Save,
+  CreditCard,
 } from "lucide-react";
+import { NotificationSystem } from "@/components/NotificationSystem";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import type { Variants } from "framer-motion";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
 
 // --- HOOKS E COMPONENTES ---
 import { usePlan } from "@/hooks/usePlan";
 import { UpgradeModal } from "@/components/UpgradeModal";
 
 import { AIBriefingGenerator } from "@/components/AIBriefingGenerator";
+import { DashboardStats } from "@/components/dashboard/Stats";
+import { Sidebar } from "@/components/layout/Sidebar";
+import { ProjectList } from "@/components/dashboard/ProjectList";
+import { startTour } from "@/components/dashboard/TourGuide";
 
-// Definição local para evitar erros de importação
-type PlanType = "starter" | "pro" | "agency";
+import type { Project, User, PlanType } from "@/types";
 
 const PLANS: {
   id: PlanType;
@@ -111,208 +109,12 @@ const PLANS: {
   },
 ];
 
-// --- VARIANTES DE ANIMAÇÃO ---
-const containerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    // Mude "show" para "visible" se quiser seguir o padrão, ou mantenha "show"
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.2,
-    },
-  },
-};
-
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 20, scale: 0.95 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: { type: "spring", stiffness: 300, damping: 24 },
-  },
-};
-
-// --- LISTA DE DICAS ---
-const PRO_TIPS = [
-  {
-    icon: <Sparkles className="w-4 h-4 text-amber-400" />,
-    title: "Use o Briefing com IA",
-    desc: "Economize tempo gerando perguntas automáticas baseadas no nicho do cliente.",
-  },
-  {
-    icon: <Grid className="w-4 h-4 text-blue-400" />,
-    title: "Organize por Fases",
-    desc: "Mantenha o cliente atualizado movendo os cards no Roadmap do projeto.",
-  },
-  {
-    icon: <Mail className="w-4 h-4 text-emerald-400" />,
-    title: "Aprovações Rápidas",
-    desc: "Envie o link público para o cliente aprovar o briefing sem precisar de login.",
-  },
-  {
-    icon: <User className="w-4 h-4 text-purple-400" />,
-    title: "Personalize seu Perfil",
-    desc: "Adicione sua foto e nome nas configurações para dar um toque profissional.",
-  },
-];
-
-// --- COMPONENTE DE STATS ---
-function DashboardStats({ user, projects, plan }: any) {
-  const firstName = user?.user_metadata?.full_name?.split(" ")[0] || "Usuário";
-  const [currentTip, setCurrentTip] = useState(0);
-
-  // Lógica: Próxima Entrega Real
-  const nextProject = projects
-    ?.filter((p: any) => p.due_date && new Date(p.due_date) > new Date())
-    .sort(
-      (a: any, b: any) =>
-        new Date(a.due_date).getTime() - new Date(b.due_date).getTime()
-    )[0];
-
-  const today = new Date();
-  const dateStr = format(today, "EEEE, d 'de' MMMM", { locale: ptBR });
-
-  // Ciclo das Dicas (Looping infinito a cada 5s)
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTip((prev) => (prev + 1) % PRO_TIPS.length);
-    }, 5000);
-    return () => clearInterval(timer);
-  }, []);
-
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
-      {/* CARD 1: BOAS VINDAS + EFEITO SCAN */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-zinc-900/40 border border-zinc-800 p-6 rounded-2xl relative overflow-hidden group"
-      >
-        {/* ANIMAÇÃO ESTÁTICA: Linha de Scan passando */}
-        <motion.div
-          animate={{ left: ["-100%", "200%"] }}
-          transition={{
-            duration: 3,
-            repeat: Infinity,
-            repeatDelay: 3, // Espera 3s antes de passar de novo
-            ease: "easeInOut",
-          }}
-          className="absolute top-0 bottom-0 w-20 bg-gradient-to-r from-transparent via-white/5 to-transparent skew-x-12 pointer-events-none z-0"
-        />
-
-        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-          <Sparkles className="w-12 h-12 text-white" />
-        </div>
-        <div className="relative z-10">
-          <p className="text-zinc-500 text-xs uppercase tracking-wider font-semibold mb-1 capitalize">
-            {dateStr}
-          </p>
-          <h2 className="text-2xl font-bold text-white mb-2">
-            Olá, <span className="text-blue-400">{firstName}</span>
-          </h2>
-          <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-zinc-800/50 border border-zinc-700/50">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-xs text-zinc-300 font-medium capitalize">
-              Plano {plan}
-            </span>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* CARD 2: DICAS (SUBSTITUIU "PROJETOS ATIVOS") */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="bg-zinc-900/40 border border-zinc-800 p-6 rounded-2xl relative overflow-hidden flex flex-col justify-between min-h-[140px]"
-      >
-        <div className="flex justify-between items-center mb-4">
-          <span className="text-zinc-500 text-xs uppercase tracking-wider font-semibold flex items-center gap-2">
-            <Lightbulb className="w-3.5 h-3.5 text-amber-400" /> Dica Rápida
-          </span>
-          {/* Indicadores de bolinha */}
-          <div className="flex gap-1">
-            {PRO_TIPS.map((_, i) => (
-              <div
-                key={i}
-                className={`w-1 h-1 rounded-full transition-colors ${
-                  i === currentTip ? "bg-zinc-200" : "bg-zinc-800"
-                }`}
-              />
-            ))}
-          </div>
-        </div>
-
-        <div className="relative h-full flex items-end">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentTip}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3 }}
-              className="w-full"
-            >
-              <div className="flex items-center gap-2 mb-1 text-zinc-200 font-medium text-sm">
-                {PRO_TIPS[currentTip].icon}
-                {PRO_TIPS[currentTip].title}
-              </div>
-              <p className="text-xs text-zinc-500 leading-relaxed">
-                {PRO_TIPS[currentTip].desc}
-              </p>
-            </motion.div>
-          </AnimatePresence>
-        </div>
-      </motion.div>
-
-      {/* CARD 3: PRÓXIMA ENTREGA (Mantido) */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="bg-zinc-900/40 border border-zinc-800 p-6 rounded-2xl flex flex-col justify-between group hover:border-zinc-700 transition-colors"
-      >
-        <div className="flex justify-between items-start mb-2">
-          <span className="text-zinc-500 text-xs uppercase tracking-wider font-semibold">
-            Próxima Entrega
-          </span>
-          <Calendar className="w-4 h-4 text-zinc-600 group-hover:text-purple-500 transition-colors" />
-        </div>
-
-        {nextProject ? (
-          <div>
-            <h3
-              className="text-lg font-medium text-zinc-200 truncate mb-1 line-clamp-1"
-              title={nextProject.name}
-            >
-              {nextProject.name}
-            </h3>
-            <p className="text-sm text-purple-400 font-medium">
-              {format(new Date(nextProject.due_date), "dd 'de' MMMM", {
-                locale: ptBR,
-              })}
-            </p>
-          </div>
-        ) : (
-          <div className="flex flex-col justify-end h-full">
-            <span className="text-zinc-500 text-sm">Nenhum prazo próximo.</span>
-            <span className="text-zinc-700 text-xs mt-1">
-              Tudo tranquilo por aqui.
-            </span>
-          </div>
-        )}
-      </motion.div>
-    </div>
-  );
-}
-
 // --- COMPONENTE PRINCIPAL ---
 export function Dashboard() {
   const navigate = useNavigate();
-  const [user, setUser] = useState<any>(null);
-  const [projects, setProjects] = useState<any[]>([]);
+  const location = useLocation();
+  const [user, setUser] = useState<User | null>(null);
+  const [projects, setProjects] = useState<Project[]>([]);
 
   // --- TRAVAS DO PLANO ---
   const { plan, usage, can, loading: planLoading, refreshPlan } = usePlan();
@@ -335,6 +137,8 @@ export function Dashboard() {
   // SETTINGS STATES
   const [settingsName, setSettingsName] = useState("");
   const [settingsAvatar, setSettingsAvatar] = useState("");
+  const [settingsFigmaToken, setSettingsFigmaToken] = useState("");
+  const [settingsAgencyName, setSettingsAgencyName] = useState("");
   const [isSavingSettings, setIsSavingSettings] = useState(false);
   const [aiBriefing, setAiBriefing] = useState<string>("");
 
@@ -348,6 +152,8 @@ export function Dashboard() {
       if (user) {
         setSettingsName(user.user_metadata?.full_name || "");
         setSettingsAvatar(user.user_metadata?.avatar_url || "");
+        setSettingsFigmaToken(user.user_metadata?.figma_token || "");
+        setSettingsAgencyName(user.user_metadata?.agency_name || "");
 
         // Buscar Projetos
         // 1) Projetos que eu sou dono
@@ -395,6 +201,30 @@ export function Dashboard() {
     };
 
     fetchData();
+
+    // Check for activeMenu in location state (e.g. from Analytics)
+    if (location.state?.activeMenu) {
+      setActiveMenu(location.state.activeMenu);
+    }
+
+    // REALTIME: Monitorar projetos e membros para manter o dashboard atualizado
+    const channel = supabase
+      .channel("dashboard-realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "projects" },
+        () => fetchData()
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "project_members" },
+        () => fetchData()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const handleLogout = async () => {
@@ -403,6 +233,7 @@ export function Dashboard() {
   };
 
   const handleCreateProject = async () => {
+    if (!user) return;
     // Dupla verificação de segurança
 
     try {
@@ -412,6 +243,7 @@ export function Dashboard() {
           name: newProjectName,
           owner_id: user.id,
           description: aiBriefing,
+          agency_name: settingsAgencyName,
         })
         .select()
         .single();
@@ -468,7 +300,12 @@ export function Dashboard() {
     setIsSavingSettings(true);
     try {
       const { data, error } = await supabase.auth.updateUser({
-        data: { full_name: settingsName, avatar_url: settingsAvatar },
+        data: {
+          full_name: settingsName,
+          avatar_url: settingsAvatar,
+          figma_token: settingsFigmaToken,
+          agency_name: settingsAgencyName,
+        },
       });
 
       if (error) throw error;
@@ -496,8 +333,7 @@ export function Dashboard() {
         return;
       }
 
-      const functionUrl =
-        "https://wdybtosjzpexycvgreph.supabase.co/functions/v1/create-checkout-session";
+      const functionUrl = getFunctionUrl("create-checkout-session");
 
       const response = await fetch(functionUrl, {
         method: "POST",
@@ -533,8 +369,7 @@ export function Dashboard() {
       }
 
       // IMPORTANTE: URL DA NOVA FUNCTION
-      const functionUrl =
-        "https://wdybtosjzpexycvgreph.supabase.co/functions/v1/create-portal-session";
+      const functionUrl = getFunctionUrl("create-portal-session");
 
       const response = await fetch(functionUrl, {
         method: "POST",
@@ -566,11 +401,6 @@ export function Dashboard() {
 
     setIsCreating(true); // Ativa o loading
 
-    // Formata o briefing
-    const formattedBriefing = briefingData.questions
-      .map((q, i) => `${i + 1}. ${q}`)
-      .join("\n\n");
-
     try {
       // 1. Cria o projeto no Supabase
       const { data, error } = await supabase
@@ -578,20 +408,42 @@ export function Dashboard() {
         .insert({
           name: briefingData.title, // Usa o título da IA como nome do projeto
           owner_id: user.id,
-          description: formattedBriefing, // Salva o briefing direto
+          description: `Gerado por IA para o nicho de ${briefingData.title}`,
+          agency_name: settingsAgencyName,
         })
         .select()
         .single();
 
       if (error) throw error;
 
-      // 2. Fecha os modais
+      // 2. Transforma perguntas em blocos de briefing
+      const blocks = briefingData.questions.map((q, i) => ({
+        id: (i + 1).toString(),
+        type: "textarea",
+        label: q,
+        placeholder: "Sua resposta aqui...",
+      }));
+
+      // 3. Salva na tabela de briefings
+      const { error: briefingError } = await supabase.from("briefings").insert({
+        project_id: data.id,
+        content: blocks,
+        status: "draft",
+        template_type: "custom",
+      });
+
+      if (briefingError) {
+        console.error("Erro ao salvar briefing:", briefingError);
+        toast.error("Projeto criado, mas houve erro ao salvar o briefing.");
+      }
+
+      // 4. Fecha os modais
       setIsAIModalOpen(false);
       setIsNewProjectOpen(false);
 
-      // 3. Redireciona para o projeto novo
-      toast.success("Projeto criado com Inteligência Artificial! 🚀");
-      navigate(`/project/${data.id}`); // <--- O PULO DO GATO
+      // 5. Redireciona para o projeto novo
+      toast.success("Projeto e Briefing criados com IA! 🚀");
+      navigate(`/project/${data.id}`);
     } catch (err: any) {
       console.error(err);
       toast.error("Erro ao criar projeto: " + err.message);
@@ -600,49 +452,15 @@ export function Dashboard() {
     }
   };
 
-  // --- COMPONENTE DE NAV DA SIDEBAR ---
-  const NavLinks = ({
-    active,
-    onChange,
-  }: {
-    active: string;
-    onChange: (val: string) => void;
-  }) => (
-    <nav className="flex-1 px-4 space-y-2 mt-8">
-      {[
-        { id: "projects", label: "Projetos", icon: Folder },
-        { id: "settings", label: "Configurações", icon: Settings },
-      ].map((item) => (
-        <button
-          key={item.id}
-          onClick={() => onChange(item.id)}
-          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group relative overflow-hidden ${
-            active === item.id
-              ? "text-white"
-              : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900/50"
-          }`}
-        >
-          {active === item.id && (
-            <motion.div
-              layoutId="menu-active"
-              className="absolute inset-0 bg-blue-600/10 border border-blue-600/20 rounded-lg z-0"
-              transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-            />
-          )}
-          <span className="relative z-10 flex items-center gap-3">
-            <item.icon className="h-4 w-4" />
-            {item.label}
-          </span>
-          {active === item.id && (
-            <motion.div
-              layoutId="menu-glow"
-              className="absolute right-2 w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]"
-            />
-          )}
-        </button>
-      ))}
-    </nav>
-  );
+  // --- ONBOARDING (Guided Tour) ---
+  useEffect(() => {
+    if (user && !user.user_metadata?.has_seen_tour) {
+      const timer = setTimeout(() => {
+        startTour();
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [user]);
 
   return (
     <div className="min-h-screen bg-[#050505] text-zinc-100 flex font-sans overflow-hidden selection:bg-blue-500/30 relative">
@@ -660,69 +478,21 @@ export function Dashboard() {
       </div>
 
       {/* SIDEBAR DESKTOP */}
-      <aside className="w-72 bg-[#050505] border-r border-zinc-900 hidden md:flex flex-col sticky top-0 h-screen z-20 relative">
-        <div className="p-6 pb-2">
-          <div className="flex items-center gap-2.5 px-2">
-            <div className="h-8 w-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-900/20">
-              <Sparkles className="h-4 w-4 text-white" />
-            </div>
-            <span className="text-lg font-bold tracking-tight text-white">
-              FLUXO.
-            </span>
-          </div>
-        </div>
-
-        <NavLinks active={activeMenu} onChange={setActiveMenu} />
-
-        {/* INDICADOR DE LIMITES */}
-        <div className="px-6 pb-4">
-          <div className="bg-zinc-900/50 rounded-lg p-3 border border-zinc-800">
-            <div className="flex justify-between text-xs mb-2">
-              <span className="text-zinc-400">Projetos</span>
-              <span className="text-white font-medium">
-                {plan === "starter" ? `${usage.projects} / 2` : "Ilimitado"}
-              </span>
-            </div>
-            {plan === "starter" && (
-              <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-blue-600 rounded-full transition-all duration-500"
-                  style={{
-                    width: `${Math.min((usage.projects / 2) * 100, 100)}%`,
-                  }}
-                />
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="p-4 border-t border-zinc-900 mt-auto">
-          <div className="bg-zinc-900/30 rounded-xl p-3 border border-zinc-800/50 flex items-center gap-3">
-            <Avatar className="h-9 w-9 border border-zinc-800">
-              <AvatarImage src={user?.user_metadata?.avatar_url} />
-              <AvatarFallback className="bg-zinc-800 text-xs">
-                {user?.email?.substring(0, 2).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 overflow-hidden min-w-0">
-              <p className="text-sm font-medium truncate text-zinc-200">
-                {user?.user_metadata?.full_name || "Usuário"}
-              </p>
-              <p className="text-[10px] text-zinc-500 truncate capitalize">
-                Plano {plan}
-              </p>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 text-zinc-500 hover:text-red-400 hover:bg-red-950/10"
-              onClick={handleLogout}
-            >
-              <LogOut className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      </aside>
+      <Sidebar
+        user={user}
+        plan={plan}
+        usage={usage}
+        activeMenu={activeMenu}
+        setActiveMenu={(menu) => {
+          if (menu === "analytics") {
+            navigate("/analytics");
+            return;
+          }
+          setActiveMenu(menu);
+        }}
+        onLogout={handleLogout}
+        onShowTutorial={() => startTour()}
+      />
 
       {/* MAIN CONTENT */}
       <main className="flex-1 flex flex-col h-screen overflow-hidden relative z-10">
@@ -730,13 +500,16 @@ export function Dashboard() {
           <div className="flex items-center gap-2 font-bold">
             <Sparkles className="h-4 w-4 text-blue-500" /> FLUXO.
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsMobileMenuOpen(true)}
-          >
-            <Menu className="h-5 w-5 text-zinc-400" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <NotificationSystem />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsMobileMenuOpen(true)}
+            >
+              <Menu className="h-5 w-5 text-zinc-400" />
+            </Button>
+          </div>
         </header>
 
         <div className="flex-1 overflow-y-auto p-6 md:p-12 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-zinc-800">
@@ -750,7 +523,13 @@ export function Dashboard() {
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <DashboardStats user={user} projects={projects} plan={plan} />
+                  <div id="dashboard-stats-wrapper">
+                    <DashboardStats
+                      user={user}
+                      projects={projects}
+                      plan={plan}
+                    />
+                  </div>
 
                   <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-10">
                     <div>
@@ -764,7 +543,10 @@ export function Dashboard() {
                     </div>
 
                     <div className="flex items-center gap-3 w-full md:w-auto">
-                      <div className="relative group flex-1 md:flex-none">
+                      <div
+                        id="dashboard-search-bar"
+                        className="relative group flex-1 md:flex-none"
+                      >
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500 group-focus-within:text-blue-500 transition-colors" />
                         <Input
                           placeholder="Buscar..."
@@ -778,6 +560,7 @@ export function Dashboard() {
                       >
                         <DialogTrigger asChild>
                           <Button
+                            id="dashboard-new-project-btn"
                             disabled={planLoading}
                             onClick={(e) => {
                               if (planLoading) {
@@ -892,78 +675,10 @@ export function Dashboard() {
                     </div>
                   </div>
 
-                  {projects.length === 0 ? (
-                    <div className="border border-dashed border-zinc-800 rounded-2xl h-64 flex flex-col items-center justify-center text-zinc-500 bg-zinc-900/20">
-                      <Grid className="h-10 w-10 mb-3 opacity-20" />
-                      <p>Nenhum projeto encontrado.</p>
-                    </div>
-                  ) : (
-                    <motion.div
-                      variants={containerVariants}
-                      initial="hidden"
-                      animate="visible"
-                      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
-                    >
-                      {projects.map((project) => (
-                        <motion.div key={project.id} variants={itemVariants}>
-                          <Link to={`/project/${project.id}`}>
-                            <div className="group relative bg-zinc-900/20 border border-zinc-800/60 hover:border-zinc-700/80 hover:bg-zinc-900/60 rounded-xl p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/50 overflow-hidden">
-                              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-
-                              <div className="flex justify-between items-start mb-4">
-                                <div className="h-10 w-10 bg-zinc-900 border border-zinc-800 rounded-lg flex items-center justify-center group-hover:border-blue-500/30 group-hover:text-blue-500 transition-colors duration-300 text-zinc-500 shadow-sm">
-                                  <Folder className="h-5 w-5" />
-                                </div>
-                                <div className="opacity-0 group-hover:opacity-100 transition-all duration-200 translate-x-2 group-hover:translate-x-0">
-                                  <Button
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      setProjectToDelete(project);
-                                    }}
-                                    size="icon"
-                                    variant="ghost"
-                                    className="h-8 w-8 text-zinc-500 hover:text-red-400 hover:bg-red-950/20 rounded-lg"
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              </div>
-
-                              <h3 className="font-medium text-zinc-200 group-hover:text-white truncate mb-1 pr-4 transition-colors">
-                                {project.name}
-                              </h3>
-                              <p className="text-xs text-zinc-500">
-                                Atualizado há{" "}
-                                {format(
-                                  new Date(project.created_at),
-                                  "d 'de' MMM",
-                                  {
-                                    locale: ptBR,
-                                  }
-                                )}
-                              </p>
-                              <div className="mt-4 pt-4 border-t border-zinc-800/50 flex items-center justify-between text-xs">
-                                <span className="flex items-center gap-1.5 text-zinc-400">
-                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)] animate-pulse"></span>
-                                  Ativo
-                                </span>
-                                <span className="text-zinc-600 group-hover:text-blue-400 transition-colors font-medium flex items-center gap-1 opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 duration-300">
-                                  Abrir <span className="text-[10px]">→</span>
-                                </span>
-                                <h3 className="font-medium text-zinc-200 group-hover:text-white truncate mb-1 pr-4 transition-colors flex items-center gap-2">
-                                  {project.isShared && (
-                                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-blue-500/10 text-blue-300 border border-blue-500/40 whitespace-nowrap">
-                                      Em equipe
-                                    </span>
-                                  )}
-                                </h3>
-                              </div>
-                            </div>
-                          </Link>
-                        </motion.div>
-                      ))}
-                    </motion.div>
-                  )}
+                  <ProjectList
+                    projects={projects}
+                    onDelete={setProjectToDelete}
+                  />
                 </motion.div>
               ) : (
                 <motion.div
@@ -987,7 +702,7 @@ export function Dashboard() {
                     <Card className="bg-zinc-900/20 border-zinc-800/60 backdrop-blur-sm">
                       <CardHeader>
                         <CardTitle className="text-lg font-medium text-white flex items-center gap-2">
-                          <User className="h-5 w-5 text-blue-500" /> Perfil
+                          <UserIcon className="h-5 w-5 text-blue-500" /> Perfil
                         </CardTitle>
                         <CardDescription className="text-zinc-500">
                           Atualize suas informações públicas.
@@ -1025,7 +740,7 @@ export function Dashboard() {
                               Nome Completo
                             </Label>
                             <div className="relative">
-                              <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+                              <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
                               <Input
                                 value={settingsName}
                                 onChange={(e) =>
@@ -1049,6 +764,77 @@ export function Dashboard() {
                               />
                             </div>
                           </div>
+                        </div>
+
+                        <div className="space-y-2 pt-4 border-t border-zinc-800">
+                          <Label className="text-xs text-zinc-400 uppercase flex items-center gap-2">
+                            Nome da Agência
+                            <span className="text-[9px] normal-case bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/20">
+                              White-Label
+                            </span>
+                          </Label>
+                          <Input
+                            value={settingsAgencyName}
+                            onChange={(e) =>
+                              setSettingsAgencyName(e.target.value)
+                            }
+                            className="bg-zinc-950/50 border-zinc-800"
+                            placeholder="Ex: MeuStudio Design"
+                          />
+                          <p className="text-[10px] text-zinc-500 mb-2">
+                            Personalize o nome exibido nas visualizações
+                            públicas enviadas aos clientes.
+                          </p>
+
+                          {/* PREVIEW */}
+                          <div className="bg-zinc-950 rounded-lg border border-zinc-800 p-4">
+                            <p className="text-[10px] text-zinc-500 uppercase font-bold mb-2">
+                              Preview da Visualização do Cliente
+                            </p>
+                            <div className="bg-[#050505] rounded-md p-3 border border-zinc-900 flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <div className="h-6 w-6 bg-blue-600 rounded flex items-center justify-center">
+                                  <Sparkles className="h-3 w-3 text-white" />
+                                </div>
+                                <span className="text-sm font-bold text-white">
+                                  {settingsAgencyName || "FLUXO."}
+                                </span>
+                              </div>
+                              <div className="text-[10px] text-zinc-500">
+                                Briefing Compartilhado
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2 pt-4 border-t border-zinc-800">
+                          <Label className="text-xs text-zinc-400 uppercase flex items-center gap-2">
+                            Figma API Token
+                            <span className="text-[9px] normal-case bg-purple-500/10 text-purple-400 px-1.5 py-0.5 rounded border border-purple-500/20">
+                              Brand Kit Inteligente
+                            </span>
+                          </Label>
+                          <Input
+                            type="password"
+                            value={settingsFigmaToken}
+                            onChange={(e) =>
+                              setSettingsFigmaToken(e.target.value)
+                            }
+                            className="bg-zinc-950/50 border-zinc-800 font-mono text-xs"
+                            placeholder="figd_..."
+                          />
+                          <p className="text-[10px] text-zinc-500">
+                            Cole seu token de acesso do Figma para habilitar
+                            extração automática de cores.{" "}
+                            <a
+                              href="https://help.figma.com/hc/en-us/articles/8085703771159-Manage-personal-access-tokens"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-400 hover:underline"
+                            >
+                              Como obter?
+                            </a>
+                          </p>
                         </div>
 
                         <div className="pt-2 flex justify-end">

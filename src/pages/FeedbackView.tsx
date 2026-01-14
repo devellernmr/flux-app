@@ -12,9 +12,13 @@ import {
   Minus,
   LayoutList,
   ChevronDown,
+  CheckCircle2,
+  RotateCcw,
+  Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import { sendNotification } from "@/lib/notifications";
 import {
   Sheet,
   SheetContent,
@@ -38,11 +42,13 @@ export function FeedbackView() {
   const [tempPin, setTempPin] = useState<{ x: number; y: number } | null>(null);
   const [user, setUser] = useState<any>(null);
   const [activeCommentId, setActiveCommentId] = useState<string | null>(null);
+  const [members, setMembers] = useState<any[]>([]);
   const imageRef = useRef<HTMLImageElement>(null);
 
   // UI States
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [scale, setScale] = useState(1);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -52,15 +58,29 @@ export function FeedbackView() {
       .on(
         "postgres_changes",
         {
-          event: "INSERT",
+          event: "*",
           schema: "public",
           table: "comments",
           filter: `file_id=eq.${fileId}`,
         },
-        (payload) => setComments((prev) => [...prev, payload.new])
+        (payload) => {
+          console.log("Realtime change in comments (FeedbackView):", payload);
+          if (payload.eventType === "INSERT") {
+            setComments((prev) => {
+              if (prev.some((c) => c.id === payload.new.id)) return prev;
+              return [...prev, payload.new];
+            });
+          } else {
+            // Para UPDATE ou DELETE, recarrega tudo para garantir consistência
+            fetchData();
+          }
+        }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log(`Realtime subscription status for file ${fileId}:`, status);
+      });
     return () => {
+      console.log(`Removing realtime channel for file ${fileId}`);
       supabase.removeChannel(channel);
     };
   }, [fileId]);
@@ -72,10 +92,18 @@ export function FeedbackView() {
     setUser(user);
     const { data: fileData } = await supabase
       .from("files")
-      .select("*, projects(name)")
+      .select("*, projects(name, custom_logo_url, agency_name)")
       .eq("id", fileId)
       .single();
     setFile(fileData);
+
+    if (fileData?.project_id) {
+      const { data: membersData } = await supabase
+        .from("team_members_with_email")
+        .select("user_id, email")
+        .eq("project_id", fileData.project_id);
+      if (membersData) setMembers(membersData);
+    }
 
     // CORREÇÃO DO ERRO 400: Removido o join complexo 'profiles:user_id(email)'
     const { data: commentsData } = await supabase
@@ -86,6 +114,39 @@ export function FeedbackView() {
 
     setComments(commentsData || []);
   };
+
+  const getEmbedUrl = (rawUrl: string) => {
+    if (rawUrl.includes("figma.com")) {
+      if (rawUrl.includes("figma.com/embed")) return rawUrl;
+      return `https://www.figma.com/embed?embed_host=fluxo&url=${encodeURIComponent(
+        rawUrl
+      )}`;
+    }
+    if (rawUrl.includes("canva.com")) {
+      if (rawUrl.includes("embed")) return rawUrl;
+      // Ensure it uses /view instead of /edit or other suffixes
+      let cleanUrl = rawUrl.split("?")[0];
+      if (cleanUrl.endsWith("/")) cleanUrl = cleanUrl.slice(0, -1);
+
+      const parts = cleanUrl.split("/");
+      const lastPart = parts[parts.length - 1];
+
+      // If it doesn't end in view or watch, try to replace the last part or append view
+      if (lastPart !== "view" && lastPart !== "watch") {
+        if (cleanUrl.includes("/design/")) {
+          // Replace the action (edit/publish) with view if present
+          cleanUrl = cleanUrl.replace(/\/(edit|publish|watch)$/, "/view");
+          if (!cleanUrl.endsWith("/view")) cleanUrl += "/view";
+        }
+      }
+      return `${cleanUrl}?embed`;
+    }
+    return rawUrl;
+  };
+
+  // Move this after the guard
+  // const isExternalLink =
+  //   file?.url?.includes("figma.com") || file?.url?.includes("canva.com");
 
   const handleWheel = (e: React.WheelEvent) => {
     if (e.ctrlKey) {
@@ -130,10 +191,68 @@ export function FeedbackView() {
         if (prev.some((c) => c.id === data.id)) return prev;
         return [...prev, data];
       });
+
+      // Notificar outros membros sobre o novo feedback
+      const otherMembers = members.filter((m) => m.user_id !== user?.id);
+      for (const member of otherMembers) {
+        await sendNotification({
+          userId: member.user_id,
+          title: "Novo feedback no design",
+          message: `${
+            user?.user_metadata?.full_name || "Alguém"
+          } deixou um comentário em ${file.name}`,
+          type: "comment",
+          link: `/feedback/${fileId}`,
+        });
+      }
+
       toast.success("Enviado!");
     } else {
       console.error(error);
       toast.error("Erro ao enviar");
+    }
+  };
+
+  const updateFileStatus = async (newStatus: "approved" | "rejected") => {
+    if (!fileId) return;
+    setIsUpdatingStatus(true);
+    try {
+      const { error } = await supabase
+        .from("files")
+        .update({ status: newStatus })
+        .eq("id", fileId);
+
+      if (error) throw error;
+
+      setFile((prev: any) => ({ ...prev, status: newStatus }));
+
+      // Notificar sobre a mudança de status
+      const otherMembers = members.filter((m) => m.user_id !== user?.id);
+      for (const member of otherMembers) {
+        await sendNotification({
+          userId: member.user_id,
+          title:
+            newStatus === "approved"
+              ? "Design Aprovado! 🎉"
+              : "Ajustes Solicitados 📝",
+          message: `O arquivo ${file.name} foi ${
+            newStatus === "approved" ? "aprovado" : "marcado para ajustes"
+          }.`,
+          type: "approval",
+          link: `/feedback/${fileId}`,
+        });
+      }
+
+      toast.success(
+        newStatus === "approved"
+          ? "Design aprovado com sucesso!"
+          : "Ajustes solicitados!"
+      );
+    } catch (err) {
+      console.error(err);
+      toast.error("Erro ao atualizar status.");
+    } finally {
+      setIsUpdatingStatus(false);
     }
   };
 
@@ -143,6 +262,9 @@ export function FeedbackView() {
         Carregando Design...
       </div>
     );
+
+  const isExternalLink =
+    file?.url?.includes("figma.com") || file?.url?.includes("canva.com");
 
   return (
     <TooltipProvider>
@@ -162,14 +284,75 @@ export function FeedbackView() {
             >
               <ArrowLeft className="h-4 w-4 md:h-5 md:w-5" />
             </Button>
-            <div className="flex flex-col justify-center max-w-[120px] md:max-w-none">
-              <h1 className="font-semibold text-xs md:text-sm text-zinc-100 leading-tight truncate">
-                {file.name}
-              </h1>
-              <span className="text-[9px] md:text-[10px] text-zinc-500 font-medium tracking-wide uppercase truncate">
-                {file.projects?.name}
-              </span>
+
+            {/* WHITE-LABEL LOGO OR AGENCY NAME */}
+            <div className="flex items-center gap-3">
+              {file.projects?.custom_logo_url ? (
+                <img
+                  src={file.projects.custom_logo_url}
+                  className="h-6 w-auto max-w-[100px] object-contain hidden md:block"
+                  alt="Agency Logo"
+                />
+              ) : (
+                file.projects?.agency_name && (
+                  <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest hidden md:block border-r border-zinc-700 pr-3 mr-1">
+                    {file.projects.agency_name}
+                  </span>
+                )
+              )}
+              <div className="flex flex-col justify-center max-w-[120px] md:max-w-none">
+                <h1 className="font-semibold text-xs md:text-sm text-zinc-100 leading-tight truncate">
+                  {file.name}
+                </h1>
+                <span className="text-[9px] md:text-[10px] text-zinc-500 font-medium tracking-wide uppercase truncate">
+                  {file.projects?.name}
+                </span>
+              </div>
             </div>
+          </div>
+
+          {/* AÇÕES DE APROVAÇÃO (DESKTOP) */}
+          <div className="hidden md:flex items-center gap-2 pointer-events-auto bg-black/40 backdrop-blur-md p-1.5 rounded-full border border-white/5 shadow-xl">
+            {file.status === "approved" ? (
+              <div className="flex items-center gap-2 px-4 py-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full text-xs font-bold uppercase tracking-wider">
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                Aprovado
+              </div>
+            ) : file.status === "rejected" ? (
+              <div className="flex items-center gap-2 px-4 py-1.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full text-xs font-bold uppercase tracking-wider">
+                <RotateCcw className="h-3.5 w-3.5" />
+                Ajustes Solicitados
+              </div>
+            ) : (
+              <>
+                <Button
+                  onClick={() => updateFileStatus("rejected")}
+                  disabled={isUpdatingStatus}
+                  variant="ghost"
+                  className="h-9 px-4 rounded-full text-zinc-400 hover:text-amber-400 hover:bg-amber-400/10 transition-all text-[11px] font-bold uppercase tracking-tight"
+                >
+                  <RotateCcw
+                    className={`h-3.5 w-3.5 mr-2 ${
+                      isUpdatingStatus ? "animate-spin" : ""
+                    }`}
+                  />
+                  Pedir Ajustes
+                </Button>
+                <div className="w-px h-4 bg-zinc-800" />
+                <Button
+                  onClick={() => updateFileStatus("approved")}
+                  disabled={isUpdatingStatus}
+                  className="h-9 px-6 rounded-full bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/20 text-[11px] font-bold uppercase tracking-wider"
+                >
+                  {isUpdatingStatus ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" />
+                  ) : (
+                    <CheckCircle2 className="h-3.5 w-3.5 mr-2" />
+                  )}
+                  Aprovar Design
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Botão Chat Mobile (Apenas Mobile) */}
@@ -227,17 +410,37 @@ export function FeedbackView() {
             style={{ cursor: tempPin ? "crosshair" : "grab" }}
           >
             <div
-              className="relative transition-transform duration-300 ease-out shadow-2xl shadow-black"
+              className={`relative shadow-2xl shadow-black overflow-hidden ring-1 ring-zinc-800/50 bg-[#09090b] ${
+                isExternalLink
+                  ? "w-[90vw] md:w-[85vw] h-[75vh] md:h-[80vh] rounded-xl"
+                  : "rounded-sm"
+              }`}
               style={{ transform: `scale(${scale})` }}
             >
-              <img
-                ref={imageRef}
-                src={file.url}
-                alt="Design"
-                className="max-w-[95vw] md:max-w-[80vw] max-h-[70vh] md:max-h-[75vh] rounded-sm ring-1 ring-zinc-800/50 select-none pointer-events-auto bg-[#09090b]"
-                onClick={handleImageClick}
-                draggable={false}
-              />
+              {isExternalLink ? (
+                <>
+                  <iframe
+                    src={getEmbedUrl(file.url)}
+                    className="w-full h-full border-0 pointer-events-auto"
+                    allowFullScreen
+                  />
+                  {/* Camada invisível para capturar cliques de pins e scroll, permitindo zoom do container */}
+                  <div
+                    className="absolute inset-0 z-20 cursor-crosshair"
+                    onClick={handleImageClick}
+                    ref={imageRef as any}
+                  />
+                </>
+              ) : (
+                <img
+                  ref={imageRef}
+                  src={file.url}
+                  alt="Design"
+                  className="max-w-[95vw] md:max-w-[80vw] max-h-[70vh] md:max-h-[75vh] select-none pointer-events-auto"
+                  onClick={handleImageClick}
+                  draggable={false}
+                />
+              )}
               <AnimatePresence>
                 {comments.map(
                   (comment, idx) =>
@@ -488,7 +691,11 @@ export function FeedbackView() {
                       <div className="space-y-1 w-full">
                         <div className="flex items-center justify-between">
                           <span className="text-xs font-bold text-zinc-300">
-                            {comment.user_id === user?.id ? "Você" : "Usuário"}
+                            {comment.user_id === user?.id
+                              ? user?.user_metadata?.full_name || "Você"
+                              : members.find(
+                                  (m) => m.user_id === comment.user_id
+                                )?.email || "Usuário"}
                           </span>
                           <span className="text-[10px] text-zinc-600">
                             {new Date(comment.created_at).toLocaleTimeString(

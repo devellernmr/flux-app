@@ -14,10 +14,27 @@ import { toast } from "sonner";
 import confetti from "canvas-confetti";
 import { motion, AnimatePresence } from "framer-motion";
 
+interface FileData {
+  id: string;
+  name: string;
+  url: string;
+  status: string;
+  projects?: { name: string; custom_logo_url?: string; agency_name?: string };
+}
+
+interface CommentData {
+  id: string;
+  x: number;
+  y: number;
+  text: string;
+  user_name: string;
+  created_at: string;
+}
+
 export function PublicFeedback() {
   const { fileId } = useParams();
-  const [file, setFile] = useState<any>(null);
-  const [comments, setComments] = useState<any[]>([]);
+  const [file, setFile] = useState<FileData | null>(null);
+  const [comments, setComments] = useState<CommentData[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Estado do Pin Temporário
@@ -38,7 +55,7 @@ export function PublicFeedback() {
     try {
       const { data: fileData, error } = await supabase
         .from("files")
-        .select("*, projects(name)")
+        .select("*, projects(name, custom_logo_url, agency_name)")
         .eq("id", fileId)
         .single();
       if (error) throw error;
@@ -152,9 +169,23 @@ export function PublicFeedback() {
       {/* HEADER (Minimalista) */}
       <header className="h-16 border-b border-zinc-800 bg-[#050505]/80 backdrop-blur-md flex items-center px-6 justify-between z-50 sticky top-0">
         <div className="flex items-center gap-4">
-          <div className="h-8 w-8 bg-zinc-900 rounded-lg border border-zinc-800 flex items-center justify-center">
-            <span className="font-bold text-xs text-white">F.</span>
-          </div>
+          {file.projects?.custom_logo_url ? (
+            <img
+              src={file.projects.custom_logo_url}
+              alt="Logo"
+              className="h-8 max-w-[120px] object-contain rounded"
+            />
+          ) : (
+            <div className="h-8 w-8 bg-zinc-900 rounded-lg border border-zinc-800 flex items-center justify-center">
+              {file.projects?.agency_name ? (
+                <span className="font-bold text-xs text-white">
+                  {file.projects.agency_name.charAt(0).toUpperCase()}.
+                </span>
+              ) : (
+                <span className="font-bold text-xs text-white">F.</span>
+              )}
+            </div>
+          )}
           <div className="h-6 w-px bg-zinc-800 mx-1" />
           <div>
             <h1 className="font-medium text-sm text-zinc-200 tracking-wide">

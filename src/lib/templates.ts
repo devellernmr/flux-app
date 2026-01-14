@@ -1,10 +1,12 @@
+export type BriefingBlockType = 'text' | 'textarea' | 'select' | 'upload';
+
 export type BriefingBlock = {
     id: string;
-    type: 'text' | 'textarea' | 'select' | 'upload';
+    type: BriefingBlockType;
     label: string;
     placeholder?: string;
     options?: string[];
-        answer?: string;
+    answer?: string;
 };
 
 export const BRIEFING_TEMPLATES = {

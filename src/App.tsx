@@ -11,6 +11,7 @@ import { PublicBriefing } from "@/pages/PublicBriefing";
 import { FeedbackView } from "@/pages/FeedbackView";
 import { PublicFeedback } from "@/pages/PublicFeedback";
 import { InvitePage } from "@/pages/invite/[token]";
+import { Analytics } from "@/pages/Analytics";
 
 // ============ PROTECTED ROUTE COMPONENT ============
 interface ProtectedRouteProps {
@@ -78,6 +79,10 @@ function App() {
         <Route
           path="/dashboard"
           element={<ProtectedRoute element={<Dashboard />} session={session} />}
+        />
+        <Route
+          path="/analytics"
+          element={<ProtectedRoute element={<Analytics />} session={session} />}
         />
 
         {/* Overview */}

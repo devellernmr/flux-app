@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { sendNotification } from "@/lib/notifications";
 
 export function ProjectActivity({ projectId }: { projectId: string }) {
   const [activity, setActivity] = useState<any[]>([]);
@@ -23,11 +24,20 @@ export function ProjectActivity({ projectId }: { projectId: string }) {
   const [sending, setSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [user, setUser] = useState<any>(null);
+  const [members, setMembers] = useState<any[]>([]);
 
   const fetchActivity = useCallback(async () => {
     if (!projectId) return;
 
     try {
+      // 1. Buscar Membros para ter os nomes/emails
+      const { data: membersData } = await supabase
+        .from("team_members_with_email")
+        .select("user_id, email")
+        .eq("project_id", projectId);
+
+      if (membersData) setMembers(membersData);
+
       const { data: chatData, error: chatError } = await supabase
         .from("project_comments")
         .select("*")
@@ -78,25 +88,43 @@ export function ProjectActivity({ projectId }: { projectId: string }) {
     fetchActivity();
 
     const channel = supabase
-      .channel(`activity-${projectId}`)
+      .channel(`project-activity-${projectId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "project_comments",
+          filter: `project_id=eq.${projectId}`,
+        },
+        (payload) => {
+          console.log("Realtime: Novo comentário no chat", payload);
+          fetchActivity();
+        }
+      )
       .on(
         "postgres_changes",
         {
           event: "INSERT",
           schema: "public",
-          table: "project_comments",
-          filter: `project_id=eq.${projectId}`,
+          table: "comments",
         },
-        () => fetchActivity()
+        (_payload) => {
+          // Só recarrega se o comentário for de um arquivo deste projeto
+          // Como não temos o project_id no payload do comment (vem file_id),
+          // recarregamos para garantir, mas de forma menos ruidosa.
+          console.log("Realtime: Novo feedback detectado");
+          fetchActivity();
+        }
       )
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "comments" },
-        () => fetchActivity()
-      )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          console.log("🔥 Realtime Chat Conectado!");
+        }
+      });
 
     return () => {
+      console.log(`Removing realtime channel for project ${projectId}`);
       supabase.removeChannel(channel);
     };
   }, [projectId, fetchActivity]);
@@ -127,7 +155,21 @@ export function ProjectActivity({ projectId }: { projectId: string }) {
       });
 
       if (error) throw error;
-      await fetchActivity();
+      fetchActivity();
+
+      // Enviar notificações para outros membros do projeto
+      const otherMembers = members.filter((m) => m.user_id !== user.id);
+      for (const member of otherMembers) {
+        await sendNotification({
+          userId: member.user_id,
+          title: "Nova mensagem no chat",
+          message: `${
+            user.user_metadata?.full_name || user.email
+          } enviou uma mensagem.`,
+          type: "comment",
+          link: `/project/${projectId}?tab=chat`,
+        });
+      }
     } catch (error: any) {
       toast.error("Erro ao enviar.");
       setNewComment(textToSend);
@@ -207,13 +249,25 @@ export function ProjectActivity({ projectId }: { projectId: string }) {
                       <MousePointer2 className="h-3 w-3 text-pink-500" />
                     </div>
                     <span className="text-[10px] text-zinc-500 font-medium">
-                      {isMe ? "Você" : "Cliente"} comentou em{" "}
+                      {isMe
+                        ? "Você"
+                        : members.find((m) => m.user_id === item.user_id)
+                            ?.email || "Cliente"}{" "}
+                      comentou em{" "}
                       <span className="text-zinc-300 font-semibold">
                         {item.fileName || "um arquivo"}
                       </span>
                     </span>
                   </div>
-                  <div className="bg-zinc-900/60 border border-zinc-800 border-l-2 border-l-pink-500 p-3 rounded-r-xl rounded-bl-xl text-sm text-zinc-300 italic relative shadow-sm">
+                  <div
+                    onClick={() =>
+                      window.open(
+                        `${window.location.origin}/feedback/${item.file_id}`,
+                        "_blank"
+                      )
+                    }
+                    className="bg-zinc-900/60 border border-zinc-800 border-l-2 border-l-pink-500 p-3 rounded-r-xl rounded-bl-xl text-sm text-zinc-300 italic relative shadow-sm cursor-pointer hover:bg-zinc-900 transition-colors group/feedback"
+                  >
                     "{item.content}"
                     <span className="absolute -bottom-5 right-0 text-[9px] text-zinc-600">
                       {item.created_at &&
@@ -222,6 +276,9 @@ export function ProjectActivity({ projectId }: { projectId: string }) {
                           locale: ptBR,
                         })}
                     </span>
+                    <div className="absolute right-2 top-2 opacity-0 group-hover/feedback:opacity-100 transition-opacity">
+                      <MousePointer2 className="h-3 w-3 text-pink-500/50" />
+                    </div>
                   </div>
                 </motion.div>
               );
@@ -244,7 +301,14 @@ export function ProjectActivity({ projectId }: { projectId: string }) {
                         : "bg-zinc-800 text-zinc-400"
                     }`}
                   >
-                    {isMe ? "EU" : "US"}
+                    {isMe
+                      ? user?.user_metadata?.full_name
+                          ?.substring(0, 2)
+                          .toUpperCase() || "EU"
+                      : members
+                          .find((m) => m.user_id === item.user_id)
+                          ?.email?.substring(0, 2)
+                          .toUpperCase() || "US"}
                   </AvatarFallback>
                 </Avatar>
 
@@ -255,7 +319,10 @@ export function ProjectActivity({ projectId }: { projectId: string }) {
                 >
                   <div className="flex items-center gap-2 mb-1 px-1">
                     <span className="text-[10px] font-bold text-zinc-400">
-                      {isMe ? "Você" : "Usuário"}
+                      {isMe
+                        ? user?.user_metadata?.full_name || "Você"
+                        : members.find((m) => m.user_id === item.user_id)
+                            ?.email || "Usuário"}
                     </span>
                     <span className="text-[9px] text-zinc-600">
                       {item.created_at &&

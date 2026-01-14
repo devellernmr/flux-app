@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
-export type PlanType = "starter" | "pro" | "agency";
+
+import type { PlanType } from "@/types";
 
 interface PlanLimits {
   projects: number; // -1 = ilimitado
@@ -32,30 +33,11 @@ export function usePlan() {
   const [loading, setLoading] = useState(true);
   const [usage, setUsage] = useState({ projects: 0, storage: 0 });
 
-  const fetchPlanData = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    
-    // ... sua lógica atual de buscar contagem de projetos ...
-    // Exemplo:
-    const { count } = await supabase
-       .from('projects')
-       .select('*', { count: 'exact', head: true })
-       .eq('owner_id', user.id);
-       
-    setUsage(prev => ({ ...prev, projects: count || 0 }));
-    // ... atualize o plano também se necessário
-  };
-
-  useEffect(() => {
-    fetchPlanAndUsage();
-     fetchPlanData();
-  }, []);
-
   const fetchPlanAndUsage = async () => {
     const {
       data: { user },
     } = await supabase.auth.getUser();
+    
     if (!user) return;
 
     // 1. BUSCA O PLANO
@@ -64,7 +46,7 @@ export function usePlan() {
       .select("plan_id, status")
       .eq("user_id", user.id)
       .eq("status", "active")
-      .single();
+      .maybeSingle();
 
     // Se não tiver assinatura ativa, assume starter
     const currentPlan = (sub?.plan_id as PlanType) || "starter";
@@ -74,12 +56,16 @@ export function usePlan() {
     const { count: projectCount } = await supabase
       .from("projects")
       .select("*", { count: "exact", head: true })
-      .eq("owner_id", user.id) // <--- GARANTA QUE ESTÁ owner_id AQUI
+      .eq("owner_id", user.id)
       .neq("status", "archived");
 
     setUsage((prev) => ({ ...prev, projects: projectCount || 0 }));
     setLoading(false);
   };
+
+  useEffect(() => {
+    fetchPlanAndUsage();
+  }, []);
 
   const can = (feature: string) => {
     // Proteção contra plano inválido
@@ -87,7 +73,6 @@ export function usePlan() {
 
     // 1. Regra para criar projetos
     if (feature === "create_project") {
-      // CORREÇÃO: Acessar .projects direto, não .limits.projects
       const limit = currentPlan.projects; 
       
       if (limit === -1) return true;
@@ -95,8 +80,6 @@ export function usePlan() {
     }
 
     if (plan === "starter") {
-      // Starter não tem 'share_client' na lista, então retorna false
-      // Starter tem upload liberado (básico)
       if (feature === "upload_file") return true;
       return false;
     }
@@ -104,7 +87,8 @@ export function usePlan() {
     // Para Pro e Agency, verifica se a feature está na lista
     return PLANS[plan].features.includes(feature);
   };
-return {
+
+  return {
     plan,
     usage,
     loading,

@@ -7,7 +7,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Check, Zap, Crown, Rocket } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/lib/supabase";
+import { supabase, getFunctionUrl } from "@/lib/supabase";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 
@@ -67,8 +67,7 @@ export function UpgradeModal({
       } = await supabase.auth.getSession();
       if (!session) return;
 
-      const functionUrl =
-        "https://wdybtosjzpexycvgreph.supabase.co/functions/v1/create-checkout-session";
+      const functionUrl = getFunctionUrl("create-checkout-session");
 
       const response = await fetch(functionUrl, {
         method: "POST",

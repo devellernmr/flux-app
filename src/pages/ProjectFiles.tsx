@@ -14,7 +14,20 @@ import {
   Sparkles,
   FileInput,
   Lock,
+  Link2,
+  Globe,
+  Palette,
 } from "lucide-react";
+import { EmbedViewer } from "@/components/project/EmbedViewer";
+import { extractColorsFromImage } from "@/lib/colorUtils";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -52,6 +65,17 @@ export function ProjectFiles({ projectId }: { projectId: string }) {
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [upgradeFeature, setUpgradeFeature] = useState("");
 
+  // --- FIGMA / CANVA LINKS ---
+  const [isAddLinkOpen, setIsAddLinkOpen] = useState(false);
+  const [newLinkName, setNewLinkName] = useState("");
+  const [newLinkUrl, setNewLinkUrl] = useState("");
+  const [isAddingLink, setIsAddingLink] = useState(false);
+
+  // --- VIEWER ---
+  const [isViewerOpen, setIsViewerOpen] = useState(false);
+  const [viewerUrl, setViewerUrl] = useState("");
+  const [viewerTitle, setViewerTitle] = useState("");
+
   useEffect(() => {
     fetchFiles();
     const channel = supabase
@@ -59,7 +83,7 @@ export function ProjectFiles({ projectId }: { projectId: string }) {
       .on(
         "postgres_changes",
         {
-          event: "INSERT",
+          event: "*",
           schema: "public",
           table: "files",
           filter: `project_id=eq.${projectId}`,
@@ -199,21 +223,50 @@ export function ProjectFiles({ projectId }: { projectId: string }) {
   };
 
   const copyReviewLink = (fileId: string) => {
-    // --- GATILHO DO ANÚNCIO (Share) ---
     if (!can("share_client")) {
       setUpgradeFeature("Compartilhamento com Cliente");
       setShowUpgrade(true);
       return;
     }
-    // ----------------------------------
-
     const linkUrl = `${window.location.origin}/feedback/${fileId}`;
     navigator.clipboard.writeText(linkUrl);
     toast.success("Link copiado!");
   };
 
-  const openReview = (url: string) => {
-    window.open(url, "_blank");
+  const handleAddLink = async () => {
+    if (!newLinkName || !newLinkUrl) {
+      toast.error("Preencha todos os campos.");
+      return;
+    }
+    setIsAddingLink(true);
+    try {
+      const { error } = await supabase.from("files").insert({
+        project_id: projectId,
+        name: `${newLinkName} (Link)`,
+        url: newLinkUrl,
+        status: "pending",
+      });
+      if (error) throw error;
+      toast.success("Link adicionado!");
+      setIsAddLinkOpen(false);
+      setNewLinkName("");
+      setNewLinkUrl("");
+      fetchFiles();
+    } catch (error: any) {
+      toast.error("Erro ao salvar link.");
+    } finally {
+      setIsAddingLink(false);
+    }
+  };
+
+  const openReview = (url: string, title: string, id: string) => {
+    if (url.includes("figma.com") || url.includes("canva.com")) {
+      setViewerUrl(url);
+      setViewerTitle(title);
+      setIsViewerOpen(true);
+    } else {
+      window.open(`${window.location.origin}/feedback/${id}`, "_blank");
+    }
   };
 
   const triggerGroupUpload = (groupName: string) => {
@@ -222,6 +275,60 @@ export function ProjectFiles({ projectId }: { projectId: string }) {
       "upload-btn-design"
     ) as HTMLInputElement;
     if (input) input.click();
+  };
+
+  const handleAddToBrandKit = async (url: string) => {
+    const toastId = toast.loading("Analisando cores da imagem...");
+    try {
+      const newColors = await extractColorsFromImage(url, 5);
+
+      if (newColors.length === 0) {
+        toast.error("Nenhuma cor dominante encontrada.", { id: toastId });
+        return;
+      }
+
+      // Get current branding
+      const { data: project } = await supabase
+        .from("projects")
+        .select("branding")
+        .eq("id", projectId)
+        .single();
+
+      const currentColors = project?.branding?.colors || [];
+      const updatedColors = [...currentColors];
+      let addedCount = 0;
+
+      newColors.forEach((c) => {
+        if (!updatedColors.includes(c)) {
+          updatedColors.push(c);
+          addedCount++;
+        }
+      });
+
+      if (addedCount === 0) {
+        toast.info("Essas cores já estão no Brand Kit.", { id: toastId });
+        return;
+      }
+
+      const { error } = await supabase
+        .from("projects")
+        .update({
+          branding: {
+            ...project?.branding,
+            colors: updatedColors,
+          },
+        })
+        .eq("id", projectId);
+
+      if (error) throw error;
+
+      toast.success(`${addedCount} cores adicionadas ao Brand Kit!`, {
+        id: toastId,
+      });
+    } catch (e) {
+      console.error(e);
+      toast.error("Erro ao atualizar Brand Kit.", { id: toastId });
+    }
   };
 
   return (
@@ -278,32 +385,45 @@ export function ProjectFiles({ projectId }: { projectId: string }) {
               </TabsTrigger>
             </TabsList>
 
-            <label
-              htmlFor={
-                activeTab === "design"
-                  ? "upload-btn-design"
-                  : "upload-btn-client"
-              }
-              onClick={() => setUploadTargetGroup(null)}
-              className={`w-full sm:w-auto h-11 sm:h-9 px-6 rounded-xl cursor-pointer transition-all flex items-center justify-center gap-2 select-none shadow-lg shadow-blue-600/20 active:scale-95 hover:brightness-110 ${
-                uploading
-                  ? "bg-zinc-800 text-zinc-500 cursor-wait border border-white/5"
-                  : "bg-blue-600 text-white border border-blue-500/50"
-              }`}
-            >
-              {uploading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Plus className="h-4 w-4 stroke-[3px]" />
-              )}
-              <span className="text-sm sm:text-xs font-bold tracking-wide">
-                {uploading
-                  ? "Enviando..."
-                  : activeTab === "design"
-                  ? "Nova Entrega"
-                  : "Adicionar Asset"}
-              </span>
-            </label>
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsAddLinkOpen(true)}
+                className="flex-1 sm:flex-none h-11 sm:h-9 bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white"
+              >
+                <Link2 className="w-4 h-4 mr-2" />
+                Add Link (Figma/Canva)
+              </Button>
+
+              <label
+                id="project-upload-btn"
+                htmlFor={
+                  activeTab === "design"
+                    ? "upload-btn-design"
+                    : "upload-btn-client"
+                }
+                onClick={() => setUploadTargetGroup(null)}
+                className={`flex-1 sm:flex-none h-11 sm:h-9 px-6 rounded-xl cursor-pointer transition-all flex items-center justify-center gap-2 select-none shadow-lg shadow-blue-600/20 active:scale-95 hover:brightness-110 ${
+                  uploading
+                    ? "bg-zinc-800 text-zinc-500 cursor-wait border border-white/5"
+                    : "bg-blue-600 text-white border border-blue-500/50"
+                }`}
+              >
+                {uploading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Plus className="h-4 w-4 stroke-[3px]" />
+                )}
+                <span className="text-sm sm:text-xs font-bold tracking-wide">
+                  {uploading
+                    ? "Enviando..."
+                    : activeTab === "design"
+                    ? "Nova Entrega"
+                    : "Adicionar Asset"}
+                </span>
+              </label>
+            </div>
           </div>
         </div>
 
@@ -399,6 +519,60 @@ export function ProjectFiles({ projectId }: { projectId: string }) {
                             className="w-full h-full object-cover"
                             alt={file.name}
                           />
+                        ) : file.url.includes("figma.com") ||
+                          file.url.includes("canva.com") ? (
+                          <div
+                            className={`w-full h-full flex flex-col items-center justify-center gap-3 transition-colors ${
+                              file.url.includes("figma.com")
+                                ? "bg-zinc-950 hover:bg-zinc-900"
+                                : "bg-blue-600/5 hover:bg-blue-600/10"
+                            }`}
+                          >
+                            <div
+                              className={`p-4 rounded-2xl border ${
+                                file.url.includes("figma.com")
+                                  ? "bg-zinc-900 border-zinc-800 text-pink-500 shadow-xl"
+                                  : "bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-500/20"
+                              }`}
+                            >
+                              {file.url.includes("figma.com") ? (
+                                <svg
+                                  viewBox="0 0 38 57"
+                                  fill="none"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  className="w-8 h-8"
+                                >
+                                  <path
+                                    d="M19 28.5C19 25.9837 20.0009 23.5706 21.7825 21.7891C23.564 20.0076 25.9772 19.0067 28.4935 19.0067C31.0098 19.0067 33.4229 20.0076 35.2045 21.7891C36.986 23.5706 37.987 25.9837 37.987 28.5C37.987 31.0163 36.986 33.4294 35.2045 35.2109C33.4229 36.9924 31.0098 37.9933 28.4935 37.9933C25.9772 37.9933 23.564 36.9924 21.7825 35.2109C20.0009 33.4294 19 31.0163 19 28.5Z"
+                                    fill="#1ABCFE"
+                                  />
+                                  <path
+                                    d="M0 47.4933C0 44.9771 1.00089 42.564 2.78248 40.7825C4.56407 39.0009 6.97718 38 9.49351 38H18.987V47.4933C18.987 50.0097 17.9861 52.4228 16.2045 54.2044C14.4229 55.986 12.0098 56.9868 9.49351 56.9868C6.97718 56.9868 4.56407 55.986 2.78248 54.2044C1.00089 52.4228 0 50.0097 0 47.4933Z"
+                                    fill="#0ACF83"
+                                  />
+                                  <path
+                                    d="M0 28.5C0 25.9837 1.00089 23.5706 2.78248 21.7891C4.56407 20.0076 6.97718 19.0067 9.49351 19.0067H18.987V38H9.49351C6.97718 38 4.56407 36.9924 2.78248 35.2109C1.00089 33.4294 0 31.0163 0 28.5Z"
+                                    fill="#A259FF"
+                                  />
+                                  <path
+                                    d="M0 9.5C0 6.98371 1.00089 4.57059 2.78248 2.78906C4.56407 1.00753 6.97718 0.00665283 9.49351 0.00665283H18.987V19.0067H9.49351C6.97718 19.0067 4.56407 18.0058 2.78248 16.2243C1.00089 14.4427 0 12.0296 0 9.5Z"
+                                    fill="#F24E1E"
+                                  />
+                                  <path
+                                    d="M19 0.00665283H28.4935C31.0098 0.00665283 33.4229 1.00753 35.2045 2.78906C36.986 4.57059 37.987 6.98371 37.987 9.5C37.987 12.0163 36.986 14.4294 35.2045 16.2109C33.4229 17.9924 31.0098 18.9933 28.4935 18.9933H19V0.00665283Z"
+                                    fill="#FF7262"
+                                  />
+                                </svg>
+                              ) : (
+                                <Globe className="h-8 w-8" />
+                              )}
+                            </div>
+                            <span className="text-[10px] uppercase font-bold tracking-widest text-zinc-500">
+                              {file.url.includes("figma.com")
+                                ? "Figma Prototype"
+                                : "Canva Design"}
+                            </span>
+                          </div>
                         ) : (
                           <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-900 text-zinc-500 gap-2">
                             <FileInput className="h-8 w-8 opacity-50" />
@@ -425,9 +599,25 @@ export function ProjectFiles({ projectId }: { projectId: string }) {
                           )}
                         </div>
 
+                        {/* Auto-Suggestion Action */}
+                        {file.name.match(/\.(jpg|jpeg|png|webp)$/i) && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleAddToBrandKit(file.url);
+                            }}
+                            className="absolute top-3 right-3 p-1.5 rounded-lg bg-black/40 hover:bg-black/60 text-white/70 hover:text-white backdrop-blur-md border border-white/10 opacity-0 group-hover:opacity-100 transition-all z-20"
+                            title="Extrair cores para Brand Kit"
+                          >
+                            <Palette className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+
                         <div className="absolute inset-x-0 bottom-0 p-2.5 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-center gap-2 translate-y-[2px] sm:translate-y-full sm:group-hover:translate-y-0 transition-transform duration-300">
                           <Button
-                            onClick={() => openReview(file.url)}
+                            onClick={() =>
+                              openReview(file.url, file.name, file.id)
+                            }
                             className="flex-1 h-8 bg-white/95 hover:bg-white text-zinc-900 text-xs font-semibold rounded-lg shadow-lg backdrop-blur-sm active:scale-95 transition-all border-0"
                           >
                             <Eye className="w-3.5 h-3.5 mr-1.5 opacity-70" />
@@ -518,6 +708,67 @@ export function ProjectFiles({ projectId }: { projectId: string }) {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* MODAL ADICIONAR LINK */}
+      <Dialog open={isAddLinkOpen} onOpenChange={setIsAddLinkOpen}>
+        <DialogContent className="bg-[#0A0A0A] border-zinc-800 text-white">
+          <DialogHeader>
+            <DialogTitle>Adicionar Link Externo</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-zinc-500 uppercase">
+                Nome da Entrega
+              </label>
+              <Input
+                placeholder="Ex: Landing Page V1"
+                value={newLinkName}
+                onChange={(e) => setNewLinkName(e.target.value)}
+                className="bg-zinc-900 border-zinc-800"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-zinc-500 uppercase">
+                URL (Figma ou Canva)
+              </label>
+              <Input
+                placeholder="https://figma.com/..."
+                value={newLinkUrl}
+                onChange={(e) => setNewLinkUrl(e.target.value)}
+                className="bg-zinc-900 border-zinc-800"
+              />
+              <p className="text-[10px] text-zinc-600">
+                Cole o link de compartilhamento. O sistema irá gerar o embed
+                automaticamente.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setIsAddLinkOpen(false)}>
+              Cancelar
+            </Button>
+            <Button
+              className="bg-blue-600 hover:bg-blue-500"
+              onClick={handleAddLink}
+              disabled={isAddingLink}
+            >
+              {isAddingLink ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                "Salvar Link"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* VIEWER DE EMBED */}
+      <EmbedViewer
+        isOpen={isViewerOpen}
+        onOpenChange={setIsViewerOpen}
+        url={viewerUrl}
+        title={viewerTitle}
+      />
     </div>
   );
 }
