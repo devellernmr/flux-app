@@ -4,29 +4,33 @@ import { useMemo } from "react";
 
 interface ProjectRoadmapProps {
   briefingStatus:
-    | "empty"
-    | "draft"
-    | "awaiting_response"
-    | "sent"
-    | "approved"
-    | "active"
-    | "completed"; // ✅ Adicionado
+  | "empty"
+  | "draft"
+  | "awaiting_response"
+  | "sent"
+  | "approved"
+  | "active"
+  | "completed";
   projectStatus: "active" | "paused" | "done" | "archived";
+  milestones?: { label: string; desc: string }[];
 }
 
 export function ProjectRoadmap({
   briefingStatus,
   projectStatus,
+  milestones,
 }: ProjectRoadmapProps) {
-  // 1. Definição das 6 Etapas Solicitadas
-  const steps = [
-    { label: "Briefing", desc: "Rascunho" }, // 0: Draft
-    { label: "Send", desc: "Enviado" }, // 1: Enviado
-    { label: "Response", desc: "Resposta" }, // 2: Análise/Resposta
-    { label: "Developed", desc: "Em Desenv." }, // 3: Desenvolvimento
-    { label: "Feedback", desc: "Revisão" }, // 4: Revisão/Feedback
-    { label: "Approved", desc: "Aprovado" }, // 5: Conclusão
+  // 1. Definição das Etapas (Dinâmicas ou Padrão)
+  const defaultSteps = [
+    { label: "Briefing", desc: "Rascunho" },
+    { label: "Send", desc: "Enviado" },
+    { label: "Response", desc: "Resposta" },
+    { label: "Developed", desc: "Em Desenv." },
+    { label: "Feedback", desc: "Revisão" },
+    { label: "Approved", desc: "Aprovado" },
   ];
+
+  const steps = milestones && milestones.length > 0 ? milestones : defaultSteps;
 
   // 2. Lógica Refinada para as 6 Etapas
   const currentStepIndex = useMemo(() => {
@@ -53,39 +57,42 @@ export function ProjectRoadmap({
             <MapIcon className="h-4 w-4 text-blue-400" />
           </div>
           <div>
-            <h4 className="text-sm font-semibold text-zinc-200 tracking-tight">
-              Roadmap do Projeto
-            </h4>
+            <div className="flex items-center gap-2">
+              <h4 className="text-sm font-semibold text-zinc-200 tracking-tight">
+                Roadmap do Projeto
+              </h4>
+              {milestones && milestones.length > 0 && (
+                <span className="text-[9px] bg-blue-500/10 text-blue-400 border border-blue-500/20 px-1.5 py-0.5 rounded-md font-bold uppercase tracking-widest">
+                  AI Generated
+                </span>
+              )}
+            </div>
             <p className="text-[10px] text-zinc-500 font-medium uppercase tracking-wider">
-              {steps[currentStepIndex].label}
+              {steps[currentStepIndex]?.label || "Carregando..."}
             </p>
           </div>
         </div>
 
         {/* Badge de Status Geral */}
         <div
-          className={`hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-full border ${
-            projectStatus === "done"
-              ? "bg-emerald-500/10 border-emerald-500/20"
-              : "bg-blue-500/10 border-blue-500/20"
-          }`}
+          className={`hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-full border ${projectStatus === "done"
+            ? "bg-emerald-500/10 border-emerald-500/20"
+            : "bg-blue-500/10 border-blue-500/20"
+            }`}
         >
           <span className="relative flex h-2 w-2">
             <span
-              className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
-                projectStatus === "done" ? "bg-emerald-400" : "bg-blue-400"
-              }`}
+              className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${projectStatus === "done" ? "bg-emerald-400" : "bg-blue-400"
+                }`}
             ></span>
             <span
-              className={`relative inline-flex rounded-full h-2 w-2 ${
-                projectStatus === "done" ? "bg-emerald-500" : "bg-blue-500"
-              }`}
+              className={`relative inline-flex rounded-full h-2 w-2 ${projectStatus === "done" ? "bg-emerald-500" : "bg-blue-500"
+                }`}
             ></span>
           </span>
           <span
-            className={`text-[10px] font-bold uppercase tracking-wide ${
-              projectStatus === "done" ? "text-emerald-300" : "text-blue-300"
-            }`}
+            className={`text-[10px] font-bold uppercase tracking-wide ${projectStatus === "done" ? "text-emerald-300" : "text-blue-300"
+              }`}
           >
             {projectStatus === "done" ? "Concluído" : "Em Progresso"}
           </span>
@@ -103,11 +110,10 @@ export function ProjectRoadmap({
             initial={{ width: 0 }}
             animate={{ width: progressWidth }}
             transition={{ duration: 1.5, ease: "easeOut" }}
-            className={`absolute left-0 top-5 h-[2px] -z-10 rounded-full ${
-              projectStatus === "done"
-                ? "bg-gradient-to-r from-emerald-600 to-emerald-400"
-                : "bg-gradient-to-r from-blue-600 to-blue-400"
-            }`}
+            className={`absolute left-0 top-5 h-[2px] -z-10 rounded-full ${projectStatus === "done"
+              ? "bg-gradient-to-r from-emerald-600 to-emerald-400"
+              : "bg-gradient-to-r from-blue-600 to-blue-400"
+              }`}
           />
 
           {steps.map((step, i) => {
@@ -126,10 +132,9 @@ export function ProjectRoadmap({
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ delay: i * 0.1 }}
                   className={`h-10 w-10 rounded-full flex items-center justify-center border-4 transition-all duration-300 z-10
-                    ${
-                      isDone
-                        ? "bg-zinc-900 border-zinc-800 text-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.1)]"
-                        : isCurrent
+                    ${isDone
+                      ? "bg-zinc-900 border-zinc-800 text-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.1)]"
+                      : isCurrent
                         ? "bg-blue-600 border-zinc-950 text-white shadow-[0_0_20px_rgba(37,99,235,0.4)] scale-110"
                         : "bg-zinc-950 border-zinc-800 text-zinc-700"
                     }`}
@@ -146,22 +151,20 @@ export function ProjectRoadmap({
                 {/* Textos */}
                 <div className="flex flex-col items-center gap-0.5 text-center">
                   <span
-                    className={`text-xs font-bold tracking-tight transition-colors ${
-                      isCurrent
-                        ? "text-white"
-                        : isDone
+                    className={`text-xs font-bold tracking-tight transition-colors ${isCurrent
+                      ? "text-white"
+                      : isDone
                         ? "text-zinc-400"
                         : "text-zinc-600"
-                    }`}
+                      }`}
                   >
                     {step.label}
                   </span>
                   <span
-                    className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${
-                      isCurrent
-                        ? "bg-blue-500/10 border-blue-500/20 text-blue-300"
-                        : "bg-transparent border-transparent text-zinc-600"
-                    }`}
+                    className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${isCurrent
+                      ? "bg-blue-500/10 border-blue-500/20 text-blue-300"
+                      : "bg-transparent border-transparent text-zinc-600"
+                      }`}
                   >
                     {step.desc}
                   </span>

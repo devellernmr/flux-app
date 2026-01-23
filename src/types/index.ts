@@ -25,6 +25,27 @@ export interface Project {
   due_date?: string;
   custom_logo_url?: string;
   agency_name?: string;
+  milestones?: { label: string; desc: string }[];
+  budget?: number;
+  expenses?: number;
+  currency?: string;
+  category?: string;
+  estimated_hours?: number;
+  target_hourly_rate?: number;
+  branding?: {
+    colors: string[];
+    fonts: { name: string; weight: string }[];
+    primary_color?: string;
+  };
+}
+
+export interface AgencyConfig {
+  id: string;
+  user_id: string;
+  name: string;
+  logo_url?: string;
+  primary_color?: string;
+  figma_token?: string;
 }
 
 export interface ProjectMember {

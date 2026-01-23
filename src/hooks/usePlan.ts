@@ -37,7 +37,7 @@ export function usePlan() {
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    
+
     if (!user) return;
 
     // 1. BUSCA O PLANO
@@ -56,7 +56,7 @@ export function usePlan() {
     const { count: projectCount } = await supabase
       .from("projects")
       .select("*", { count: "exact", head: true })
-      .eq("owner_id", user.id)
+      .eq("user_id", user.id)
       .neq("status", "archived");
 
     setUsage((prev) => ({ ...prev, projects: projectCount || 0 }));
@@ -73,8 +73,8 @@ export function usePlan() {
 
     // 1. Regra para criar projetos
     if (feature === "create_project") {
-      const limit = currentPlan.projects; 
-      
+      const limit = currentPlan.projects;
+
       if (limit === -1) return true;
       return usage.projects < limit;
     }
@@ -94,6 +94,6 @@ export function usePlan() {
     loading,
     can,
     isPro: plan === "pro" || plan === "agency",
-    refreshPlan: fetchPlanAndUsage 
+    refreshPlan: fetchPlanAndUsage
   };
 }

@@ -1,10 +1,20 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Adicione "as string" no final
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error(
+    'Supabase environment variables are missing. Please check your .env file.',
+    { supabaseUrl, supabaseAnonKey }
+  );
+}
+
+export const supabase = createClient(
+  supabaseUrl || 'http://127.0.0.1:54321',
+  supabaseAnonKey || 'placeholder-anon-key'
+);
 
 /**
  * Retorna a URL base para as Edge Functions do Supabase.

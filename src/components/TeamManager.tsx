@@ -12,6 +12,7 @@ import { Users, X, Copy, Check, Mail } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
+import { logProjectActivity } from "@/lib/activity";
 
 interface TeamInvite {
   id: string;
@@ -134,6 +135,12 @@ export function TeamManager({ projectId }: { projectId: string }) {
 
       if (error) throw error;
 
+      await logProjectActivity({
+        projectId,
+        content: `Novo convite enviado para ${inviteEmail}`,
+        type: "member_add"
+      });
+
       toast.success("Convite criado! Copie o link e envie para a pessoa.");
       setInviteEmail("");
       setShowDialog(false);
@@ -163,6 +170,12 @@ export function TeamManager({ projectId }: { projectId: string }) {
         .eq("user_id", userId);
 
       if (error) throw error;
+
+      await logProjectActivity({
+        projectId,
+        content: `Membro removido do projeto`,
+        type: "member_remove"
+      });
 
       toast.success("Membro removido");
       fetchTeamData();
@@ -218,9 +231,8 @@ export function TeamManager({ projectId }: { projectId: string }) {
           <p className="text-[11px] text-zinc-500">
             {teamMembers.length === 0
               ? "Nenhum membro adicionado ainda."
-              : `${teamMembers.length} membro${
-                  teamMembers.length > 1 ? "s" : ""
-                } com acesso a este projeto.`}
+              : `${teamMembers.length} membro${teamMembers.length > 1 ? "s" : ""
+              } com acesso a este projeto.`}
           </p>
         </div>
         <Button
@@ -245,9 +257,8 @@ export function TeamManager({ projectId }: { projectId: string }) {
               {/* ESQUERDA: avatar + email + role */}
               <div className="flex items-center gap-3 min-w-0">
                 <div
-                  className={`h-8 w-8 rounded-full flex items-center justify-center text-[11px] font-semibold text-zinc-50 ${
-                    colorMap[(member.color || "blue") as MemberColor].bg
-                  }`}
+                  className={`h-8 w-8 rounded-full flex items-center justify-center text-[11px] font-semibold text-zinc-50 ${colorMap[(member.color || "blue") as MemberColor].bg
+                    }`}
                 >
                   {(member.email || member.user?.email || "??")
                     .substring(0, 2)
@@ -280,11 +291,10 @@ export function TeamManager({ projectId }: { projectId: string }) {
                         key={c}
                         type="button"
                         onClick={() => updateMemberColor(member.id, c)}
-                        className={`h-4 w-4 rounded-full border border-zinc-700 ${bg} ${
-                          isActive
-                            ? "ring-2 ring-offset-[1px] ring-offset-zinc-950"
-                            : ""
-                        }`}
+                        className={`h-4 w-4 rounded-full border border-zinc-700 ${bg} ${isActive
+                          ? "ring-2 ring-offset-[1px] ring-offset-zinc-950"
+                          : ""
+                          }`}
                       />
                     );
                   })}

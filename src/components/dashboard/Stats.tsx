@@ -1,38 +1,32 @@
+
 import { useState, useEffect } from "react";
 import {
-  Sparkles,
-  Lightbulb,
   Calendar,
-  Grid,
   Mail,
-  User as UserIcon,
+  Zap,
+  TrendingUp,
+  Target
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { User, Project, PlanType } from "@/types";
 
-// --- LISTA DE DICAS ---
 const PRO_TIPS = [
   {
-    icon: <Sparkles className="w-4 h-4 text-amber-400" />,
-    title: "Use o Briefing com IA",
-    desc: "Economize tempo gerando perguntas automáticas baseadas no nicho do cliente.",
+    icon: <Target className="w-3.5 h-3.5 text-blue-400" />,
+    title: "Briefing com IA",
+    desc: "Gere perguntas estratégicas automaticamente para seus clientes.",
   },
   {
-    icon: <Grid className="w-4 h-4 text-blue-400" />,
-    title: "Organize por Fases",
-    desc: "Mantenha o cliente atualizado movendo os cards no Roadmap do projeto.",
+    icon: <Zap className="w-3.5 h-3.5 text-yellow-400" />,
+    title: "Roadmap Ágil",
+    desc: "Mantenha o progresso visível movendo os cards de entrega.",
   },
   {
-    icon: <Mail className="w-4 h-4 text-emerald-400" />,
-    title: "Aprovações Rápidas",
-    desc: "Envie o link público para o cliente aprovar o briefing sem precisar de login.",
-  },
-  {
-    icon: <UserIcon className="w-4 h-4 text-purple-400" />,
-    title: "Personalize seu Perfil",
-    desc: "Adicione sua foto e nome nas configurações para dar um toque profissional.",
+    icon: <Mail className="w-3.5 h-3.5 text-emerald-400" />,
+    title: "Links Públicos",
+    desc: "Compartilhe o briefing e receba aprovações sem login.",
   },
 ];
 
@@ -46,148 +40,138 @@ export function DashboardStats({ user, projects, plan }: DashboardStatsProps) {
   const firstName = user?.user_metadata?.full_name?.split(" ")[0] || "Usuário";
   const [currentTip, setCurrentTip] = useState(0);
 
-  // Lógica: Próxima Entrega Real
   const nextProject = projects
     ?.filter((p) => p.due_date && new Date(p.due_date) > new Date())
-    .sort(
-      (a, b) =>
-        new Date(a.due_date!).getTime() - new Date(b.due_date!).getTime()
-    )[0];
+    .sort((a, b) => new Date(a.due_date!).getTime() - new Date(b.due_date!).getTime())[0];
 
-  const today = new Date();
-  const dateStr = format(today, "EEEE, d 'de' MMMM", { locale: ptBR });
+  const dateStr = format(new Date(), "EE, d MMM", { locale: ptBR });
 
-  // Ciclo das Dicas (Looping infinito a cada 5s)
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTip((prev) => (prev + 1) % PRO_TIPS.length);
-    }, 5000);
+    }, 6000);
     return () => clearInterval(timer);
   }, []);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
-      {/* CARD 1: BOAS VINDAS + EFEITO SCAN */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-zinc-900/40 border border-zinc-800 p-6 rounded-2xl relative overflow-hidden group"
-      >
-        {/* ANIMAÇÃO ESTÁTICA: Linha de Scan passando */}
-        <motion.div
-          animate={{ left: ["-100%", "200%"] }}
-          transition={{
-            duration: 3,
-            repeat: Infinity,
-            repeatDelay: 3, // Espera 3s antes de passar de novo
-            ease: "easeInOut",
-          }}
-          className="absolute top-0 bottom-0 w-20 bg-gradient-to-r from-transparent via-white/5 to-transparent skew-x-12 pointer-events-none z-0"
-        />
+    <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mb-14">
 
-        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-          <Sparkles className="w-12 h-12 text-white" />
-        </div>
+      {/* CARD 1: WELCOME & PERFORMANCE */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="md:col-span-12 lg:col-span-5 bg-zinc-900/30 border border-white/5 p-8 rounded-[40px] relative overflow-hidden backdrop-blur-md flex flex-col justify-between min-h-[220px] group shadow-2xl"
+      >
+        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/10 blur-[80px] rounded-full group-hover:bg-blue-600/15 transition-all duration-700" />
+
         <div className="relative z-10">
-          <p className="text-zinc-500 text-xs uppercase tracking-wider font-semibold mb-1 capitalize">
-            {dateStr}
-          </p>
-          <h2 className="text-2xl font-bold text-white mb-2">
-            Olá, <span className="text-blue-400">{firstName}</span>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="px-3 py-1 bg-zinc-950/50 border border-zinc-800 rounded-full text-[10px] font-black text-zinc-500 uppercase tracking-widest flex items-center gap-2">
+              <Calendar className="h-3 w-3" />
+              {dateStr}
+            </div>
+            <div className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-[10px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Network Online
+            </div>
+          </div>
+
+          <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter mb-2">
+            Bem-vindo <span className="text-zinc-500">{firstName}</span>
           </h2>
-          <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-zinc-800/50 border border-zinc-700/50">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-xs text-zinc-300 font-medium capitalize">
-              Plano {plan}
-            </span>
+          <p className="text-sm text-zinc-400 font-medium max-w-xs">
+            Seu centro de comando está pronto para novas integrações hoje.
+          </p>
+        </div>
+
+        <div className="relative z-10 flex items-center gap-4 mt-6">
+          <div className="flex flex-col">
+            <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Workspace</span>
+            <span className="text-sm font-bold text-zinc-200 capitalize">{plan} Active</span>
+          </div>
+          <div className="h-8 w-[1px] bg-zinc-800" />
+          <div className="flex flex-col">
+            <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Fluxos</span>
+            <span className="text-sm font-bold text-zinc-200">{projects.length} Online</span>
           </div>
         </div>
       </motion.div>
 
-      {/* CARD 2: DICAS (SUBSTITUIU "PROJETOS ATIVOS") */}
+      {/* CARD 2: NEXT DEADLINE */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.1 }}
-        className="bg-zinc-900/40 border border-zinc-800 p-6 rounded-2xl relative overflow-hidden flex flex-col justify-between min-h-[140px]"
+        className="md:col-span-6 lg:col-span-4 bg-zinc-900/30 border border-white/5 p-8 rounded-[40px] relative overflow-hidden backdrop-blur-md flex flex-col justify-between group shadow-xl"
       >
-        <div className="flex justify-between items-center mb-4">
-          <span className="text-zinc-500 text-xs uppercase tracking-wider font-semibold flex items-center gap-2">
-            <Lightbulb className="w-3.5 h-3.5 text-amber-400" /> Dica Rápida
-          </span>
-          {/* Indicadores de bolinha */}
-          <div className="flex gap-1">
-            {PRO_TIPS.map((_, i) => (
-              <div
-                key={i}
-                className={`w-1 h-1 rounded-full transition-colors ${
-                  i === currentTip ? "bg-zinc-200" : "bg-zinc-800"
-                }`}
-              />
-            ))}
+        <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-purple-600/5 blur-[50px] rounded-full group-hover:bg-purple-600/10 transition-all duration-700" />
+
+        <div className="relative z-10 flex justify-between items-start">
+          <div className="p-3 bg-purple-500/10 rounded-2xl border border-purple-500/20 group-hover:scale-110 transition-transform">
+            <TrendingUp className="h-5 w-5 text-purple-400" />
           </div>
+          <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest bg-zinc-950/50 px-3 py-1 rounded-full border border-zinc-800">Próxima Meta</span>
         </div>
 
-        <div className="relative h-full flex items-end">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentTip}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3 }}
-              className="w-full"
-            >
-              <div className="flex items-center gap-2 mb-1 text-zinc-200 font-medium text-sm">
-                {PRO_TIPS[currentTip].icon}
-                {PRO_TIPS[currentTip].title}
-              </div>
-              <p className="text-xs text-zinc-500 leading-relaxed">
-                {PRO_TIPS[currentTip].desc}
-              </p>
-            </motion.div>
-          </AnimatePresence>
+        <div className="relative z-10 mt-6">
+          {nextProject ? (
+            <>
+              <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-1">Impacto Imediato</p>
+              <h3 className="text-xl font-bold text-white truncate mb-1">
+                {nextProject.name}
+              </h3>
+              <span className="text-sm font-black text-purple-400">
+                {format(new Date(nextProject.due_date!), "dd/MM", { locale: ptBR })} — {format(new Date(nextProject.due_date!), "EEEE", { locale: ptBR })}
+              </span>
+            </>
+          ) : (
+            <>
+              <h3 className="text-xl font-bold text-zinc-500">Fluxo em Dia</h3>
+              <p className="text-xs text-zinc-600 font-medium">Nenhum prazo crítico detectado.</p>
+            </>
+          )}
         </div>
       </motion.div>
 
-      {/* CARD 3: PRÓXIMA ENTREGA (Mantido) */}
+      {/* CARD 3: PRO TIPS (COMPACT INTEL) */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.2 }}
-        className="bg-zinc-900/40 border border-zinc-800 p-6 rounded-2xl flex flex-col justify-between group hover:border-zinc-700 transition-colors"
+        className="md:col-span-6 lg:col-span-3 bg-zinc-950/50 border border-white/5 p-8 rounded-[40px] relative overflow-hidden backdrop-blur-md flex flex-col justify-between group shadow-xl"
       >
-        <div className="flex justify-between items-start mb-2">
-          <span className="text-zinc-500 text-xs uppercase tracking-wider font-semibold">
-            Próxima Entrega
-          </span>
-          <Calendar className="w-4 h-4 text-zinc-600 group-hover:text-purple-500 transition-colors" />
-        </div>
+        <div className="relative z-10">
+          <div className="flex items-center justify-between mb-8">
+            <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Fluxo Intel</span>
+            <div className="flex gap-1">
+              {PRO_TIPS.map((_, i) => (
+                <div key={i} className={`h-1 rounded-full transition-all duration-500 ${i === currentTip ? "w-4 bg-blue-500" : "w-1 bg-zinc-800"}`} />
+              ))}
+            </div>
+          </div>
 
-        {nextProject ? (
-          <div>
-            <h3
-              className="text-lg font-medium text-zinc-200 truncate mb-1 line-clamp-1"
-              title={nextProject.name}
-            >
-              {nextProject.name}
-            </h3>
-            <p className="text-sm text-purple-400 font-medium">
-              {nextProject.due_date
-                ? format(new Date(nextProject.due_date), "dd 'de' MMMM", {
-                    locale: ptBR,
-                  })
-                : "Sem data"}
-            </p>
+          <div className="min-h-[100px] flex flex-col justify-center">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentTip}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.4 }}
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="p-1.5 bg-zinc-900 border border-zinc-800 rounded-lg">
+                    {PRO_TIPS[currentTip].icon}
+                  </div>
+                  <span className="text-[11px] font-black text-white uppercase tracking-tight">{PRO_TIPS[currentTip].title}</span>
+                </div>
+                <p className="text-[11px] text-zinc-500 font-medium leading-relaxed">
+                  {PRO_TIPS[currentTip].desc}
+                </p>
+              </motion.div>
+            </AnimatePresence>
           </div>
-        ) : (
-          <div className="flex flex-col justify-end h-full">
-            <span className="text-zinc-500 text-sm">Nenhum prazo próximo.</span>
-            <span className="text-zinc-700 text-xs mt-1">
-              Tudo tranquilo por aqui.
-            </span>
-          </div>
-        )}
+        </div>
       </motion.div>
     </div>
   );

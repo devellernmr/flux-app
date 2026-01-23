@@ -36,7 +36,7 @@ export function InvitePage() {
                 name,
                 agency_name,
                 custom_logo_url,
-                owner_id
+                user_id
             )
         `
         )

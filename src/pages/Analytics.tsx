@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { startAnalyticsTour } from "@/components/dashboard/TourGuide";
+// import { startAnalyticsTour } from "@/components/dashboard/TourGuide";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { supabase } from "@/lib/supabase";
 import { usePlan } from "@/hooks/usePlan";
@@ -19,6 +19,9 @@ import {
   Folder,
   Settings,
   LogOut,
+  DollarSign,
+  Briefcase,
+  Layers,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
@@ -61,6 +64,7 @@ export function Analytics() {
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true); // Ensure loading state is shown during refetch
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -69,9 +73,9 @@ export function Analytics() {
       if (user) {
         try {
           const [kpis, uploads, performance] = await Promise.all([
-            fetchStats(user.id),
-            fetchUploads(user.id),
-            fetchPerformance(user.id),
+            fetchStats(user.id, dateRange),
+            fetchUploads(user.id, dateRange),
+            fetchPerformance(user.id, dateRange),
           ]);
           setStats(kpis);
           setUploadsData(uploads);
@@ -84,7 +88,7 @@ export function Analytics() {
       setLoading(false);
     };
     fetchData();
-  }, []);
+  }, [dateRange]); // Added dateRange dependency
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -157,6 +161,30 @@ export function Analytics() {
       trend: "down",
       icon: Clock,
       color: "text-amber-500",
+    },
+    {
+      label: "Pipeline Total",
+      value: new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(stats?.totalBudget || 0),
+      change: "+0%",
+      trend: "neutral",
+      icon: Briefcase,
+      color: "text-blue-400",
+    },
+    {
+      label: "Lucro Estimado",
+      value: new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(stats?.estimatedProfit || 0),
+      change: "+0%",
+      trend: "up",
+      icon: DollarSign,
+      color: "text-emerald-400",
+    },
+    {
+      label: "Margem Média",
+      value: `${Math.round(stats?.avgMargin || 0)}%`,
+      change: "+0%",
+      trend: "up",
+      icon: Layers,
+      color: "text-purple-400",
     },
   ];
 
@@ -238,11 +266,10 @@ export function Analytics() {
                       }
                       setIsMobileMenuOpen(false);
                     }}
-                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all mb-1 ${
-                      activeMenu === item.id
-                        ? "bg-zinc-900 text-white border border-zinc-800"
-                        : "text-zinc-500 hover:text-white"
-                    }`}
+                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all mb-1 ${activeMenu === item.id
+                      ? "bg-zinc-900 text-white border border-zinc-800"
+                      : "text-zinc-500 hover:text-white"
+                      }`}
                   >
                     <item.icon className="h-4 w-4" />
                     {item.label}
@@ -280,7 +307,7 @@ export function Analytics() {
           }
         }}
         onLogout={handleLogout}
-        onShowTutorial={startAnalyticsTour}
+      // onShowTutorial={startAnalyticsTour}
       />
 
       <main className="flex-1 flex flex-col h-screen overflow-hidden relative z-10">
@@ -304,70 +331,83 @@ export function Analytics() {
         <div className="flex-1 overflow-y-auto p-6 md:p-12 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-zinc-800">
           <div className="max-w-7xl mx-auto space-y-10">
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-              <div>
-                <h1 className="text-3xl font-bold text-white tracking-tight flex items-center gap-3">
-                  <BarChart3 className="h-8 w-8 text-blue-500" />
-                  Relatórios & Analytics
-                </h1>
-                <p className="text-zinc-400 mt-2">
-                  Acompanhe a performance da sua agência e projetos.
-                </p>
+            <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-8 pb-8 border-b border-zinc-900/50">
+              <div className="space-y-4">
+                <motion.div
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-[10px] font-black text-blue-400 uppercase tracking-widest"
+                >
+                  <BarChart3 className="h-3 w-3" /> Intelligence Hub
+                </motion.div>
+                <div>
+                  <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter leading-none mb-2">
+                    Relatórios <span className="text-zinc-500">& Insights</span>
+                  </h1>
+                  <p className="text-zinc-500 max-w-xl font-medium">
+                    Acompanhe a performance financeira e operacional da sua agência em tempo real com métricas preditivas.
+                  </p>
+                </div>
               </div>
-              <div className="flex items-center gap-3">
+
+              <div className="flex flex-col sm:flex-row items-center gap-4 bg-zinc-900/30 p-2 rounded-2xl border border-zinc-800/50 backdrop-blur-sm">
                 <div
                   id="project-analytics-filters"
-                  className="bg-zinc-900/50 p-1 rounded-lg border border-zinc-800 flex items-center"
+                  className="flex items-center gap-1 bg-zinc-950/50 p-1 rounded-xl border border-zinc-800 w-full sm:w-auto"
                 >
                   {["7d", "30d", "90d"].map((range) => (
                     <button
                       key={range}
                       onClick={() => setDateRange(range)}
-                      className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all ${
-                        dateRange === range
-                          ? "bg-zinc-800 text-white shadow-sm"
-                          : "text-zinc-500 hover:text-zinc-300"
-                      }`}
+                      className={`relative px-4 py-2 rounded-lg text-xs font-black transition-all flex-1 sm:flex-none text-center transform active:scale-95 ${dateRange === range
+                        ? "text-white bg-zinc-800 shadow-lg shadow-black/20"
+                        : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900"
+                        }`}
                     >
                       {range === "7d"
-                        ? "7 dias"
+                        ? "7 DIAS"
                         : range === "30d"
-                        ? "30 dias"
-                        : "3 Meses"}
+                          ? "30 DIAS"
+                          : "3 MESES"}
                     </button>
                   ))}
                 </div>
+
+                <div className="h-8 w-[1px] bg-zinc-800 hidden sm:block" />
+
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
                       id="project-analytics-export"
-                      variant="outline"
+                      variant="ghost"
                       disabled={isExporting}
-                      className="border-zinc-800 bg-zinc-900/50 text-zinc-400 hover:text-white"
+                      className="text-zinc-400 hover:text-white hover:bg-zinc-800/50 rounded-xl h-10 px-4 w-full sm:w-auto justify-between sm:justify-center"
                     >
+                      <span className="text-xs font-bold mr-2">EXPORTAR</span>
                       {isExporting ? (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (
-                        <Download className="h-4 w-4 mr-2" />
+                        <Download className="h-4 w-4" />
                       )}
-                      Exportar
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="end"
-                    className="bg-zinc-900 border-zinc-800 text-zinc-300"
+                    className="bg-[#0A0A0A] border-zinc-800 text-zinc-300 min-w-[200px]"
                   >
                     <DropdownMenuItem
                       onClick={handleExport}
-                      className="cursor-pointer"
+                      className="cursor-pointer focus:bg-zinc-900 focus:text-white p-3 font-medium"
                     >
-                      Relatório Completo (PDF)
+                      <FileCheck2 className="h-4 w-4 mr-2 text-blue-500" />
+                      Relatório PDF
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={handleExportCSV}
-                      className="cursor-pointer"
+                      className="cursor-pointer focus:bg-zinc-900 focus:text-white p-3 font-medium"
                     >
-                      Dados Brutos (CSV)
+                      <Layers className="h-4 w-4 mr-2 text-emerald-500" />
+                      Dados CSV
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -375,44 +415,58 @@ export function Analytics() {
             </div>
 
             {/* KPI Cards */}
-            <div
-              id="project-analytics-stats"
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
-            >
-              {kpis.map((kpi) => (
-                <div
-                  key={kpi.label}
-                  className="bg-zinc-900/30 border border-zinc-800/50 rounded-2xl p-6 relative overflow-hidden group hover:border-zinc-700/50 transition-colors"
-                >
-                  <div className="flex justify-between items-start mb-4">
-                    <span
-                      className={`p-2 rounded-lg bg-zinc-900 border border-zinc-800 ${kpi.color}`}
-                    >
-                      <kpi.icon className="h-5 w-5" />
-                    </span>
-                    <div
-                      className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full bg-zinc-900/50 border border-zinc-800 ${
-                        kpi.trend === "up"
-                          ? "text-emerald-400"
-                          : "text-zinc-400"
-                      }`}
-                    >
-                      {kpi.change}
-                      {kpi.trend === "up" ? (
-                        <TrendingUp className="h-3 w-3" />
-                      ) : (
-                        <TrendingDown className="h-3 w-3" />
-                      )}
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-zinc-500 text-xs font-bold uppercase tracking-wider mb-1">
-                      {kpi.label}
-                    </p>
-                    <p className="text-3xl font-bold text-white">{kpi.value}</p>
-                  </div>
+            {/* KPI Groups */}
+            <div className="space-y-12 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+              {/* Group 1: Produção & Qualidade */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 px-2">
+                  <div className="h-1.5 w-1.5 rounded-full bg-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.8)]" />
+                  <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-500">Produção & Eficiência</h3>
                 </div>
-              ))}
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {kpis.filter(k => ["Projetos Ativos", "Taxa de Aprovação", "Arquivos Enviados"].includes(k.label)).map((kpi, i) => (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.1 }}
+                      key={kpi.label}
+                    >
+                      <KpiCard kpi={kpi} />
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Group 2: Financeiro & Pipeline */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 px-2">
+                  <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.8)]" />
+                  <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-500">Financeiro & Pipeline</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {kpis.filter(k => ["Pipeline Total", "Lucro Estimado", "Margem Média"].includes(k.label)).map((kpi, i) => (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3 + (i * 0.1) }}
+                      key={kpi.label}
+                    >
+                      <KpiCard kpi={kpi} />
+                    </motion.div>
+                  ))}
+                  {/* Destaque para Pendências na linha financeira/pipeline */}
+                  {kpis.filter(k => ["Arquivos Pendentes"].includes(k.label)).map(kpi => (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.6 }}
+                      key={kpi.label}
+                    >
+                      <KpiCard kpi={kpi} isWarning />
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
             </div>
 
             {/* Charts Area */}
@@ -424,9 +478,102 @@ export function Analytics() {
                 projectPerformance={performanceData}
               />
             </div>
+
+            {/* DETAILED REPORT SECTION (Restored per user request) */}
+            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
+              <div className="flex items-center gap-3 px-2 border-l-2 border-blue-500 pl-4">
+                <h3 className="text-xl font-bold text-white tracking-tight">Desempenho por Projeto</h3>
+                <span className="text-xs text-zinc-500 font-medium uppercase tracking-wider">Top 5 Ativos</span>
+              </div>
+
+              <div className="bg-[#0A0A0A] border border-zinc-800/50 rounded-2xl overflow-hidden">
+                <div className="grid grid-cols-4 p-4 bg-zinc-900/30 text-[10px] font-black text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50">
+                  <div className="col-span-2">Nome do Projeto</div>
+                  <div className="text-center">Aprovados</div>
+                  <div className="text-right">Pendências</div>
+                </div>
+                {performanceData.length > 0 ? (
+                  performanceData.map((project, i) => (
+                    <div key={i} className="grid grid-cols-4 p-4 border-b border-zinc-800/20 last:border-0 hover:bg-zinc-900/20 transition-colors items-center">
+                      <div className="col-span-2 flex items-center gap-3">
+                        <div className={`h-8 w-8 rounded-lg flex items-center justify-center text-xs font-bold ${i === 0 ? "bg-amber-500/10 text-amber-500 border border-amber-500/20" :
+                            i === 1 ? "bg-zinc-800 text-zinc-400" :
+                              "bg-zinc-900 text-zinc-600"
+                          }`}>
+                          #{i + 1}
+                        </div>
+                        <span className="font-bold text-zinc-200">{project.name}</span>
+                      </div>
+                      <div className="text-center">
+                        <span className="px-2 py-1 rounded-md bg-emerald-500/10 text-emerald-500 text-xs font-bold border border-emerald-500/20">
+                          {project.completed}
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <span className={`px-2 py-1 rounded-md text-xs font-bold border ${project.pending > 0 ? "bg-amber-500/10 text-amber-500 border-amber-500/20" : "bg-zinc-900 text-zinc-600 border-zinc-800"}`}>
+                          {project.pending}
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="p-8 text-center text-zinc-500 text-sm">
+                    Nenhum dado disponível para o período selecionado.
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </main>
     </div>
   );
+}
+
+function KpiCard({ kpi, isWarning }: { kpi: any, isWarning?: boolean }) {
+  // Configuração de cores baseada no ícone para o fundo do ícone
+  const getIconBg = () => {
+    if (isWarning) return "bg-amber-500/10 border-amber-500/20";
+    if (kpi.color.includes("blue")) return "bg-blue-500/10 border-blue-500/20";
+    if (kpi.color.includes("emerald")) return "bg-emerald-500/10 border-emerald-500/20";
+    if (kpi.color.includes("purple")) return "bg-purple-500/10 border-purple-500/20";
+    return "bg-zinc-800 border-zinc-700";
+  }
+
+  return (
+    <div className={`relative h-full overflow-hidden rounded-[24px] border p-6 transition-all duration-500 group hover:-translate-y-1 hover:shadow-2xl ${isWarning
+      ? 'bg-amber-950/10 border-amber-500/20 hover:border-amber-500/50 hover:shadow-amber-900/20'
+      : 'bg-[#0A0A0A] border-zinc-800/60 hover:border-zinc-700 hover:shadow-zinc-950/50'
+      }`}>
+      {/* Background Glow Effect */}
+      <div className={`absolute -right-10 -top-10 h-32 w-32 rounded-full blur-[60px] opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none ${isWarning ? 'bg-amber-500/10' : kpi.color.replace('text-', 'bg-').replace('500', '500/10')
+        }`} />
+
+      <div className="relative z-10">
+        <div className="flex justify-between items-start mb-6">
+          <div className={`h-12 w-12 rounded-2xl border flex items-center justify-center transition-colors duration-300 ${getIconBg()}`}>
+            <kpi.icon className={`h-5 w-5 ${kpi.color}`} />
+          </div>
+
+          <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full border text-[10px] font-black uppercase tracking-wider ${kpi.trend === "up"
+            ? "bg-emerald-500/5 border-emerald-500/10 text-emerald-500"
+            : kpi.trend === "down"
+              ? "bg-red-500/5 border-red-500/10 text-red-500"
+              : "bg-zinc-800/50 border-zinc-700 text-zinc-500"
+            }`}>
+            {kpi.change}
+            {kpi.trend === "up" && <TrendingUp className="h-3 w-3" />}
+            {kpi.trend === "down" && <TrendingDown className="h-3 w-3" />}
+          </div>
+        </div>
+
+        <div>
+          <h4 className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em] mb-2">{kpi.label}</h4>
+          <p className="text-3xl md:text-3xl lg:text-4xl font-black text-white tracking-tighter tabular-nums leading-none">
+            {kpi.value}
+          </p>
+        </div>
+      </div>
+    </div>
+  )
 }

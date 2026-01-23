@@ -15,6 +15,7 @@ import {
   CheckCircle2,
   RotateCcw,
   Loader2,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -49,6 +50,8 @@ export function FeedbackView() {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [scale, setScale] = useState(1);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [aiAnalysis, setAiAnalysis] = useState<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -198,9 +201,8 @@ export function FeedbackView() {
         await sendNotification({
           userId: member.user_id,
           title: "Novo feedback no design",
-          message: `${
-            user?.user_metadata?.full_name || "Alguém"
-          } deixou um comentário em ${file.name}`,
+          message: `${user?.user_metadata?.full_name || "Alguém"
+            } deixou um comentário em ${file.name}`,
           type: "comment",
           link: `/feedback/${fileId}`,
         });
@@ -235,9 +237,8 @@ export function FeedbackView() {
             newStatus === "approved"
               ? "Design Aprovado! 🎉"
               : "Ajustes Solicitados 📝",
-          message: `O arquivo ${file.name} foi ${
-            newStatus === "approved" ? "aprovado" : "marcado para ajustes"
-          }.`,
+          message: `O arquivo ${file.name} foi ${newStatus === "approved" ? "aprovado" : "marcado para ajustes"
+            }.`,
           type: "approval",
           link: `/feedback/${fileId}`,
         });
@@ -253,6 +254,29 @@ export function FeedbackView() {
       toast.error("Erro ao atualizar status.");
     } finally {
       setIsUpdatingStatus(false);
+    }
+  };
+
+  const handleAnalyzeFeedback = async () => {
+    if (comments.length === 0) {
+      toast.info("Ainda não há comentários para analisar.");
+      return;
+    }
+
+    setIsAnalyzing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("analyze-feedback", {
+        body: { comments }
+      });
+
+      if (error) throw error;
+      setAiAnalysis(data);
+      toast.success("Análise concluída!");
+    } catch (err: any) {
+      console.error(err);
+      toast.error("Erro ao analisar feedback.");
+    } finally {
+      setIsAnalyzing(false);
     }
   };
 
@@ -332,9 +356,8 @@ export function FeedbackView() {
                   className="h-9 px-4 rounded-full text-zinc-400 hover:text-amber-400 hover:bg-amber-400/10 transition-all text-[11px] font-bold uppercase tracking-tight"
                 >
                   <RotateCcw
-                    className={`h-3.5 w-3.5 mr-2 ${
-                      isUpdatingStatus ? "animate-spin" : ""
-                    }`}
+                    className={`h-3.5 w-3.5 mr-2 ${isUpdatingStatus ? "animate-spin" : ""
+                      }`}
                   />
                   Pedir Ajustes
                 </Button>
@@ -410,11 +433,10 @@ export function FeedbackView() {
             style={{ cursor: tempPin ? "crosshair" : "grab" }}
           >
             <div
-              className={`relative shadow-2xl shadow-black overflow-hidden ring-1 ring-zinc-800/50 bg-[#09090b] ${
-                isExternalLink
+              className={`relative shadow-2xl shadow-black overflow-hidden ring-1 ring-zinc-800/50 bg-[#09090b] ${isExternalLink
                   ? "w-[90vw] md:w-[85vw] h-[75vh] md:h-[80vh] rounded-xl"
                   : "rounded-sm"
-              }`}
+                }`}
               style={{ transform: `scale(${scale})` }}
             >
               {isExternalLink ? (
@@ -464,11 +486,10 @@ export function FeedbackView() {
                           }
                         }}
                         className={`absolute w-8 h-8 -ml-4 -mt-4 rounded-full border-2 flex items-center justify-center text-xs font-bold shadow-lg z-10 transition-colors
-                            ${
-                              activeCommentId === comment.id
-                                ? "bg-blue-600 border-white text-white z-50 ring-4 ring-blue-500/20"
-                                : "bg-zinc-900 border-zinc-600 text-zinc-400 hover:bg-blue-500 hover:text-white"
-                            }
+                            ${activeCommentId === comment.id
+                            ? "bg-blue-600 border-white text-white z-50 ring-4 ring-blue-500/20"
+                            : "bg-zinc-900 border-zinc-600 text-zinc-400 hover:bg-blue-500 hover:text-white"
+                          }
                         `}
                         style={{
                           left: `${comment.position_x}%`,
@@ -587,11 +608,10 @@ export function FeedbackView() {
                       <Button
                         variant={isSheetOpen ? "secondary" : "ghost"}
                         size="icon"
-                        className={`h-10 w-10 rounded-full ${
-                          isSheetOpen
+                        className={`h-10 w-10 rounded-full ${isSheetOpen
                             ? "bg-blue-500/20 text-blue-400"
                             : "text-zinc-400"
-                        }`}
+                          }`}
                         onClick={() => setIsSheetOpen(true)}
                       >
                         <div className="relative">
@@ -651,6 +671,70 @@ export function FeedbackView() {
             </SheetHeader>
 
             <div className="flex-1 overflow-y-auto p-0 pb-20 md:pb-0">
+              {/* SEÇÃO AI INSIGHTS */}
+              {comments.length > 0 && (
+                <div className="p-4 border-b border-white/5 bg-gradient-to-br from-blue-500/5 to-purple-500/5">
+                  {!aiAnalysis && !isAnalyzing ? (
+                    <Button
+                      onClick={handleAnalyzeFeedback}
+                      className="w-full h-10 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl shadow-lg shadow-blue-500/20 text-xs font-bold uppercase tracking-wider"
+                    >
+                      <Sparkles className="h-3.5 w-3.5 mr-2" />
+                      Analisar com IA
+                    </Button>
+                  ) : isAnalyzing ? (
+                    <div className="flex flex-col items-center justify-center p-6 space-y-3 bg-zinc-900/40 rounded-2xl border border-zinc-800 animate-pulse">
+                      <Loader2 className="h-6 w-6 text-blue-500 animate-spin" />
+                      <span className="text-xs text-zinc-400 font-medium tracking-tight">Destilando feedbacks...</span>
+                    </div>
+                  ) : (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="bg-[#18181b]/60 backdrop-blur-xl border border-white/10 p-5 rounded-2xl shadow-xl overflow-hidden relative group"
+                    >
+                      {/* Efeito de brilho AI */}
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 blur-3xl rounded-full -mr-10 -mt-10" />
+
+                      <div className="flex items-center justify-between mb-3 relative">
+                        <div className="flex items-center gap-2">
+                          <Sparkles className="h-4 w-4 text-blue-400" />
+                          <h4 className="text-sm font-bold text-white">AI Insights</h4>
+                        </div>
+                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest border ${aiAnalysis.sentiment === 'positivo' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                            aiAnalysis.sentiment === 'negativo' ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' :
+                              'bg-zinc-500/10 text-zinc-400 border-zinc-500/20'
+                          }`}>
+                          {aiAnalysis.sentiment}
+                        </span>
+                      </div>
+
+                      <p className="text-xs text-zinc-300 leading-relaxed mb-4 font-light italic">
+                        "{aiAnalysis.summary}"
+                      </p>
+
+                      <div className="space-y-2 relative">
+                        {aiAnalysis.actionable_points.map((point: string, i: number) => (
+                          <div key={i} className="flex gap-2.5 items-start">
+                            <div className="h-4 w-4 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                              <div className="w-1 h-1 bg-blue-400 rounded-full" />
+                            </div>
+                            <span className="text-[11px] text-zinc-400 leading-tight">{point}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      <button
+                        onClick={() => setAiAnalysis(null)}
+                        className="mt-4 w-full py-2 text-[10px] text-zinc-500 hover:text-white uppercase font-bold tracking-widest transition-colors"
+                      >
+                        Recarregar Análise
+                      </button>
+                    </motion.div>
+                  )}
+                </div>
+              )}
+
               {comments.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-64 text-zinc-600 gap-3">
                   <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center">
@@ -665,9 +749,8 @@ export function FeedbackView() {
                   {comments.map((comment, idx) => (
                     <div
                       key={comment.id}
-                      className={`flex gap-4 p-5 hover:bg-white/[0.02] cursor-pointer group transition-colors ${
-                        activeCommentId === comment.id ? "bg-blue-500/5" : ""
-                      }`}
+                      className={`flex gap-4 p-5 hover:bg-white/[0.02] cursor-pointer group transition-colors ${activeCommentId === comment.id ? "bg-blue-500/5" : ""
+                        }`}
                       onClick={() => {
                         setIsSheetOpen(false);
                         setActiveCommentId(comment.id);
@@ -675,11 +758,10 @@ export function FeedbackView() {
                     >
                       <div className="shrink-0 mt-1">
                         <div
-                          className={`w-6 h-6 rounded-full border flex items-center justify-center text-[10px] font-bold transition-all ${
-                            activeCommentId === comment.id
+                          className={`w-6 h-6 rounded-full border flex items-center justify-center text-[10px] font-bold transition-all ${activeCommentId === comment.id
                               ? "bg-blue-500 border-blue-400 text-white"
                               : "bg-zinc-800 border-zinc-700 text-zinc-400"
-                          }`}
+                            }`}
                         >
                           {comment.position_x ? (
                             idx + 1
@@ -694,8 +776,8 @@ export function FeedbackView() {
                             {comment.user_id === user?.id
                               ? user?.user_metadata?.full_name || "Você"
                               : members.find(
-                                  (m) => m.user_id === comment.user_id
-                                )?.email || "Usuário"}
+                                (m) => m.user_id === comment.user_id
+                              )?.email || "Usuário"}
                           </span>
                           <span className="text-[10px] text-zinc-600">
                             {new Date(comment.created_at).toLocaleTimeString(

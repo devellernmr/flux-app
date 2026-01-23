@@ -1,12 +1,9 @@
-import { Sparkles, Folder, Settings, LogOut, BarChart3 } from "lucide-react";
+import { Sparkles, Settings, LogOut, BarChart3, Zap, Layers } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import type { User, PlanType } from "@/types";
-
-// ... (existing imports)
-
-// Notification system is integrated via pages to maintain header context
+import { useNavigate, useLocation } from "react-router-dom";
 
 interface SidebarProps {
   user: User | null;
@@ -15,7 +12,7 @@ interface SidebarProps {
   activeMenu: string;
   setActiveMenu: (menu: string) => void;
   onLogout: () => void;
-  onShowTutorial: () => void;
+  onShowTutorial?: () => void;
 }
 
 export function Sidebar({
@@ -27,53 +24,63 @@ export function Sidebar({
   onLogout,
   onShowTutorial,
 }: SidebarProps) {
+  /* NAVIGATION LOGIC REMOVED FROM PROPS, RESTORING INTERNAL HANDLER */
+
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleNavigation = (item: { id: string; label: string; icon: any; path?: string }) => {
+    if (item.id === "analytics") {
+      navigate("/analytics");
+    } else if (item.id === "projects" || item.id === "settings") {
+      if (location.pathname !== "/dashboard") {
+        navigate("/dashboard", { state: { activeMenu: item.id } });
+      } else {
+        setActiveMenu(item.id);
+      }
+    } else {
+      setActiveMenu(item.id);
+    }
+  };
+
   const NavLinks = () => (
-    <nav className="flex-1 px-4 space-y-2 mt-8">
+    <nav className="flex-1 px-4 space-y-1.5 mt-10">
       {[
-        { id: "projects", label: "Projetos", icon: Folder },
-        { id: "analytics", label: "Relatórios", icon: BarChart3 },
-        { id: "settings", label: "Configurações", icon: Settings },
+        { id: "projects", label: "Meus Fluxos", icon: Layers },
+        { id: "analytics", label: "Insights", icon: BarChart3 },
+        { id: "settings", label: "Preferences", icon: Settings },
       ].map((item) => (
         <button
           key={item.id}
           id={`sidebar-nav-${item.id}`}
-          onClick={() => setActiveMenu(item.id)}
-          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group relative overflow-hidden ${
-            activeMenu === item.id
-              ? "text-white"
-              : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900/50"
-          }`}
+          onClick={() => handleNavigation(item)}
+          className={`w-full group flex items-center gap-4 px-4 py-3.5 rounded-2xl text-[13px] font-bold transition-all duration-300 relative overflow-hidden ${activeMenu === item.id
+            ? "bg-white text-black shadow-2xl shadow-white/5"
+            : "text-zinc-500 hover:text-zinc-200 hover:bg-zinc-900/50"
+            }`}
         >
           {activeMenu === item.id && (
             <motion.div
-              layoutId="menu-active"
-              className="absolute inset-0 bg-blue-600/10 border border-blue-600/20 rounded-lg z-0"
+              layoutId="main-menu-active"
+              className="absolute inset-0 bg-white"
               transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
             />
           )}
-          <span className="relative z-10 flex items-center gap-3">
-            <item.icon className="h-4 w-4" />
-            {item.label}
-          </span>
-          {activeMenu === item.id && (
-            <motion.div
-              layoutId="menu-glow"
-              className="absolute right-2 w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]"
-            />
-          )}
+          <item.icon className={`h-4 w-4 relative z-10 ${activeMenu === item.id ? "text-black" : "group-hover:text-blue-400 transition-colors"}`} />
+          <span className="relative z-10 uppercase tracking-tight">{item.label}</span>
         </button>
       ))}
     </nav>
   );
 
   return (
-    <aside className="w-72 bg-[#050505] border-r border-zinc-900 hidden md:flex flex-col sticky top-0 h-screen z-20 relative">
-      <div className="p-6 pb-2">
-        <div className="flex items-center gap-2.5 px-2">
-          <div className="h-8 w-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-900/20">
-            <Sparkles className="h-4 w-4 text-white" />
+    <aside className="w-80 bg-[#030303] border-r border-zinc-900/50 hidden md:flex flex-col sticky top-0 h-screen z-20">
+      <div className="p-8 pb-2">
+        <div className="flex items-center gap-3 px-2">
+          <div className="h-9 w-9 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/20">
+            <Sparkles className="h-5 w-5 text-white" />
           </div>
-          <span className="text-lg font-bold tracking-tight text-white">
+          <span className="text-xl font-black tracking-tighter text-white">
             FLUXO.
           </span>
         </div>
@@ -82,64 +89,79 @@ export function Sidebar({
       <NavLinks />
 
       {/* HELP BUTTON */}
-      <div className="px-4 mt-auto mb-4">
+      <div className="px-5 mt-auto mb-6">
         <button
           id="sidebar-help-btn"
           onClick={onShowTutorial}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-zinc-400 hover:text-blue-400 hover:bg-blue-500/10 transition-colors group"
+          className="w-full flex items-center gap-4 px-4 py-4 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 hover:border-zinc-700 transition-all group"
         >
-          <div className="w-5 h-5 rounded-full border border-zinc-700 group-hover:border-blue-500/50 flex items-center justify-center text-[10px] font-bold">
-            ?
+          <div className="p-2 bg-blue-500/10 rounded-xl group-hover:scale-110 transition-transform">
+            <Zap className="h-4 w-4 text-blue-500" />
           </div>
-          <span>Tutorial & Ajuda</span>
+          <div className="flex flex-col items-start leading-tight">
+            <span className="text-[11px] font-black text-zinc-300 uppercase tracking-tighter">Support Node</span>
+            <span className="text-[9px] text-zinc-600 font-medium">Abrir central de ajuda</span>
+          </div>
         </button>
       </div>
 
       {/* INDICADOR DE LIMITES */}
-      <div className="px-6 pb-4">
-        <div className="bg-zinc-900/50 rounded-lg p-3 border border-zinc-800">
-          <div className="flex justify-between text-xs mb-2">
-            <span className="text-zinc-400">Projetos</span>
-            <span className="text-white font-medium">
-              {plan === "starter" ? `${usage.projects} / 2` : "Ilimitado"}
+      <div className="px-6 mb-4">
+        <div className="bg-zinc-950 rounded-2xl p-4 border border-white/5">
+          <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest mb-3">
+            <span className="text-zinc-500">Fluxos de Atividade</span>
+            <span className="text-blue-500">
+              {plan === "starter" ? `${usage.projects}/2` : "∞ Level"}
             </span>
           </div>
-          {plan === "starter" && (
-            <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-blue-600 rounded-full transition-all duration-500"
-                style={{
-                  width: `${Math.min((usage.projects / 2) * 100, 100)}%`,
-                }}
+          {plan === "starter" ? (
+            <div className="h-1.5 bg-zinc-900 rounded-full overflow-hidden">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${Math.min((usage.projects / 2) * 100, 100)}%` }}
+                className="h-full bg-gradient-to-r from-blue-600 to-blue-400 rounded-full"
               />
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5">
+              <div className="h-1 w-full bg-zinc-900 rounded-full overflow-hidden">
+                <motion.div
+                  animate={{ x: ["-100%", "100%"] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                  className="h-full bg-blue-500/50 w-2/3 blur-sm"
+                />
+              </div>
             </div>
           )}
         </div>
       </div>
 
-      <div className="p-4 border-t border-zinc-900 mt-auto">
+      <div className="p-4 bg-[#080808]">
         <div
           id="sidebar-user-profile"
-          className="bg-zinc-900/30 rounded-xl p-3 border border-zinc-800/50 flex items-center gap-3"
+          className="bg-zinc-900/20 rounded-[28px] p-3 border border-white/5 flex items-center gap-3 group transition-all"
         >
-          <Avatar className="h-9 w-9 border border-zinc-800">
-            <AvatarImage src={user?.user_metadata?.avatar_url} />
-            <AvatarFallback className="bg-zinc-800 text-xs">
-              {user?.email?.substring(0, 2).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
+          <div className="relative">
+            <Avatar className="h-10 w-10 border border-zinc-800 p-0.5 bg-zinc-900">
+              <AvatarImage src={user?.user_metadata?.avatar_url} />
+              <AvatarFallback className="bg-blue-600 text-xs font-black text-white">
+                {user?.email?.substring(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 bg-emerald-500 border-2 border-[#090909] rounded-full" />
+          </div>
           <div className="flex-1 overflow-hidden min-w-0">
-            <p className="text-sm font-medium truncate text-zinc-200">
+            <p className="text-xs font-black truncate text-zinc-100 group-hover:text-white transition-colors">
               {user?.user_metadata?.full_name || "Usuário"}
             </p>
-            <p className="text-[10px] text-zinc-500 truncate capitalize">
-              Plano {plan}
+            <p className="text-[9px] text-zinc-600 font-black uppercase tracking-[0.1em] truncate capitalize">
+              System Node • {plan}
             </p>
           </div>
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 text-zinc-500 hover:text-red-400 hover:bg-red-950/10"
+            className="h-9 w-9 text-zinc-700 hover:text-red-400 hover:bg-red-400/10 rounded-xl transition-all"
             onClick={onLogout}
           >
             <LogOut className="h-4 w-4" />

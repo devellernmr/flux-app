@@ -93,24 +93,23 @@ export function ApprovalsHub({ projectId }: { projectId: string }) {
           </p>
         </div>
 
-        <div className="flex items-center gap-2 bg-zinc-900/50 p-1 rounded-xl border border-zinc-800">
+        <div className="flex items-center gap-1.5 bg-zinc-900/40 p-1 rounded-xl border border-zinc-800/50 overflow-x-auto no-scrollbar">
           {(["all", "pending", "approved", "rejected"] as const).map((s) => (
             <button
               key={s}
               onClick={() => setFilter(s)}
-              className={`px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
-                filter === s
-                  ? "bg-zinc-800 text-white shadow-lg"
-                  : "text-zinc-500 hover:text-zinc-300"
-              }`}
+              className={`whitespace-nowrap px-3 md:px-4 py-1.5 rounded-lg text-[10px] md:text-xs font-bold uppercase tracking-wider transition-all ${filter === s
+                ? "bg-zinc-800 text-white shadow-lg border border-white/5"
+                : "text-zinc-500 hover:text-zinc-300"
+                }`}
             >
               {s === "all"
                 ? "Todos"
                 : s === "pending"
-                ? "Pendentes"
-                : s === "approved"
-                ? "Aprovados"
-                : "Ajustes"}
+                  ? "Pendentes"
+                  : s === "approved"
+                    ? "Aprovados"
+                    : "Ajustes"}
             </button>
           ))}
         </div>
@@ -141,17 +140,20 @@ export function ApprovalsHub({ projectId }: { projectId: string }) {
         ].map((item) => (
           <div
             key={item.label}
-            className="bg-zinc-900/40 border border-zinc-800/50 p-4 rounded-2xl"
+            className="bg-zinc-900/40 border border-zinc-800/50 p-3 md:p-4 rounded-xl md:rounded-2xl"
           >
-            <div className="flex items-center justify-between mb-2">
-              <item.icon className={`h-4 w-4 text-${item.color}-500`} />
+            <div className="flex items-center justify-between mb-1.5 md:mb-2">
+              <item.icon className="h-3.5 w-3.5 md:h-4 md:w-4 text-zinc-500" />
               <span
-                className={`text-[10px] font-bold text-${item.color}-500 uppercase tracking-widest`}
+                className={`text-[9px] md:text-[10px] font-bold uppercase tracking-widest ${item.color === "emerald" ? "text-emerald-500" :
+                  item.color === "amber" ? "text-amber-500" :
+                    item.color === "rose" ? "text-rose-500" : "text-zinc-500"
+                  }`}
               >
                 {item.label}
               </span>
             </div>
-            <div className="text-2xl font-bold text-white">{item.value}</div>
+            <div className="text-xl md:text-2xl font-bold text-white tabular-nums">{item.value}</div>
           </div>
         ))}
       </div>
@@ -215,19 +217,18 @@ export function ApprovalsHub({ projectId }: { projectId: string }) {
                     <td className="px-6 py-4">
                       <div className="flex justify-center">
                         <span
-                          className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-tighter border ${
-                            file.status === "approved"
-                              ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                              : file.status === "rejected"
+                          className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-tighter border ${file.status === "approved"
+                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                            : file.status === "rejected"
                               ? "bg-rose-500/10 text-rose-400 border-rose-500/20"
                               : "bg-amber-500/10 text-amber-400 border-amber-500/20"
-                          }`}
+                            }`}
                         >
                           {file.status === "approved"
                             ? "Aprovado"
                             : file.status === "rejected"
-                            ? "Com Ajustes"
-                            : "Pendente"}
+                              ? "Com Ajustes"
+                              : "Pendente"}
                         </span>
                       </div>
                     </td>

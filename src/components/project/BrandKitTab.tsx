@@ -222,10 +222,10 @@ export function BrandKitTab({ projectId }: { projectId: string }) {
             const hex = `#${Math.round(r * 255)
               .toString(16)
               .padStart(2, "0")}${Math.round(g * 255)
-              .toString(16)
-              .padStart(2, "0")}${Math.round(b * 255)
-              .toString(16)
-              .padStart(2, "0")}`;
+                .toString(16)
+                .padStart(2, "0")}${Math.round(b * 255)
+                  .toString(16)
+                  .padStart(2, "0")}`;
             extractedColors.add(hex);
           } else if (paint.type.includes("GRADIENT") && paint.gradientStops) {
             paint.gradientStops.forEach((stop: any) => {
@@ -234,10 +234,10 @@ export function BrandKitTab({ projectId }: { projectId: string }) {
                 const hex = `#${Math.round(r * 255)
                   .toString(16)
                   .padStart(2, "0")}${Math.round(g * 255)
-                  .toString(16)
-                  .padStart(2, "0")}${Math.round(b * 255)
-                  .toString(16)
-                  .padStart(2, "0")}`;
+                    .toString(16)
+                    .padStart(2, "0")}${Math.round(b * 255)
+                      .toString(16)
+                      .padStart(2, "0")}`;
                 extractedColors.add(hex);
               }
             });
@@ -285,19 +285,19 @@ export function BrandKitTab({ projectId }: { projectId: string }) {
 
   return (
     <div className="space-y-10 pb-20">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-white tracking-tight">
+          <h2 className="text-xl md:text-2xl font-bold text-white tracking-tight">
             Identidade Visual
           </h2>
-          <p className="text-zinc-500 text-sm mt-1">
+          <p className="text-zinc-500 text-xs md:text-sm mt-0.5">
             Defina as cores e tipografia da marca.
           </p>
         </div>
         <Button
           onClick={saveBrandKit}
           disabled={saving}
-          className="bg-blue-600 hover:bg-blue-500 text-white gap-2"
+          className="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white gap-2 h-11 sm:h-auto font-bold"
         >
           {saving ? (
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -366,7 +366,7 @@ export function BrandKitTab({ projectId }: { projectId: string }) {
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-4">
+          <div className="grid grid-cols-4 sm:flex sm:flex-wrap gap-3 md:gap-4">
             {colors.map((color, i) => (
               <motion.div
                 key={i}
@@ -375,28 +375,28 @@ export function BrandKitTab({ projectId }: { projectId: string }) {
                 className="group relative"
               >
                 <div
-                  className="w-16 h-16 rounded-2xl border border-white/10 shadow-lg cursor-pointer transition-transform hover:scale-110 active:scale-95 flex items-center justify-center overflow-hidden"
+                  className="w-full aspect-square sm:w-16 sm:h-16 rounded-xl md:rounded-2xl border border-white/10 shadow-lg cursor-pointer transition-transform hover:scale-110 active:scale-95 flex items-center justify-center overflow-hidden"
                   style={{ backgroundColor: color }}
                   onClick={() => copyToClipboard(color)}
                 >
                   {copiedColor === color && (
-                    <Check className="w-6 h-6 text-white drop-shadow-md" />
+                    <Check className="w-5 h-5 md:w-6 md:h-6 text-white drop-shadow-md" />
                   )}
                 </div>
                 <button
                   onClick={() => removeColor(color)}
-                  className="absolute -top-1 -right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                  className="absolute -top-1 -right-1 p-1 bg-red-500 text-white rounded-full opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity shadow-lg"
                 >
-                  <Trash2 className="w-3 h-3" />
+                  <Trash2 className="w-2.5 h-2.5 md:w-3 md:h-3" />
                 </button>
-                <span className="block text-[10px] font-mono text-zinc-500 text-center mt-2 uppercase">
+                <span className="block text-[8px] md:text-[10px] font-mono text-zinc-500 text-center mt-2 uppercase">
                   {color}
                 </span>
               </motion.div>
             ))}
 
             <div className="flex flex-col items-center gap-2">
-              <div className="w-16 h-16 rounded-2xl border-2 border-dashed border-zinc-800 flex items-center justify-center p-1 bg-zinc-900/50">
+              <div className="w-full aspect-square sm:w-16 sm:h-16 rounded-xl md:rounded-2xl border-2 border-dashed border-zinc-800 flex items-center justify-center p-0.5 md:p-1 bg-zinc-900/50">
                 <input
                   type="color"
                   value={newColor}
@@ -408,9 +408,9 @@ export function BrandKitTab({ projectId }: { projectId: string }) {
                 variant="ghost"
                 size="sm"
                 onClick={addColor}
-                className="h-6 px-2 text-[10px] text-zinc-400 hover:text-blue-400"
+                className="h-6 px-1 md:px-2 text-[9px] md:text-[10px] text-zinc-400 hover:text-blue-400"
               >
-                <Plus className="w-3 h-3 mr-1" /> Add
+                <Plus className="w-2.5 h-2.5 md:w-3 md:h-3 mr-1" /> Add
               </Button>
             </div>
           </div>

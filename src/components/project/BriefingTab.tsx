@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, memo } from "react";
 import { motion } from "framer-motion";
 import {
   Plus,
@@ -30,7 +30,7 @@ export function BriefingSuccessAction({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="mb-10 p-8 rounded-3xl border border-emerald-500/20 bg-emerald-500/5 text-center relative overflow-hidden group shadow-2xl shadow-emerald-900/10"
+      className="mb-8 md:mb-10 p-6 md:p-8 rounded-2xl md:rounded-3xl border border-emerald-500/20 bg-emerald-500/5 text-center relative overflow-hidden group shadow-2xl shadow-emerald-900/10"
     >
       <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/5 to-transparent pointer-events-none" />
       <div className="absolute -top-24 -right-24 w-48 h-48 bg-emerald-500/20 blur-3xl rounded-full pointer-events-none" />
@@ -41,10 +41,10 @@ export function BriefingSuccessAction({
         </div>
 
         <div className="space-y-2">
-          <h3 className="text-2xl font-bold text-white tracking-tight">
+          <h3 className="text-xl md:text-2xl font-bold text-white tracking-tight">
             Briefing Salvo com Sucesso!
           </h3>
-          <p className="text-zinc-400 max-w-md mx-auto text-sm leading-relaxed">
+          <p className="text-zinc-400 max-w-md mx-auto text-xs md:text-sm leading-relaxed">
             O conteúdo está pronto. Agora envie o link para o cliente preencher
             ou revisar as informações.
           </p>
@@ -102,19 +102,19 @@ export function TemplateCard({ icon, title, desc, color, onClick }: any) {
   return (
     <button
       onClick={onClick}
-      className="group relative flex flex-col items-start p-5 bg-zinc-900/40 border border-zinc-800/60 rounded-xl hover:border-zinc-700 transition-all text-left w-full overflow-hidden hover:-translate-y-1 hover:shadow-xl hover:shadow-black/30"
+      className="group relative flex flex-col items-start p-4 md:p-5 bg-zinc-900/40 border border-zinc-800/60 rounded-xl hover:border-zinc-700 transition-all text-left w-full overflow-hidden hover:-translate-y-1 hover:shadow-xl hover:shadow-black/30"
     >
       <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
       <div
-        className={`h-10 w-10 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-center mb-3 ${colors[color]} group-hover:scale-110 transition-transform relative z-10`}
+        className={`h-9 w-9 md:h-10 md:w-10 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-center mb-3 ${colors[color]} group-hover:scale-110 transition-transform relative z-10`}
       >
         {icon}
       </div>
-      <h3 className="font-medium text-zinc-200 text-sm group-hover:text-white relative z-10">
+      <h3 className="font-semibold text-zinc-200 text-xs md:text-sm group-hover:text-white relative z-10">
         {title}
       </h3>
-      <p className="text-xs text-zinc-500 mt-1 relative z-10">{desc}</p>
+      <p className="text-[10px] md:text-xs text-zinc-500 mt-1 relative z-10 line-clamp-2 md:line-clamp-none">{desc}</p>
     </button>
   );
 }
@@ -123,13 +123,13 @@ export function TemplateCard({ icon, title, desc, color, onClick }: any) {
 
 interface BriefingTabProps {
   briefingStatus:
-    | "empty"
-    | "draft"
-    | "sent"
-    | "awaiting_response"
-    | "approved"
-    | "active"
-    | "completed";
+  | "empty"
+  | "draft"
+  | "sent"
+  | "awaiting_response"
+  | "approved"
+  | "active"
+  | "completed";
   isEditing: boolean;
   setIsEditing: (value: boolean) => void;
   blocks: BriefingBlock[];
@@ -146,7 +146,7 @@ interface BriefingTabProps {
   itemVariants: any;
 }
 
-export function BriefingTab({
+export const BriefingTab = memo(({
   briefingStatus,
   isEditing,
   setIsEditing,
@@ -162,7 +162,7 @@ export function BriefingTab({
   onAddBlock,
   containerVariants,
   itemVariants,
-}: BriefingTabProps) {
+}: BriefingTabProps) => {
   const [isAIGeneratorOpen, setIsAIGeneratorOpen] = useState(false);
 
   const handleAIUse = (result: any) => {
@@ -205,7 +205,7 @@ export function BriefingTab({
         {(briefingStatus === "sent" ||
           briefingStatus === "approved" ||
           briefingStatus === "awaiting_response") &&
-        !isEditing ? (
+          !isEditing ? (
           <div className="space-y-8">
             {/* COMPONENTE DE AÇÃO APROVADO OU SUCESSO AQUI */}
             {briefingStatus === "approved" ? (
@@ -349,119 +349,119 @@ export function BriefingTab({
             {(isEditing ||
               briefingStatus === "draft" ||
               briefingStatus === "sent") && (
-              <div id="project-briefing-editor" className="space-y-6 pt-4">
-                <div className="flex justify-between items-center mb-6 border-b border-zinc-800 pb-4">
-                  <h3 className="font-medium text-zinc-200">
-                    Editor de Perguntas
-                  </h3>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={onOpenResetDialog}
-                    className="text-zinc-500 hover:text-red-400 text-xs h-7"
-                  >
-                    Limpar Tudo
-                  </Button>
-                </div>
+                <div id="project-briefing-editor" className="space-y-6 pt-4">
+                  <div className="flex justify-between items-center mb-6 border-b border-zinc-800 pb-4">
+                    <h3 className="font-medium text-zinc-200">
+                      Editor de Perguntas
+                    </h3>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={onOpenResetDialog}
+                      className="text-zinc-500 hover:text-red-400 text-xs h-7"
+                    >
+                      Limpar Tudo
+                    </Button>
+                  </div>
 
-                {/* Loop dos Blocos de Edição (Inputs) */}
-                {blocks.map((block, i) => (
-                  <div
-                    key={block.id}
-                    className="group bg-zinc-950/50 hover:bg-zinc-900/80 p-4 rounded-xl border border-zinc-800/50 hover:border-zinc-700 transition-all flex flex-col md:flex-row gap-4 items-start"
-                  >
-                    <div className="flex items-center gap-2 w-full md:w-auto">
-                      <span className="text-xs text-zinc-600 font-mono pt-0 md:pt-3">
-                        {i + 1 < 10 ? `0${i + 1}` : i + 1}
-                      </span>
+                  {/* Loop dos Blocos de Edição (Inputs) */}
+                  {blocks.map((block, i) => (
+                    <div
+                      key={block.id}
+                      className="group bg-zinc-950/50 hover:bg-zinc-900/80 p-4 rounded-xl border border-zinc-800/50 hover:border-zinc-700 transition-all flex flex-col md:flex-row gap-4 items-start"
+                    >
+                      <div className="flex items-center gap-2 w-full md:w-auto">
+                        <span className="text-xs text-zinc-600 font-mono pt-0 md:pt-3">
+                          {i + 1 < 10 ? `0${i + 1}` : i + 1}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => onRemoveBlock(i)}
+                          className="md:hidden ml-auto text-zinc-600 hover:text-red-400 h-6 w-6"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+
+                      <div className="flex-1 space-y-3 w-full">
+                        <Input
+                          value={block.label}
+                          onChange={(e) =>
+                            onUpdateBlock(i, "label", e.target.value)
+                          }
+                          className="bg-transparent border-none text-sm font-medium px-0 h-auto focus-visible:ring-0 text-zinc-200 placeholder:text-zinc-700"
+                          placeholder="Digite a pergunta aqui..."
+                        />
+
+                        <div className="flex flex-wrap gap-2 items-center opacity-100 md:opacity-50 group-hover:opacity-100 transition-opacity">
+                          <select
+                            value={block.type}
+                            onChange={(e) =>
+                              onUpdateBlock(i, "type", e.target.value)
+                            }
+                            className="bg-[#050505] text-xs text-zinc-400 border border-zinc-800 rounded px-2 py-1 focus:outline-none w-full md:w-auto"
+                          >
+                            <option value="text">Texto Curto</option>
+                            <option value="textarea">Texto Longo</option>
+                            <option value="select">Múltipla Escolha</option>
+                            <option value="upload">Upload de Arquivo</option>
+                          </select>
+                          <Input
+                            value={block.placeholder || ""}
+                            onChange={(e) =>
+                              onUpdateBlock(i, "placeholder", e.target.value)
+                            }
+                            className="bg-transparent border-none text-xs text-zinc-500 h-auto p-0 focus-visible:ring-0 w-full md:w-auto"
+                            placeholder="Texto de exemplo (placeholder)..."
+                          />
+                        </div>
+                      </div>
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => onRemoveBlock(i)}
-                        className="md:hidden ml-auto text-zinc-600 hover:text-red-400 h-6 w-6"
+                        className="hidden md:flex opacity-0 group-hover:opacity-100 transition-opacity text-zinc-600 hover:text-red-400"
                       >
-                        <Trash2 className="h-3 w-3" />
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
+                  ))}
 
-                    <div className="flex-1 space-y-3 w-full">
-                      <Input
-                        value={block.label}
-                        onChange={(e) =>
-                          onUpdateBlock(i, "label", e.target.value)
-                        }
-                        className="bg-transparent border-none text-sm font-medium px-0 h-auto focus-visible:ring-0 text-zinc-200 placeholder:text-zinc-700"
-                        placeholder="Digite a pergunta aqui..."
-                      />
-
-                      <div className="flex flex-wrap gap-2 items-center opacity-100 md:opacity-50 group-hover:opacity-100 transition-opacity">
-                        <select
-                          value={block.type}
-                          onChange={(e) =>
-                            onUpdateBlock(i, "type", e.target.value)
-                          }
-                          className="bg-[#050505] text-xs text-zinc-400 border border-zinc-800 rounded px-2 py-1 focus:outline-none w-full md:w-auto"
-                        >
-                          <option value="text">Texto Curto</option>
-                          <option value="textarea">Texto Longo</option>
-                          <option value="select">Múltipla Escolha</option>
-                          <option value="upload">Upload de Arquivo</option>
-                        </select>
-                        <Input
-                          value={block.placeholder || ""}
-                          onChange={(e) =>
-                            onUpdateBlock(i, "placeholder", e.target.value)
-                          }
-                          className="bg-transparent border-none text-xs text-zinc-500 h-auto p-0 focus-visible:ring-0 w-full md:w-auto"
-                          placeholder="Texto de exemplo (placeholder)..."
-                        />
-                      </div>
-                    </div>
+                  {/* Botões de Ação do Editor */}
+                  <div className="flex flex-col md:flex-row justify-between pt-6 gap-3">
                     <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onRemoveBlock(i)}
-                      className="hidden md:flex opacity-0 group-hover:opacity-100 transition-opacity text-zinc-600 hover:text-red-400"
+                      variant="outline"
+                      onClick={() => onAddBlock()}
+                      className="border-zinc-800 bg-zinc-900/50 text-zinc-300 hover:bg-zinc-800 w-full md:w-auto"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Plus className="mr-2 h-4 w-4" /> Adicionar Pergunta
+                    </Button>
+                    <Button
+                      id="project-briefing-ai-btn"
+                      variant="outline"
+                      onClick={() => setIsAIGeneratorOpen(true)}
+                      className="border-blue-600/30 bg-blue-600/5 text-blue-400 hover:bg-blue-600/10 w-full md:w-auto"
+                    >
+                      <Sparkles className="mr-2 h-4 w-4" /> Gerar com IA
+                    </Button>
+                    <Button
+                      id="project-briefing-save-btn"
+                      onClick={onSave}
+                      disabled={isSaving}
+                      className="bg-blue-600 hover:bg-blue-500 text-white w-full md:w-auto"
+                    >
+                      {isSaving ? (
+                        "Salvando..."
+                      ) : (
+                        <>
+                          <Save className="mr-2 h-4 w-4" /> Salvar Briefing
+                        </>
+                      )}
                     </Button>
                   </div>
-                ))}
-
-                {/* Botões de Ação do Editor */}
-                <div className="flex flex-col md:flex-row justify-between pt-6 gap-3">
-                  <Button
-                    variant="outline"
-                    onClick={() => onAddBlock()}
-                    className="border-zinc-800 bg-zinc-900/50 text-zinc-300 hover:bg-zinc-800 w-full md:w-auto"
-                  >
-                    <Plus className="mr-2 h-4 w-4" /> Adicionar Pergunta
-                  </Button>
-                  <Button
-                    id="project-briefing-ai-btn"
-                    variant="outline"
-                    onClick={() => setIsAIGeneratorOpen(true)}
-                    className="border-blue-600/30 bg-blue-600/5 text-blue-400 hover:bg-blue-600/10 w-full md:w-auto"
-                  >
-                    <Sparkles className="mr-2 h-4 w-4" /> Gerar com IA
-                  </Button>
-                  <Button
-                    id="project-briefing-save-btn"
-                    onClick={onSave}
-                    disabled={isSaving}
-                    className="bg-blue-600 hover:bg-blue-500 text-white w-full md:w-auto"
-                  >
-                    {isSaving ? (
-                      "Salvando..."
-                    ) : (
-                      <>
-                        <Save className="mr-2 h-4 w-4" /> Salvar Briefing
-                      </>
-                    )}
-                  </Button>
                 </div>
-              </div>
-            )}
+              )}
           </div>
         )}
       </div>
@@ -475,4 +475,6 @@ export function BriefingTab({
       </div>
     </div>
   );
-}
+});
+
+BriefingTab.displayName = "BriefingTab";
