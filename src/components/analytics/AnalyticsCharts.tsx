@@ -30,7 +30,7 @@ export function AnalyticsCharts({
       {/* 1. FLUXO DE UPLOADS (Area Chart) */}
       <div className="lg:col-span-2 bg-[#0A0A0A] border border-zinc-800/60 rounded-[32px] p-6 md:p-8 min-h-[350px] md:min-h-[380px] flex flex-col group hover:border-zinc-700/80 transition-colors">
         <h3 className="text-base md:text-lg font-black text-white mb-6 md:mb-8 flex items-center gap-3 tracking-tight">
-          Fluxo de Entregas
+          Fluxs. de Entregas
           <span className="hidden sm:inline-block text-[10px] bg-zinc-900 border border-zinc-800 text-zinc-400 px-2 py-1 rounded-lg font-bold uppercase tracking-widest">
             Tempo Real
           </span>

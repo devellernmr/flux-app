@@ -14,6 +14,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
 
 // --- FUNÇÃO "INTELIGENTE" PARA NOMEAR ARQUIVOS ---
 const getGroupNameFromLabel = (label: string): string => {
@@ -54,6 +55,9 @@ export function PublicBriefing() {
       }
       setBriefing(data);
       if (data.content) setBlocks(data.content);
+      if (data.projects?.name) {
+        document.title = `Briefing | ${data.projects.name}`;
+      }
       setLoading(false);
     }
     fetchBriefing();
@@ -128,71 +132,93 @@ export function PublicBriefing() {
 
   if (completed)
     return (
-      <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center text-white p-4 text-center">
-        <CheckCircle2 className="h-16 w-16 text-emerald-500 mb-6" />
-        <h1 className="text-3xl font-bold mb-2">Recebido com Sucesso!</h1>
-        <p className="text-zinc-400 mb-8 max-w-sm">
-          Analisaremos tudo e entraremos em contato.
-        </p>
-        <Button variant="outline" onClick={() => window.close()}>
-          Fechar
-        </Button>
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center p-6 text-center font-sans overflow-hidden relative">
+        <div className="pointer-events-none fixed inset-0 z-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
+        <div className="absolute top-[10%] left-[5%] w-[60%] h-[60%] bg-blue-600/5 blur-[120px] rounded-full animate-pulse" />
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="max-w-md w-full glass-card p-12 rounded-[40px] border border-white/5 bg-zinc-900/10 backdrop-blur-3xl relative z-10 shadow-2xl"
+        >
+          <div className="w-20 h-20 bg-emerald-500/10 rounded-[32px] border border-emerald-500/20 flex items-center justify-center mx-auto mb-8 shadow-[0_0_40px_rgba(16,185,129,0.1)]">
+            <CheckCircle2 className="h-10 w-10 text-emerald-500" />
+          </div>
+          <h1 className="text-3xl font-black text-white tracking-tighter mb-4 leading-none">Briefing Enviado!</h1>
+          <p className="text-zinc-500 font-medium leading-relaxed mb-10">
+            Recebemos seus dados com sucesso. Nossa inteligência está processando tudo e nossa equipe entrará em contato em breve.
+          </p>
+          <div className="space-y-4">
+            <div className="h-px w-full bg-white/5 mb-6" />
+            <p className="text-[10px] font-black text-zinc-700 uppercase tracking-[0.2em]">Powered by Fluxs Intelligence</p>
+          </div>
+        </motion.div>
       </div>
     );
 
   const progress =
     blocks.length > 0
       ? Math.round(
-          (blocks.filter((b) => b.answer?.trim().length > 0).length /
-            blocks.length) *
-            100
-        )
+        (blocks.filter((b) => b.answer?.trim().length > 0).length /
+          blocks.length) *
+        100
+      )
       : 0;
 
   return (
-    <div className="min-h-screen bg-[#050505] text-zinc-100 font-sans pb-20">
+    <div className="min-h-screen bg-black text-zinc-100 font-sans pb-20 selection:bg-blue-500/30 overflow-x-hidden relative">
+      {/* GLOBAL OVERLAYS */}
+      <div className="pointer-events-none fixed inset-0 z-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
+
       <div className="fixed top-0 left-0 right-0 h-1 bg-zinc-900 z-50">
         <div
-          className="h-full bg-blue-600 transition-all duration-500"
+          className="h-full bg-blue-600 transition-all duration-500 shadow-[0_0_15px_rgba(59,130,246,0.5)]"
           style={{ width: `${progress}%` }}
         />
       </div>
 
-      <div className="max-w-2xl mx-auto px-6 pt-20">
+      <div className="max-w-2xl mx-auto px-6 pt-20 relative z-10">
         {/* Header */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-16 space-y-6">
           {briefing?.projects?.custom_logo_url ? (
-            <img
-              src={briefing.projects.custom_logo_url}
-              alt="Logo"
-              className="h-12 mx-auto mb-6 object-contain"
-            />
+            <div className="inline-block p-4 bg-zinc-900/40 rounded-3xl border border-white/5 backdrop-blur-md shadow-2xl mb-2">
+              <img
+                src={briefing.projects.custom_logo_url}
+                alt="Logo"
+                className="h-12 object-contain"
+              />
+            </div>
           ) : (
-            <div className="flex items-center justify-center gap-2 font-bold text-white mb-6">
+            <div className="flex items-center justify-center gap-3 font-black text-white mb-8 group">
+              <div className="h-10 w-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/20 group-hover:scale-110 transition-transform">
+                <Sparkles className="h-6 w-6 text-white" />
+              </div>
               {briefing?.projects?.agency_name ? (
-                <span className="text-xl tracking-tight">
+                <span className="text-2xl tracking-tighter uppercase font-black">
                   {briefing.projects.agency_name}
                 </span>
               ) : (
-                <>
-                  <Sparkles className="h-5 w-5 text-blue-500" /> FLUXO.
-                </>
+                <span className="text-2xl tracking-tighter uppercase font-black">
+                  FLUXS.
+                </span>
               )}
             </div>
           )}
-          <h1 className="text-3xl font-bold mb-2">
-            {briefing?.projects?.name}
-          </h1>
-          <p className="text-zinc-500">
-            Por favor, responda as questões abaixo.
-          </p>
+          <div className="space-y-2">
+            <h1 className="text-4xl font-black text-white tracking-tighter leading-none">
+              {briefing?.projects?.name}
+            </h1>
+            <p className="text-zinc-500 font-medium tracking-tight">
+              Central de Coleta Dinâmica • <span className="text-zinc-400">Fluxs Intel</span>
+            </p>
+          </div>
         </div>
 
         {/* Form */}
-        <div className="space-y-10">
+        <div className="space-y-12">
           {blocks.map((block: any, index: number) => (
-            <div key={index} className="space-y-4">
-              <label className="text-sm font-medium text-zinc-400">
+            <div key={index} className="space-y-4 animate-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 100}ms` }}>
+              <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-2">
                 {block.label}
               </label>
               {block.type === "textarea" ? (
@@ -200,32 +226,43 @@ export function PublicBriefing() {
                   value={block.answer || ""}
                   onChange={(e) => handleInputChange(index, e.target.value)}
                   placeholder={block.placeholder}
-                  className="bg-zinc-900/50 border-zinc-800 focus:border-blue-500/50 min-h-[120px]"
+                  className="bg-zinc-900/40 border-zinc-800 focus:border-blue-500/50 min-h-[160px] rounded-3xl p-6 text-white placeholder:text-zinc-700 transition-all text-sm leading-relaxed"
                 />
               ) : block.type === "file" ? (
-                <div className="border border-dashed border-zinc-800 rounded-xl p-8 text-center bg-zinc-900/20">
+                <div className="relative border border-dashed border-zinc-800 rounded-3xl p-10 text-center bg-zinc-900/20 group hover:border-blue-500/30 transition-all backdrop-blur-sm shadow-xl hover:bg-zinc-900/30">
                   {block.answer ? (
-                    <div className="flex items-center justify-between bg-zinc-900 p-3 rounded-lg border border-zinc-800">
-                      <div className="flex items-center gap-3">
-                        <FileText className="h-6 w-6 text-blue-500" />
-                        <span className="text-sm">Arquivo anexado</span>
+                    <div className="flex items-center justify-between bg-zinc-950 p-4 rounded-2xl border border-zinc-800 group-hover:border-blue-500/20">
+                      <div className="flex items-center gap-4">
+                        <div className="p-3 bg-blue-500/10 rounded-xl">
+                          <FileText className="h-6 w-6 text-blue-400" />
+                        </div>
+                        <div className="text-left">
+                          <span className="block text-sm font-bold text-white">Arquivo anexado</span>
+                          <span className="block text-[10px] text-zinc-500 uppercase tracking-widest">Documento v01</span>
+                        </div>
                       </div>
                       <Button
                         variant="ghost"
                         size="icon"
+                        className="h-10 w-10 text-zinc-500 hover:text-red-400 hover:bg-red-400/10 rounded-xl transition-all"
                         onClick={() => handleInputChange(index, "")}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   ) : (
-                    <div className="flex flex-col items-center gap-3">
-                      <UploadCloud className="h-8 w-8 text-zinc-600" />
-                      <p className="text-sm text-zinc-500">
-                        {uploadingState[index]
-                          ? "Enviando..."
-                          : "Clique para enviar"}
-                      </p>
+                    <div className="flex flex-col items-center gap-4 py-4">
+                      <div className="h-16 w-16 bg-zinc-900 rounded-2xl flex items-center justify-center border border-zinc-800 group-hover:scale-110 transition-transform">
+                        <UploadCloud className="h-8 w-8 text-zinc-500 group-hover:text-blue-400 transition-colors" />
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-sm font-bold text-white">
+                          {uploadingState[index]
+                            ? "Enviando arquivo..."
+                            : "Subir Arquivo de Referência"}
+                        </p>
+                        <p className="text-[10px] text-zinc-500 font-medium">Clique ou arraste para enviar</p>
+                      </div>
                       <input
                         type="file"
                         onChange={(e) =>
@@ -247,22 +284,26 @@ export function PublicBriefing() {
                   value={block.answer || ""}
                   onChange={(e) => handleInputChange(index, e.target.value)}
                   placeholder={block.placeholder}
-                  className="bg-zinc-900/50 border-zinc-800"
+                  className="bg-zinc-900/40 border-zinc-800 h-14 rounded-2xl px-6 text-white focus:ring-blue-500/20 placeholder:text-zinc-700 transition-all font-bold"
                 />
               )}
             </div>
           ))}
         </div>
 
-        <div className="mt-16 pt-8 border-t border-zinc-900">
+        <div className="mt-20 pt-10 border-t border-zinc-900 flex flex-col items-center gap-6">
           <Button
-            className="w-full h-12 bg-blue-600 hover:bg-blue-700 font-bold"
+            className="w-full h-16 bg-white text-black hover:bg-zinc-200 font-black rounded-2xl shadow-2xl shadow-blue-500/10 hover:scale-[1.02] transition-all flex items-center justify-center gap-3 text-lg"
             onClick={submitBriefing}
             disabled={submitting}
           >
-            {submitting ? "Enviando..." : "Enviar Briefing"}{" "}
-            <ArrowRight className="ml-2 h-4 w-4" />
+            {submitting ? <Loader2 className="animate-spin h-5 w-5" /> : null}
+            {submitting ? "PROCESSANDO..." : "FINALIZAR E ENVIAR BRIEFING"}
+            {!submitting && <ArrowRight className="h-5 w-5" />}
           </Button>
+          <div className="flex items-center gap-2 text-[10px] font-black text-zinc-600 uppercase tracking-[0.2em]">
+            <Sparkles className="h-3 w-3" /> Powered by Fluxs Intelligence
+          </div>
         </div>
       </div>
     </div>

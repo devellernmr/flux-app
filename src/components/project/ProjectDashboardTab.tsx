@@ -8,8 +8,9 @@ import {
     ChevronRight,
 } from "lucide-react";
 import { format } from "date-fns";
+import { useTranslation } from "react-i18next";
 import { ProjectRoadmap } from "@/pages/ProjectRoadmap";
-// import { startProjectTour } from "@/components/dashboard/TourGuide";
+import { useTutorial } from "@/components/tutorial/TutorialContext";
 import type { Project } from "@/types";
 
 interface ProjectDashboardTabProps {
@@ -29,6 +30,9 @@ export const ProjectDashboardTab = memo(({
     projectStatus,
     milestones,
 }: ProjectDashboardTabProps) => {
+    const { startTutorial } = useTutorial();
+    const { t } = useTranslation();
+
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -44,12 +48,12 @@ export const ProjectDashboardTab = memo(({
                             variant="outline"
                             className="text-[10px] border-zinc-800 text-zinc-500 uppercase tracking-widest"
                         >
-                            Prazo
+                            {t("project_dashboard.deadline_label")}
                         </Badge>
                     </div>
                     <div>
                         <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5">
-                            Entrega Prevista
+                            {t("project_dashboard.expected_delivery")}
                         </p>
                         <h3 className="text-2xl font-bold text-white tabular-nums">
                             {project?.due_date
@@ -72,10 +76,10 @@ export const ProjectDashboardTab = memo(({
                     </div>
                     <div>
                         <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5">
-                            Briefing
+                            {t("project_dashboard.briefing_label")}
                         </p>
                         <h3 className="text-xl font-bold text-white capitalize">
-                            {briefingStatus ? briefingStatus.replace("_", " ") : "Carregando..."}
+                            {briefingStatus ? briefingStatus.replace("_", " ") : t("common.loading")}
                         </h3>
                     </div>
                 </div>
@@ -98,10 +102,10 @@ export const ProjectDashboardTab = memo(({
                     </div>
                     <div>
                         <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5">
-                            Aprovações
+                            {t("project_dashboard.approvals_label")}
                         </p>
                         <h3 className="text-xl font-bold text-white">
-                            {pendingApprovalsCount} Pendentes
+                            {pendingApprovalsCount} {t("project_dashboard.pending")}
                         </h3>
                     </div>
                 </div>
@@ -109,7 +113,7 @@ export const ProjectDashboardTab = memo(({
                 {/* TUTORIAL CARD */}
                 <div
                     id="project-dash-card-help"
-                    // onClick={() => startProjectTour(setActiveTab)} // TODO: Integrar novo sistema
+                    onClick={() => startTutorial()}
                     className="bg-blue-600/5 border border-blue-500/20 p-6 rounded-2xl flex flex-col justify-between h-40 cursor-pointer hover:bg-blue-600/10 hover:border-blue-500/40 transition-all group"
                 >
                     <div className="flex justify-between items-start">
@@ -120,10 +124,10 @@ export const ProjectDashboardTab = memo(({
                     </div>
                     <div>
                         <p className="text-[10px] font-bold text-blue-400/70 uppercase tracking-widest mb-1.5">
-                            Tutorial & Suporte
+                            {t("project_dashboard.tutorial_support_label")}
                         </p>
                         <h3 className="text-xl font-bold text-white">
-                            Guia do Fluxo 🎯
+                            {t("project_dashboard.fluxs_guide")}
                         </h3>
                     </div>
                 </div>

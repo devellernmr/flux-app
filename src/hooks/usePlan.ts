@@ -19,12 +19,12 @@ const PLANS: Record<PlanType, PlanLimits> = {
   pro: {
     projects: -1,
     storage: 1024 * 1024 * 1024 * 10, // 10GB
-    features: ["share_client", "upload_file"], // Adicionei upload_file aqui para diferenciar
+    features: ["share_client", "upload_file", "ai"],
   },
   agency: {
     projects: -1,
     storage: 1024 * 1024 * 1024 * 1000, // 1TB
-    features: ["share_client", "upload_file", "white_label", "team"],
+    features: ["share_client", "upload_file", "white_label", "team", "analytics", "finance", "ai"],
   },
 };
 

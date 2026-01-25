@@ -229,7 +229,7 @@ export function SettingsModal({
               </div>
             )}
             <p className="text-[10px] text-zinc-500">
-              Este logo substituirá o padrão do FLUXO nas visualizações enviadas
+              Este logo substituirá o padrão do FLUXS. nas visualizações enviadas
               para os clientes.
             </p>
           </div>

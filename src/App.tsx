@@ -1,8 +1,7 @@
-// src/App.tsx
-
 import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
+import { Loader2 } from "lucide-react";
 import { Login } from "@/pages/Login";
 import { Toaster } from "@/components/ui/sonner";
 import { Dashboard } from "@/pages/Dashboard";
@@ -12,6 +11,8 @@ import { FeedbackView } from "@/pages/FeedbackView";
 import { PublicFeedback } from "@/pages/PublicFeedback";
 import { InvitePage } from "@/pages/invite/[token]";
 import { Analytics } from "@/pages/Analytics";
+import { AdminDashboard } from "@/pages/AdminDashboard";
+import { useAdmin } from "@/hooks/useAdmin";
 
 // ============ PROTECTED ROUTE COMPONENT ============
 interface ProtectedRouteProps {
@@ -21,6 +22,29 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute = ({ element, session }: ProtectedRouteProps) => {
   return session ? element : <Navigate to="/" replace />;
+};
+
+// ============ ADMIN ROUTE COMPONENT ============
+interface AdminRouteProps {
+  element: React.ReactElement;
+  session: any;
+}
+
+const AdminRoute = ({ element, session }: AdminRouteProps) => {
+  const { isAdmin, loading } = useAdmin();
+
+  if (!session) return <Navigate to="/" replace />;
+
+  if (loading) {
+    return (
+      <div className="bg-black text-white h-screen flex flex-col items-center justify-center gap-4">
+        <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+        <p className="text-zinc-500 font-bold uppercase tracking-widest text-xs">Verificando Credenciais...</p>
+      </div>
+    );
+  }
+
+  return isAdmin ? element : <Navigate to="/dashboard" replace />;
 };
 
 // ============ PUBLIC ROUTE COMPONENT ============
@@ -83,6 +107,12 @@ function App() {
         <Route
           path="/analytics"
           element={<ProtectedRoute element={<Analytics />} session={session} />}
+        />
+
+        {/* Admin */}
+        <Route
+          path="/admin"
+          element={<AdminRoute element={<AdminDashboard />} session={session} />}
         />
 
         {/* Overview */}

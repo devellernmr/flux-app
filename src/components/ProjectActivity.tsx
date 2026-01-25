@@ -19,8 +19,16 @@ import {
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { ptBR, enUS, es, fr } from "date-fns/locale";
 import { sendNotification } from "@/lib/notifications";
+import { useTranslation } from "react-i18next";
+
+const localeMap: Record<string, any> = {
+  pt: ptBR,
+  en: enUS,
+  es: es,
+  fr: fr
+};
 
 export function ProjectActivity({ projectId }: { projectId: string }) {
   const [activity, setActivity] = useState<any[]>([]);
@@ -29,6 +37,7 @@ export function ProjectActivity({ projectId }: { projectId: string }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [user, setUser] = useState<any>(null);
   const [members, setMembers] = useState<any[]>([]);
+  const { t, i18n } = useTranslation();
 
   const fetchActivity = useCallback(async () => {
     if (!projectId) return;
@@ -133,6 +142,8 @@ export function ProjectActivity({ projectId }: { projectId: string }) {
     };
   }, [projectId, fetchActivity]);
 
+  const currentLang = i18n.language?.split("-")[0] || "en";
+
   useEffect(() => {
     if (scrollRef.current) {
       setTimeout(() => {
@@ -205,7 +216,7 @@ export function ProjectActivity({ projectId }: { projectId: string }) {
       {/* HEADER */}
       <div className="px-4 py-3 border-b border-zinc-800/50 bg-zinc-950/40 flex items-center justify-between shrink-0 backdrop-blur-md">
         <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-widest font-mono">
-          Timeline Unificada
+          {t("activity.unified_timeline")}
         </span>
         <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)] animate-pulse" />
       </div>
@@ -221,7 +232,7 @@ export function ProjectActivity({ projectId }: { projectId: string }) {
               <User className="h-6 w-6 -rotate-3 text-zinc-500" />
             </div>
             <p className="text-xs font-medium tracking-wide">
-              Nenhuma atividade ainda.
+              {t("activity.no_activity")}
             </p>
           </div>
         ) : (
@@ -261,12 +272,12 @@ export function ProjectActivity({ projectId }: { projectId: string }) {
                     </div>
                     <span className="text-[10px] text-zinc-500 font-medium">
                       {isMe
-                        ? "Você"
+                        ? t("activity.you")
                         : members.find((m) => m.user_id === item.user_id)
-                          ?.email || "Cliente"}{" "}
-                      comentou em{" "}
+                          ?.email || t("activity.client")}{" "}
+                      {t("activity.commented_on")}{" "}
                       <span className="text-zinc-300 font-semibold">
-                        {item.fileName || "um arquivo"}
+                        {item.fileName || t("activity.a_file")}
                       </span>
                     </span>
                   </div>
@@ -284,7 +295,7 @@ export function ProjectActivity({ projectId }: { projectId: string }) {
                       {item.created_at &&
                         formatDistanceToNow(new Date(item.created_at), {
                           addSuffix: true,
-                          locale: ptBR,
+                          locale: localeMap[currentLang] || enUS,
                         })}
                     </span>
                     <div className="absolute right-2 top-2 opacity-0 group-hover/feedback:opacity-100 transition-opacity">
@@ -328,15 +339,15 @@ export function ProjectActivity({ projectId }: { projectId: string }) {
                   <div className="flex items-center gap-2 mb-1 px-1">
                     <span className="text-[10px] font-bold text-zinc-400">
                       {isMe
-                        ? user?.user_metadata?.full_name || "Você"
+                        ? user?.user_metadata?.full_name || t("activity.you")
                         : members.find((m) => m.user_id === item.user_id)
-                          ?.email || "Usuário"}
+                          ?.email || t("common.user")}
                     </span>
                     <span className="text-[9px] text-zinc-600">
                       {item.created_at &&
                         formatDistanceToNow(new Date(item.created_at), {
                           addSuffix: true,
-                          locale: ptBR,
+                          locale: localeMap[currentLang] || enUS,
                         })}
                     </span>
                   </div>
@@ -363,7 +374,7 @@ export function ProjectActivity({ projectId }: { projectId: string }) {
       <div className="p-4 bg-zinc-950/60 border-t border-zinc-800/50 shrink-0 z-10 backdrop-blur-xl">
         <div className="relative flex items-end gap-2 bg-zinc-900/50 p-1.5 rounded-2xl border border-zinc-800 focus-within:border-zinc-700 focus-within:ring-1 focus-within:ring-zinc-800 transition-all shadow-inner">
           <Textarea
-            placeholder="Digite uma mensagem..."
+            placeholder={t("activity.type_message")}
             className="min-h-[44px] max-h-32 bg-transparent border-none focus:ring-0 resize-none text-sm py-3 px-3 scrollbar-hide placeholder:text-zinc-600 text-zinc-200 w-full"
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}

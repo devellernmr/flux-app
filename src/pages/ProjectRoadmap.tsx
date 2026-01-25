@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Check, Circle, Loader2, Map as MapIcon } from "lucide-react";
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
 interface ProjectRoadmapProps {
   briefingStatus:
@@ -20,14 +21,16 @@ export function ProjectRoadmap({
   projectStatus,
   milestones,
 }: ProjectRoadmapProps) {
+  const { t } = useTranslation();
+
   // 1. Definição das Etapas (Dinâmicas ou Padrão)
   const defaultSteps = [
-    { label: "Briefing", desc: "Rascunho" },
-    { label: "Send", desc: "Enviado" },
-    { label: "Response", desc: "Resposta" },
-    { label: "Developed", desc: "Em Desenv." },
-    { label: "Feedback", desc: "Revisão" },
-    { label: "Approved", desc: "Aprovado" },
+    { label: t("roadmap.steps.briefing.label"), desc: t("roadmap.steps.briefing.desc") },
+    { label: t("roadmap.steps.sent.label"), desc: t("roadmap.steps.sent.desc") },
+    { label: t("roadmap.steps.response.label"), desc: t("roadmap.steps.response.desc") },
+    { label: t("roadmap.steps.developed.label"), desc: t("roadmap.steps.developed.desc") },
+    { label: t("roadmap.steps.feedback.label"), desc: t("roadmap.steps.feedback.desc") },
+    { label: t("roadmap.steps.approved.label"), desc: t("roadmap.steps.approved.desc") },
   ];
 
   const steps = milestones && milestones.length > 0 ? milestones : defaultSteps;
@@ -59,16 +62,16 @@ export function ProjectRoadmap({
           <div>
             <div className="flex items-center gap-2">
               <h4 className="text-sm font-semibold text-zinc-200 tracking-tight">
-                Roadmap do Projeto
+                {t("roadmap.title")}
               </h4>
               {milestones && milestones.length > 0 && (
                 <span className="text-[9px] bg-blue-500/10 text-blue-400 border border-blue-500/20 px-1.5 py-0.5 rounded-md font-bold uppercase tracking-widest">
-                  AI Generated
+                  {t("roadmap.ai_generated")}
                 </span>
               )}
             </div>
             <p className="text-[10px] text-zinc-500 font-medium uppercase tracking-wider">
-              {steps[currentStepIndex]?.label || "Carregando..."}
+              {steps[currentStepIndex]?.label || t("common.loading")}
             </p>
           </div>
         </div>
@@ -94,7 +97,7 @@ export function ProjectRoadmap({
             className={`text-[10px] font-bold uppercase tracking-wide ${projectStatus === "done" ? "text-emerald-300" : "text-blue-300"
               }`}
           >
-            {projectStatus === "done" ? "Concluído" : "Em Progresso"}
+            {projectStatus === "done" ? t("roadmap.completed") : t("roadmap.in_progress")}
           </span>
         </div>
       </div>

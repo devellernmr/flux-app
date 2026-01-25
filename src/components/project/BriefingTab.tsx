@@ -17,6 +17,7 @@ import {
 import { AIBriefingGenerator } from "@/components/AIBriefingGenerator";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 import type { BriefingBlock } from "@/lib/templates";
 
 // --- SUB-COMPONENTES ---
@@ -142,6 +143,9 @@ interface BriefingTabProps {
   onUpdateBlock: (i: number, field: keyof BriefingBlock, value: any) => void;
   onRemoveBlock: (i: number) => void;
   onAddBlock: (block?: BriefingBlock) => void;
+  setBlocks: (blocks: BriefingBlock[]) => void;
+  can: (feature: string) => boolean;
+  onShowUpgrade: (feature?: string) => void;
   containerVariants: any;
   itemVariants: any;
 }
@@ -151,6 +155,9 @@ export const BriefingTab = memo(({
   isEditing,
   setIsEditing,
   blocks,
+  setBlocks,
+  can,
+  onShowUpgrade,
   onCopyLink,
   onApprove,
   onLoadTemplate,
@@ -176,9 +183,11 @@ export const BriefingTab = memo(({
       answer: "",
     }));
 
-    // Add them to the existing blocks
-    newBlocks.forEach((block) => onAddBlock(block));
+    // Replace existing blocks with new AI blocks
+    setBlocks(newBlocks);
+    setIsEditing(true);
     setIsAIGeneratorOpen(false);
+    toast.success("Perguntas da IA adicionadas (as anteriores foram removidas)!");
   };
   return (
     <div className="max-w-4xl mx-auto">
@@ -440,7 +449,13 @@ export const BriefingTab = memo(({
                     <Button
                       id="project-briefing-ai-btn"
                       variant="outline"
-                      onClick={() => setIsAIGeneratorOpen(true)}
+                      onClick={() => {
+                        if (can("ai")) {
+                          setIsAIGeneratorOpen(true);
+                        } else {
+                          onShowUpgrade("Assistente IA");
+                        }
+                      }}
                       className="border-blue-600/30 bg-blue-600/5 text-blue-400 hover:bg-blue-600/10 w-full md:w-auto"
                     >
                       <Sparkles className="mr-2 h-4 w-4" /> Gerar com IA
@@ -466,13 +481,11 @@ export const BriefingTab = memo(({
         )}
       </div>
 
-      <div className="hidden">
-        <AIBriefingGenerator
-          isOpen={isAIGeneratorOpen}
-          onClose={() => setIsAIGeneratorOpen(false)}
-          onUse={handleAIUse}
-        />
-      </div>
+      <AIBriefingGenerator
+        isOpen={isAIGeneratorOpen}
+        onClose={() => setIsAIGeneratorOpen(false)}
+        onUse={handleAIUse}
+      />
     </div>
   );
 });

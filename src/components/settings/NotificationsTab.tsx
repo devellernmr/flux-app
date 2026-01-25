@@ -67,7 +67,7 @@ export function NotificationsTab() {
                                 Dicas e Novidades
                             </Label>
                             <p className="text-sm text-zinc-500">
-                                Receba dicas de produtividade e novidades sobre novas features do Fluxo.
+                                Receba dicas de produtividade e novidades sobre novas features do Fluxs.
                             </p>
                         </div>
                     </div>

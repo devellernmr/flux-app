@@ -15,11 +15,14 @@ import {
     DollarSign,
     Box,
     Zap,
-    HelpCircle as HelpIcon
+    HelpCircle as HelpIcon,
+    Shield
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-// import { startProjectTour } from "@/components/dashboard/TourGuide";
+import { useTutorial } from "@/components/tutorial/TutorialContext";
+import { useAdmin } from "@/hooks/useAdmin";
+import { useTranslation } from "react-i18next";
 import type { User } from "@/types";
 
 interface ProjectSidebarProps {
@@ -49,18 +52,25 @@ export const ProjectSidebar = memo(function ProjectSidebar({
     mobileMode,
     desktopMode,
 }: ProjectSidebarProps) {
+    const { isAdmin } = useAdmin();
+    const { t } = useTranslation();
 
     const NavLinks = () => {
+        const { startTutorial } = useTutorial();
         const allLinks = [
-            { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-            { id: "briefing", label: "Briefing", icon: Layout },
-            { id: "identidade", label: "Identidade", icon: Palette },
-            { id: "approvals", label: "Entregas", icon: CheckCircle2 },
-            { id: "files", label: "Arquivos", icon: Folder },
-            { id: "members", label: "Equipe", icon: Users },
-            { id: "finance", label: "Financeiro", icon: DollarSign },
-            { id: "help", label: "Ajuda", icon: HelpIcon },
+            { id: "dashboard", label: t("sidebar.dashboard"), icon: LayoutDashboard },
+            { id: "briefing", label: t("sidebar.briefing"), icon: Layout },
+            { id: "identidade", label: t("sidebar.identity"), icon: Palette },
+            { id: "approvals", label: t("sidebar.deliveries"), icon: CheckCircle2 },
+            { id: "files", label: t("sidebar.files"), icon: Folder },
+            { id: "members", label: t("sidebar.team"), icon: Users },
+            { id: "finance", label: t("sidebar.finance"), icon: DollarSign },
+            { id: "help", label: t("sidebar.help"), icon: HelpIcon },
         ];
+
+        if (isAdmin) {
+            allLinks.push({ id: "admin", label: t("common.admin"), icon: Shield });
+        }
 
         const filteredLinks = allLinks.filter(item => {
             if (!isOwner) {
@@ -76,14 +86,14 @@ export const ProjectSidebar = memo(function ProjectSidebar({
                         <div className="p-1.5 bg-zinc-900/50 border border-zinc-800 rounded-lg group-hover:border-zinc-700 transition-colors">
                             <ArrowLeft className="h-3.5 w-3.5 group-hover:-translate-x-0.5 transition-transform" />
                         </div>
-                        <span className="text-xs font-black uppercase tracking-widest leading-none">Voltar</span>
+                        <span className="text-xs font-black uppercase tracking-widest leading-none">{t("sidebar.back_btn")}</span>
                     </button>
                 </Link>
 
                 <div className="space-y-8 flex-1">
                     <div className="space-y-1">
                         <p className="px-3 text-[10px] font-black text-zinc-600 uppercase tracking-[0.2em] mb-4">
-                            Workflow
+                            {t("sidebar.workflow")}
                         </p>
                         <div className="space-y-1.5">
                             {filteredLinks.map((item) => (
@@ -91,6 +101,10 @@ export const ProjectSidebar = memo(function ProjectSidebar({
                                     key={item.id}
                                     id={`project-tab-${item.id}`}
                                     onClick={() => {
+                                        if (item.id === "admin") {
+                                            window.location.href = "/admin";
+                                            return;
+                                        }
                                         setActiveTab(item.id);
                                         setIsMobileMenuOpen(false);
                                     }}
@@ -125,15 +139,15 @@ export const ProjectSidebar = memo(function ProjectSidebar({
                 <div className="mt-auto mb-6 px-1">
                     <button
                         id="project-sidebar-help-btn"
-                        // onClick={() => startProjectTour(setActiveTab)} // TODO: Novo sistema
+                        onClick={() => startTutorial()}
                         className="w-full flex items-center gap-3 px-4 py-4 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 hover:border-zinc-700 transition-all group"
                     >
                         <div className="p-1.5 bg-blue-500/10 rounded-lg group-hover:scale-110 transition-transform">
                             <Zap className="h-3.5 w-3.5 text-blue-500" />
                         </div>
                         <div className="flex flex-col items-start">
-                            <span className="text-[11px] font-black text-zinc-300 uppercase tracking-tighter">Fluxo Assist</span>
-                            <span className="text-[9px] text-zinc-500 font-medium">Abrir tutorial interativo</span>
+                            <span className="text-[11px] font-black text-zinc-300 uppercase tracking-tighter">{t("sidebar.assist")}</span>
+                            <span className="text-[9px] text-zinc-500 font-medium">{t("sidebar.tutorial_desc")}</span>
                         </div>
                     </button>
                 </div>
@@ -192,7 +206,7 @@ export const ProjectSidebar = memo(function ProjectSidebar({
                                     <div className="h-8 w-8 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/20">
                                         <Sparkles className="h-4 w-4 text-white" />
                                     </div>
-                                    FLUXO.
+                                    FLUXS.
                                 </div>
                             )}
                         </div>
@@ -210,7 +224,7 @@ export const ProjectSidebar = memo(function ProjectSidebar({
                             <div className="h-8 w-8 bg-blue-600 rounded-xl flex items-center justify-center">
                                 <Sparkles className="h-4 w-4 text-white" />
                             </div>
-                            <span className="text-xl font-black text-white tracking-tighter">FLUXO.</span>
+                            <span className="text-xl font-black text-white tracking-tighter">FLUXS.</span>
                         </div>
                         <Button
                             variant="ghost"

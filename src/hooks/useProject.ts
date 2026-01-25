@@ -2,12 +2,15 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { usePlan } from "@/hooks/usePlan";
 import type { Project, User } from "@/types";
 import type { BriefingBlock } from "@/lib/templates";
+import { BRIEFING_TEMPLATES } from "@/lib/templates";
 import { logProjectActivity } from "@/lib/activity";
 
 export function useProject(id: string | undefined) {
     const navigate = useNavigate();
+    const { can } = usePlan();
     const [user, setUser] = useState<User | null>(null);
     const [project, setProject] = useState<Project | null>(null);
     const [loading, setLoading] = useState(true);
@@ -261,39 +264,69 @@ export function useProject(id: string | undefined) {
 
             if (briefErr) throw briefErr;
 
-            // 2. Gerar Milestones com IA
-            toast.promise(
-                (async () => {
-                    const { data: aiMilestones, error: aiErr } = await supabase.functions.invoke("generate-milestones", {
-                        body: { briefingContent: blocks, projectName: project.name }
-                    });
+            // 2. Gerar Milestones (com IA ou Padrão)
+            if (can("ai")) {
+                toast.promise(
+                    (async () => {
+                        const { data: aiMilestones, error: aiErr } = await supabase.functions.invoke("generate-milestones", {
+                            body: { briefingContent: blocks, projectName: project.name }
+                        });
 
-                    if (aiErr) throw aiErr;
+                        if (aiErr) throw aiErr;
 
-                    // 3. Salvar Milestones no Projeto
-                    await supabase
-                        .from("projects")
-                        .update({
-                            status: "active",
-                            milestones: aiMilestones
-                        })
-                        .eq("id", id);
+                        await supabase
+                            .from("projects")
+                            .update({
+                                status: "active",
+                                milestones: aiMilestones
+                            })
+                            .eq("id", id);
 
-                    setBriefingStatus("approved");
-                    setProject(prev => prev ? { ...prev, status: "active", milestones: aiMilestones } : null);
+                        setBriefingStatus("approved");
+                        setProject(prev => prev ? { ...prev, status: "active", milestones: aiMilestones } : null);
 
-                    await logProjectActivity({
-                        projectId: id!,
-                        content: "Briefing aprovado e Roadmap dinâmico gerado com IA.",
-                        type: "approve"
-                    });
-                })(),
-                {
-                    loading: 'Gerando roadmap personalizado...',
-                    success: 'Projeto iniciado com roadmap dinâmico!',
-                    error: 'Briefing aprovado, mas erro ao gerar roadmap.',
-                }
-            );
+                        await logProjectActivity({
+                            projectId: id!,
+                            content: "Briefing aprovado e Roadmap dinâmico gerado com IA.",
+                            type: "approve"
+                        });
+                    })(),
+                    {
+                        loading: 'Gerando roadmap personalizado...',
+                        success: 'Projeto iniciado com roadmap dinâmico!',
+                        error: 'Briefing aprovado, mas erro ao gerar roadmap.',
+                    }
+                );
+            } else {
+                // FALLBACK PADRÃO PARA STARTER (Sem IA)
+                const standardMilestones = [
+                    { label: "Briefing", desc: "Concluído" },
+                    { label: "Setup", desc: "Pendente" },
+                    { label: "Design", desc: "Pendente" },
+                    { label: "Feedback", desc: "Pendente" },
+                    { label: "Entrega", desc: "Pendente" },
+                    { label: "Finalizado", desc: "Pendente" }
+                ];
+
+                await supabase
+                    .from("projects")
+                    .update({
+                        status: "active",
+                        milestones: standardMilestones
+                    })
+                    .eq("id", id);
+
+                setBriefingStatus("approved");
+                setProject(prev => prev ? { ...prev, status: "active", milestones: standardMilestones } : null);
+
+                await logProjectActivity({
+                    projectId: id!,
+                    content: "Briefing aprovado e Roadmap padrão criado.",
+                    type: "approve"
+                });
+
+                toast.success("Briefing aprovado! Projeto iniciado.");
+            }
 
         } catch (err: any) {
             console.error(err);
@@ -302,8 +335,7 @@ export function useProject(id: string | undefined) {
     };
 
     const useTemplate = (templateName: string) => {
-        // @ts-ignore
-        const template = BRIEFING_TEMPLATES[templateName];
+        const template = BRIEFING_TEMPLATES[templateName as keyof typeof BRIEFING_TEMPLATES];
         if (!template) return;
 
         const newBlocks = template.blocks.map((b: BriefingBlock) => ({
@@ -315,19 +347,21 @@ export function useProject(id: string | undefined) {
     };
 
     const updateBlock = (i: number, field: keyof BriefingBlock, value: any) => {
-        const newBlocks = [...blocks];
-        newBlocks[i] = { ...newBlocks[i], [field]: value };
-        setBlocks(newBlocks);
+        setBlocks(prev => {
+            const newBlocks = [...prev];
+            newBlocks[i] = { ...newBlocks[i], [field]: value };
+            return newBlocks;
+        });
     };
 
     const removeBlock = (i: number) =>
-        setBlocks(blocks.filter((_, x) => x !== i));
+        setBlocks(prev => prev.filter((_, x) => x !== i));
 
     const addBlock = (block?: BriefingBlock) =>
-        setBlocks([
-            ...blocks,
+        setBlocks(prev => [
+            ...prev,
             block || {
-                id: Date.now().toString(),
+                id: Date.now().toString() + Math.random(),
                 type: "text",
                 label: "",
                 placeholder: "",

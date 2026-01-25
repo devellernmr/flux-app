@@ -10,6 +10,7 @@ export function useDashboard() {
     const location = useLocation();
     const [user, setUser] = useState<User | null>(null);
     const [projects, setProjects] = useState<Project[]>([]);
+    const [isInitialLoading, setIsInitialLoading] = useState(true);
 
     // --- TRAVAS DO PLANO ---
     const { plan, usage, can, loading: planLoading, refreshPlan } = usePlan();
@@ -55,7 +56,7 @@ export function useDashboard() {
             // Buscar Projetos
             const { data: ownProjects, error: ownError } = await supabase
                 .from("projects")
-                .select("*")
+                .select("*, team_members(count)")
                 .eq("user_id", user.id)
                 .order("created_at", { ascending: false });
 
@@ -72,8 +73,17 @@ export function useDashboard() {
                 memberRows?.map((row: any) => row.project).filter(Boolean) ?? [];
 
             const allProjectsMap = new Map<string, any>();
-            (ownProjects ?? []).forEach((p: any) => allProjectsMap.set(p.id, p));
-            memberProjects.forEach((p: any) => allProjectsMap.set(p.id, p));
+
+            (ownProjects ?? []).forEach((p: any) => {
+                const memberCount = p.team_members?.[0]?.count || 0;
+                allProjectsMap.set(p.id, { ...p, member_count: memberCount });
+            });
+
+            memberProjects.forEach((p: any) => {
+                // Para projetos compartilhados, não temos o count direto aqui, 
+                // mas podemos assumir que se o usuário é membro, tem pelo menos 1
+                allProjectsMap.set(p.id, { ...p, member_count: p.member_count || 1 });
+            });
 
             const allProjects = Array.from(allProjectsMap.values())
                 .map((p: any) => ({
@@ -88,6 +98,7 @@ export function useDashboard() {
 
             setProjects(allProjects);
         }
+        setIsInitialLoading(false);
     }, []);
 
     useEffect(() => {
@@ -123,6 +134,14 @@ export function useDashboard() {
 
     const handleCreateProject = async () => {
         if (!user) return;
+
+        if (!can("create_project")) {
+            setUpgradeFeature("Limite de Projetos");
+            setShowUpgrade(true);
+            setIsNewProjectOpen(false);
+            return;
+        }
+
         setIsCreating(true);
 
         try {
@@ -269,6 +288,14 @@ export function useDashboard() {
         questions: string[];
     }) => {
         if (!user) return toast.error("Usuário não identificado");
+
+        if (!can("create_project")) {
+            setUpgradeFeature("Limite de Projetos");
+            setShowUpgrade(true);
+            setIsAIModalOpen(false);
+            return;
+        }
+
         setIsCreating(true);
 
         try {
@@ -317,6 +344,7 @@ export function useDashboard() {
         usage,
         can,
         planLoading,
+        isInitialLoading,
         showUpgrade,
         setShowUpgrade,
         upgradeFeature,

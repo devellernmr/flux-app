@@ -25,6 +25,7 @@ export interface Project {
   due_date?: string;
   custom_logo_url?: string;
   agency_name?: string;
+  member_count?: number;
   milestones?: { label: string; desc: string }[];
   budget?: number;
   expenses?: number;
@@ -52,9 +53,25 @@ export interface ProjectMember {
   id: number;
   user_id: string;
   project_id: number;
-  role: "owner" | "editor" | "viewer";
+  role: "owner" | "editor" | "viewer" | "partner";
   email: string; // Joined from team_members_with_email view
   color?: "blue" | "pink" | "emerald" | "amber" | "violet";
 }
 
 export type PlanType = "starter" | "pro" | "agency";
+
+export interface SupportTicket {
+  id: string;
+  user_id: string;
+  subject: string;
+  message: string;
+  status: "open" | "in_progress" | "resolved";
+  admin_response?: string;
+  responded_at?: string;
+  created_at: string;
+  updated_at: string;
+  profiles?: {
+    full_name?: string;
+    avatar_url?: string;
+  };
+}

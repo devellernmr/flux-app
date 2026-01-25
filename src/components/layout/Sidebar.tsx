@@ -1,9 +1,22 @@
-import { Sparkles, Settings, LogOut, BarChart3, Zap, Layers } from "lucide-react";
+import {
+  Layers,
+  Settings,
+  Sparkles,
+  LogOut,
+  Shield,
+  BarChart3,
+  Zap,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import type { User, PlanType } from "@/types";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { useAdmin } from "@/hooks/useAdmin";
+import { UpgradeModal } from "@/components/UpgradeModal";
+import type { User, PlanType } from "@/types";
+import { useTranslation } from "react-i18next";
 
 interface SidebarProps {
   user: User | null;
@@ -13,6 +26,14 @@ interface SidebarProps {
   setActiveMenu: (menu: string) => void;
   onLogout: () => void;
   onShowTutorial?: () => void;
+  canAccessAnalytics?: boolean;
+}
+
+interface MenuItem {
+  id: string;
+  label: string;
+  icon: LucideIcon;
+  path?: string;
 }
 
 export function Sidebar({
@@ -23,14 +44,37 @@ export function Sidebar({
   setActiveMenu,
   onLogout,
   onShowTutorial,
+  canAccessAnalytics = false,
 }: SidebarProps) {
   /* NAVIGATION LOGIC REMOVED FROM PROPS, RESTORING INTERNAL HANDLER */
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
+  const { isAdmin } = useAdmin();
+  const { t } = useTranslation();
 
-  const handleNavigation = (item: { id: string; label: string; icon: any; path?: string }) => {
+  const menuItems: MenuItem[] = [
+    { id: "projects", label: t("sidebar.dashboard"), icon: Layers },
+    { id: "analytics", label: t("sidebar.analytics"), icon: BarChart3 },
+    { id: "settings", label: t("common.settings"), icon: Settings },
+  ];
+
+  if (isAdmin) {
+    menuItems.push({ id: "admin", label: t("common.admin"), icon: Shield, path: "/admin" });
+  }
+
+  const handleNavigation = (item: any) => {
+    if (item.id === "admin") {
+      navigate("/admin");
+      return;
+    }
+
     if (item.id === "analytics") {
+      if (!canAccessAnalytics) {
+        setShowUpgradeModal(true);
+        return;
+      }
       navigate("/analytics");
     } else if (item.id === "projects" || item.id === "settings") {
       if (location.pathname !== "/dashboard") {
@@ -45,11 +89,7 @@ export function Sidebar({
 
   const NavLinks = () => (
     <nav className="flex-1 px-4 space-y-1.5 mt-10">
-      {[
-        { id: "projects", label: "Meus Fluxos", icon: Layers },
-        { id: "analytics", label: "Insights", icon: BarChart3 },
-        { id: "settings", label: "Preferences", icon: Settings },
-      ].map((item) => (
+      {menuItems.map((item) => (
         <button
           key={item.id}
           id={`sidebar-nav-${item.id}`}
@@ -81,7 +121,7 @@ export function Sidebar({
             <Sparkles className="h-5 w-5 text-white" />
           </div>
           <span className="text-xl font-black tracking-tighter text-white">
-            FLUXO.
+            FLUXS.
           </span>
         </div>
       </div>
@@ -99,8 +139,8 @@ export function Sidebar({
             <Zap className="h-4 w-4 text-blue-500" />
           </div>
           <div className="flex flex-col items-start leading-tight">
-            <span className="text-[11px] font-black text-zinc-300 uppercase tracking-tighter">Support Node</span>
-            <span className="text-[9px] text-zinc-600 font-medium">Abrir central de ajuda</span>
+            <span className="text-[11px] font-black text-zinc-300 uppercase tracking-tighter">{t("sidebar.support_node")}</span>
+            <span className="text-[9px] text-zinc-600 font-medium">{t("sidebar.help_center")}</span>
           </div>
         </button>
       </div>
@@ -109,9 +149,9 @@ export function Sidebar({
       <div className="px-6 mb-4">
         <div className="bg-zinc-950 rounded-2xl p-4 border border-white/5">
           <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest mb-3">
-            <span className="text-zinc-500">Fluxos de Atividade</span>
+            <span className="text-zinc-500">{t("sidebar.activity_fluxs")}</span>
             <span className="text-blue-500">
-              {plan === "starter" ? `${usage.projects}/2` : "∞ Level"}
+              {plan === "starter" ? `${usage.projects}/2` : `∞ ${t("sidebar.level")}`}
             </span>
           </div>
           {plan === "starter" ? (
@@ -139,35 +179,42 @@ export function Sidebar({
       <div className="p-4 bg-[#080808]">
         <div
           id="sidebar-user-profile"
-          className="bg-zinc-900/20 rounded-[28px] p-3 border border-white/5 flex items-center gap-3 group transition-all"
+          className="bg-zinc-900/60 rounded-[28px] p-4 border border-white/10 flex items-center gap-3 group transition-all backdrop-blur-md hover:border-white/20"
         >
           <div className="relative">
-            <Avatar className="h-10 w-10 border border-zinc-800 p-0.5 bg-zinc-900">
+            <Avatar className="h-10 w-10 border border-zinc-800 p-0.5 bg-zinc-950">
               <AvatarImage src={user?.user_metadata?.avatar_url} />
               <AvatarFallback className="bg-blue-600 text-xs font-black text-white">
                 {user?.email?.substring(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
-            <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 bg-emerald-500 border-2 border-[#090909] rounded-full" />
+            <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 bg-emerald-500 border-2 border-[#090909] rounded-full shadow-[0_0_10px_rgba(16,185,129,0.4)]" />
           </div>
           <div className="flex-1 overflow-hidden min-w-0">
-            <p className="text-xs font-black truncate text-zinc-100 group-hover:text-white transition-colors">
+            <p className="text-xs font-black truncate text-white group-hover:text-blue-400 transition-colors">
               {user?.user_metadata?.full_name || "Usuário"}
             </p>
-            <p className="text-[9px] text-zinc-600 font-black uppercase tracking-[0.1em] truncate capitalize">
+            <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-[0.1em] truncate capitalize">
               System Node • {plan}
             </p>
           </div>
           <Button
             variant="ghost"
             size="icon"
-            className="h-9 w-9 text-zinc-700 hover:text-red-400 hover:bg-red-400/10 rounded-xl transition-all"
+            className="h-9 w-9 text-zinc-600 hover:text-red-400 hover:bg-red-400/10 rounded-xl transition-all"
             onClick={onLogout}
           >
             <LogOut className="h-4 w-4" />
           </Button>
         </div>
       </div>
+
+      <UpgradeModal
+        open={showUpgradeModal}
+        onOpenChange={setShowUpgradeModal}
+        featureName="Analytics Avançado"
+        currentPlan={plan}
+      />
     </aside>
   );
 }

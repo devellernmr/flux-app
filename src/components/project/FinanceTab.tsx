@@ -15,7 +15,8 @@ import {
     Wallet,
     PieChart as PieChartIcon,
     ArrowUpRight,
-    Search
+    Search,
+    Download
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -171,6 +172,50 @@ export function FinanceTab({
         }
     };
 
+    function handleExportFinance() {
+        if (expenses.length === 0) {
+            toast.error("Nenhuma despesa para exportar.");
+            return;
+        }
+
+        const headers = ["ID", "Descrição", "Valor", "Categoria", "Moeda"];
+        const rows = expenses.map(e => [
+            e.id,
+            e.label || "Sem descrição",
+            e.value.toFixed(2),
+            CATEGORY_LABELS[e.category],
+            currency
+        ]);
+
+        const summary = [
+            [],
+            ["Resumo Financeiro"],
+            ["Receita Total", budget.toFixed(2)],
+            ["Custos Totais", totalExpenses.toFixed(2)],
+            ["Lucro Líquido", profit.toFixed(2)],
+            ["Margem", `${margin.toFixed(1)}%`]
+        ];
+
+        const csvContent = [
+            headers.join(","),
+            ...rows.map(r => r.map(cell => `"${cell}"`).join(",")),
+            ...summary.map(s => s.join(","))
+        ].join("\n");
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+
+        link.setAttribute("href", url);
+        link.setAttribute("download", `financeiro-${projectName.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        toast.success("Relatório financeiro exportado!");
+    }
+
     const formatCurr = (val: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency }).format(val);
 
     return (
@@ -253,7 +298,7 @@ export function FinanceTab({
                                     <Receipt className="h-4 w-4 text-zinc-400" />
                                 </div>
                                 <div className="overflow-hidden">
-                                    <h3 className="text-sm font-bold text-white uppercase tracking-tight truncate">Gestão de Fluxo</h3>
+                                    <h3 className="text-sm font-bold text-white uppercase tracking-tight truncate">Gestão de Fluxs.</h3>
                                     <p className="text-[10px] text-zinc-500 font-medium truncate">Controle de entrada e saída</p>
                                 </div>
                             </div>
@@ -268,6 +313,14 @@ export function FinanceTab({
                                         className="w-full bg-zinc-950 border border-zinc-800 h-9 pl-9 pr-3 rounded-xl text-xs text-zinc-300 focus:outline-none focus:ring-1 focus:ring-blue-500/30 transition-all font-medium"
                                     />
                                 </div>
+                                <Button
+                                    variant="outline"
+                                    onClick={handleExportFinance}
+                                    size="sm"
+                                    className="bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white h-9 px-4 rounded-xl text-xs font-black gap-2 shrink-0"
+                                >
+                                    <Download className="h-3.5 w-3.5" /> Exportar
+                                </Button>
                                 <Button onClick={handleAddExpense} size="sm" className="bg-white text-black hover:bg-zinc-200 h-9 px-4 rounded-xl text-xs font-black gap-2 shrink-0">
                                     <Plus className="h-3.5 w-3.5" /> Adicionar
                                 </Button>

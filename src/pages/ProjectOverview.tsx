@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, X, Zap } from "lucide-react";
 
 import { useProject } from "@/hooks/useProject";
+import { usePlan } from "@/hooks/usePlan";
 import { ProjectSidebar } from "@/components/project/ProjectSidebar";
 import { ProjectHeader } from "@/components/project/ProjectHeader";
 import { ProjectDashboardTab } from "@/components/project/ProjectDashboardTab";
@@ -18,6 +19,7 @@ import { TeamManager } from "@/components/TeamManager";
 import { ProjectActivity } from "@/components/ProjectActivity";
 import { SettingsModal } from "@/components/project/SettingsModal";
 import { Button } from "@/components/ui/button";
+import { UpgradeModal } from "@/components/UpgradeModal";
 
 import {
   Dialog,
@@ -28,13 +30,18 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 
-export function ProjectOverview() {
+import { TutorialProvider } from "@/components/tutorial/TutorialContext";
+import { TutorialOverlay } from "@/components/tutorial/TutorialOverlay";
+
+export function ProjectOverviewContent() {
   const { id } = useParams();
+  const { can, plan } = usePlan();
   const {
     user,
     project,
     loading,
     blocks,
+    setBlocks,
     isEditing,
     setIsEditing,
     isSavingBriefing,
@@ -72,7 +79,9 @@ export function ProjectOverview() {
   } = useProject(id);
 
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [isActivityOpen, setIsActivityOpen] = useState(window.innerWidth >= 1600); // Only open by default on ultra-wide
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [upgradeFeatureName, setUpgradeFeatureName] = useState("Financeiro Avançado");
+  const [isActivityOpen, setIsActivityOpen] = useState(window.innerWidth >= 1600);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileActivityOpen, setIsMobileActivityOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -95,7 +104,7 @@ export function ProjectOverview() {
 
   return (
     <div className="min-h-screen bg-black text-zinc-100 flex font-sans overflow-hidden selection:bg-blue-500/30 relative">
-
+      <TutorialOverlay />
       {/* Platinum Background System */}
       <div className="fixed inset-0 z-0 pointer-events-none opacity-20 overflow-hidden">
         <div className="absolute -top-[10%] -left-[5%] w-[60%] h-[60%] bg-blue-600/5 blur-[120px] rounded-full animate-pulse" />
@@ -158,7 +167,7 @@ export function ProjectOverview() {
                   <div className="p-2 bg-zinc-900 border border-zinc-800 rounded-xl">
                     <Zap className="h-4 w-4 text-blue-500" />
                   </div>
-                  <span className="text-sm font-black text-white uppercase tracking-widest">Atividade do Fluxo</span>
+                  <span className="text-sm font-black text-white uppercase tracking-widest">Atividade do Fluxs.</span>
                 </div>
                 <Button
                   variant="ghost"
@@ -204,7 +213,7 @@ export function ProjectOverview() {
         {/* --- PLATINUM MOBILE TAB NAVIGATION --- */}
         <div className="md:hidden flex items-center gap-2 overflow-x-auto no-scrollbar px-6 py-4 border-b border-white/5 bg-[#030303]/80 backdrop-blur-xl sticky top-0 z-20">
           {[
-            { id: "dashboard", label: "Fluxo" },
+            { id: "dashboard", label: "Fluxs." },
             { id: "briefing", label: "Docs" },
             { id: "identidade", label: "Brand" },
             { id: "approvals", label: "Tasks" },
@@ -252,6 +261,7 @@ export function ProjectOverview() {
                     <BriefingTab
                       key="brief"
                       blocks={blocks}
+                      setBlocks={setBlocks}
                       isEditing={isEditing}
                       isSaving={isSavingBriefing}
                       briefingStatus={briefingStatus}
@@ -264,6 +274,11 @@ export function ProjectOverview() {
                       onAddBlock={addBlock}
                       onRemoveBlock={removeBlock}
                       setIsEditing={setIsEditing}
+                      can={can}
+                      onShowUpgrade={(feat) => {
+                        setUpgradeFeatureName(feat || "Assistente IA");
+                        setShowUpgradeModal(true);
+                      }}
                       containerVariants={{}}
                       itemVariants={{}}
                     />
@@ -281,16 +296,37 @@ export function ProjectOverview() {
                     <TeamManager key="members" projectId={id!} />
                   )}
                   {activeTab === "finance" && (
-                    <FinanceTab
-                      key="finance"
-                      projectId={id!}
-                      initialBudget={budget}
-                      initialExpenses={expenses}
-                      initialEstimatedHours={estimatedHours}
-                      initialTargetHourlyRate={targetHourlyRate}
-                      currency={project?.currency}
-                      projectName={projectName}
-                    />
+                    can("finance") ? (
+                      <FinanceTab
+                        key="finance"
+                        projectId={id!}
+                        initialBudget={budget}
+                        initialExpenses={expenses}
+                        initialEstimatedHours={estimatedHours}
+                        initialTargetHourlyRate={targetHourlyRate}
+                        currency={project?.currency}
+                        projectName={projectName}
+                      />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center h-full py-20">
+                        <div className="text-center max-w-md">
+                          <div className="mb-6 inline-flex items-center justify-center w-16 h-16 bg-purple-500/10 rounded-full">
+                            <Zap className="w-8 h-8 text-purple-500" />
+                          </div>
+                          <h3 className="text-2xl font-bold text-white mb-2">Financeiro Avançado</h3>
+                          <p className="text-zinc-400 mb-6">
+                            O módulo de Financeiro está disponível apenas no plano <span className="text-purple-400 font-bold">Agency</span>.
+                          </p>
+                          <Button
+                            onClick={() => setShowUpgradeModal(true)}
+                            className="bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 text-white font-bold"
+                          >
+                            <Zap className="w-4 h-4 mr-2 fill-current" />
+                            Fazer Upgrade
+                          </Button>
+                        </div>
+                      </div>
+                    )
                   )}
                   {activeTab === "help" && <HelpTab key="help" />}
                 </motion.div>
@@ -303,7 +339,7 @@ export function ProjectOverview() {
                   <div className="p-8 border-b border-white/5 bg-zinc-900/10 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
-                      <h2 className="text-[11px] font-black text-white uppercase tracking-[0.2em]">Fluxo de Inteligência</h2>
+                      <h2 className="text-[11px] font-black text-white uppercase tracking-[0.2em]">Fluxs. de Inteligência</h2>
                     </div>
                   </div>
                   <div className="flex-1 overflow-hidden p-6">
@@ -366,6 +402,21 @@ export function ProjectOverview() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <UpgradeModal
+        open={showUpgradeModal}
+        onOpenChange={setShowUpgradeModal}
+        featureName={upgradeFeatureName}
+        currentPlan={plan}
+      />
     </div>
+  );
+}
+
+export function ProjectOverview() {
+  return (
+    <TutorialProvider>
+      <ProjectOverviewContent />
+    </TutorialProvider>
   );
 }

@@ -34,6 +34,7 @@ import {
 import { NotificationSystem } from "@/components/NotificationSystem";
 import type { User } from "@/types";
 import { AnalyticsCharts } from "@/components/analytics/AnalyticsCharts";
+import { useTranslation } from "react-i18next";
 
 import {
   getAnalyticsStats as fetchStats,
@@ -50,6 +51,7 @@ export function Analytics() {
   const [activeMenu, setActiveMenu] = useState("analytics");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const { t } = useTranslation();
 
   // State for Export
   const [isExporting, setIsExporting] = useState(false);
@@ -131,7 +133,7 @@ export function Analytics() {
 
   const kpis = [
     {
-      label: "Projetos Ativos",
+      label: t("analytics.cards.active_projects"),
       value: stats?.activeProjects.toString() || "0",
       change: "0",
       trend: "neutral",
@@ -139,7 +141,7 @@ export function Analytics() {
       color: "text-blue-500",
     },
     {
-      label: "Taxa de Aprovação",
+      label: t("analytics.cards.approval_rate"),
       value: stats ? `${stats.approvalRate}%` : "0%",
       change: "0%",
       trend: "up",
@@ -147,7 +149,7 @@ export function Analytics() {
       color: "text-emerald-500",
     },
     {
-      label: "Arquivos Enviados",
+      label: t("analytics.cards.files_sent"),
       value: stats?.totalFiles.toString() || "0",
       change: "+0",
       trend: "up",
@@ -155,7 +157,7 @@ export function Analytics() {
       color: "text-purple-500",
     },
     {
-      label: "Arquivos Pendentes",
+      label: t("analytics.cards.files_pending"),
       value: stats?.pendingCount.toString() || "0",
       change: "0",
       trend: "down",
@@ -163,7 +165,7 @@ export function Analytics() {
       color: "text-amber-500",
     },
     {
-      label: "Pipeline Total",
+      label: t("analytics.cards.total_pipeline"),
       value: new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(stats?.totalBudget || 0),
       change: "+0%",
       trend: "neutral",
@@ -171,7 +173,7 @@ export function Analytics() {
       color: "text-blue-400",
     },
     {
-      label: "Lucro Estimado",
+      label: t("analytics.cards.est_profit"),
       value: new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(stats?.estimatedProfit || 0),
       change: "+0%",
       trend: "up",
@@ -179,7 +181,7 @@ export function Analytics() {
       color: "text-emerald-400",
     },
     {
-      label: "Margem Média",
+      label: t("analytics.cards.avg_margin"),
       value: `${Math.round(stats?.avgMargin || 0)}%`,
       change: "+0%",
       trend: "up",
@@ -189,8 +191,8 @@ export function Analytics() {
   ];
 
   const statusData = [
-    { name: "Aprovados", value: stats?.approvedCount || 0, color: "#10b981" },
-    { name: "Pendentes", value: stats?.pendingCount || 0, color: "#f59e0b" },
+    { name: t("analytics.table.approved"), value: stats?.approvedCount || 0, color: "#10b981" },
+    { name: t("analytics.table.pending"), value: stats?.pendingCount || 0, color: "#f59e0b" },
     { name: "Com Ajustes", value: stats?.rejectedCount || 0, color: "#f43f5e" },
   ];
 
@@ -224,7 +226,7 @@ export function Analytics() {
               <div className="p-6 flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <Sparkles className="h-4 w-4 text-blue-500" />
-                  <span className="font-bold text-white">FLUXO.</span>
+                  <span className="font-bold text-white">FLUXS.</span>
                 </div>
                 <Button
                   variant="ghost"
@@ -239,19 +241,19 @@ export function Analytics() {
                 {[
                   {
                     id: "projects",
-                    label: "Meus Projetos",
+                    label: t("sidebar.dashboard"),
                     icon: Folder,
                     path: "/dashboard",
                   },
                   {
                     id: "analytics",
-                    label: "Analytics",
+                    label: t("sidebar.analytics"),
                     icon: BarChart3,
                     path: "/analytics",
                   },
                   {
                     id: "settings",
-                    label: "Configurações",
+                    label: t("common.settings"),
                     icon: Settings,
                     path: "/dashboard",
                   },
@@ -284,7 +286,7 @@ export function Analytics() {
                   className="w-full justify-start text-zinc-500 hover:text-red-400"
                 >
                   <LogOut className="h-4 w-4 mr-2" />
-                  Sair
+                  {t("common.logout")}
                 </Button>
               </div>
             </motion.aside>
@@ -314,7 +316,7 @@ export function Analytics() {
         {/* MOBILE HEADER */}
         <header className="md:hidden h-16 border-b border-zinc-900 flex items-center justify-between px-4 bg-[#050505]/80 backdrop-blur-md sticky top-0 z-30">
           <div className="flex items-center gap-2 font-bold">
-            <Sparkles className="h-4 w-4 text-blue-500" /> FLUXO.
+            <Sparkles className="h-4 w-4 text-blue-500" /> FLUXS.
           </div>
           <div className="flex items-center gap-2">
             <NotificationSystem />
@@ -338,14 +340,14 @@ export function Analytics() {
                   animate={{ opacity: 1, y: 0 }}
                   className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-[10px] font-black text-blue-400 uppercase tracking-widest"
                 >
-                  <BarChart3 className="h-3 w-3" /> Intelligence Hub
+                  <BarChart3 className="h-3 w-3" /> {t("analytics.intelligence_hub")}
                 </motion.div>
                 <div>
                   <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter leading-none mb-2">
-                    Relatórios <span className="text-zinc-500">& Insights</span>
+                    {t("analytics.title").split(" ")[0]} <span className="text-zinc-500">{t("analytics.title").substring(t("analytics.title").indexOf(" ") + 1) || "& Insights"}</span>
                   </h1>
                   <p className="text-zinc-500 max-w-xl font-medium">
-                    Acompanhe a performance financeira e operacional da sua agência em tempo real com métricas preditivas.
+                    {t("analytics.subtitle")}
                   </p>
                 </div>
               </div>
@@ -365,10 +367,10 @@ export function Analytics() {
                         }`}
                     >
                       {range === "7d"
-                        ? "7 DIAS"
+                        ? t("analytics.tabs.7d")
                         : range === "30d"
-                          ? "30 DIAS"
-                          : "3 MESES"}
+                          ? t("analytics.tabs.30d")
+                          : t("analytics.tabs.90d")}
                     </button>
                   ))}
                 </div>
@@ -383,7 +385,7 @@ export function Analytics() {
                       disabled={isExporting}
                       className="text-zinc-400 hover:text-white hover:bg-zinc-800/50 rounded-xl h-10 px-4 w-full sm:w-auto justify-between sm:justify-center"
                     >
-                      <span className="text-xs font-bold mr-2">EXPORTAR</span>
+                      <span className="text-xs font-bold mr-2">{t("analytics.export_btn")}</span>
                       {isExporting ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (
@@ -400,14 +402,14 @@ export function Analytics() {
                       className="cursor-pointer focus:bg-zinc-900 focus:text-white p-3 font-medium"
                     >
                       <FileCheck2 className="h-4 w-4 mr-2 text-blue-500" />
-                      Relatório PDF
+                      {t("analytics.export_pdf")}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={handleExportCSV}
                       className="cursor-pointer focus:bg-zinc-900 focus:text-white p-3 font-medium"
                     >
                       <Layers className="h-4 w-4 mr-2 text-emerald-500" />
-                      Dados CSV
+                      {t("analytics.export_csv")}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -421,10 +423,10 @@ export function Analytics() {
               <div className="space-y-4">
                 <div className="flex items-center gap-3 px-2">
                   <div className="h-1.5 w-1.5 rounded-full bg-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.8)]" />
-                  <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-500">Produção & Eficiência</h3>
+                  <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-500">{t("analytics.sections.production")}</h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {kpis.filter(k => ["Projetos Ativos", "Taxa de Aprovação", "Arquivos Enviados"].includes(k.label)).map((kpi, i) => (
+                  {kpis.filter(k => [t("analytics.cards.active_projects"), t("analytics.cards.approval_rate"), t("analytics.cards.files_sent")].includes(k.label)).map((kpi, i) => (
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -441,10 +443,10 @@ export function Analytics() {
               <div className="space-y-4">
                 <div className="flex items-center gap-3 px-2">
                   <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.8)]" />
-                  <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-500">Financeiro & Pipeline</h3>
+                  <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-500">{t("analytics.sections.finance")}</h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {kpis.filter(k => ["Pipeline Total", "Lucro Estimado", "Margem Média"].includes(k.label)).map((kpi, i) => (
+                  {kpis.filter(k => [t("analytics.cards.total_pipeline"), t("analytics.cards.est_profit"), t("analytics.cards.avg_margin")].includes(k.label)).map((kpi, i) => (
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -455,7 +457,7 @@ export function Analytics() {
                     </motion.div>
                   ))}
                   {/* Destaque para Pendências na linha financeira/pipeline */}
-                  {kpis.filter(k => ["Arquivos Pendentes"].includes(k.label)).map(kpi => (
+                  {kpis.filter(k => [t("analytics.cards.files_pending")].includes(k.label)).map(kpi => (
                     <motion.div
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
@@ -482,23 +484,23 @@ export function Analytics() {
             {/* DETAILED REPORT SECTION (Restored per user request) */}
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
               <div className="flex items-center gap-3 px-2 border-l-2 border-blue-500 pl-4">
-                <h3 className="text-xl font-bold text-white tracking-tight">Desempenho por Projeto</h3>
-                <span className="text-xs text-zinc-500 font-medium uppercase tracking-wider">Top 5 Ativos</span>
+                <h3 className="text-xl font-bold text-white tracking-tight">{t("analytics.sections.performance")}</h3>
+                <span className="text-xs text-zinc-500 font-medium uppercase tracking-wider">{t("analytics.sections.top_active")}</span>
               </div>
 
               <div className="bg-[#0A0A0A] border border-zinc-800/50 rounded-2xl overflow-hidden">
                 <div className="grid grid-cols-4 p-4 bg-zinc-900/30 text-[10px] font-black text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50">
-                  <div className="col-span-2">Nome do Projeto</div>
-                  <div className="text-center">Aprovados</div>
-                  <div className="text-right">Pendências</div>
+                  <div className="col-span-2">{t("analytics.table.project_name")}</div>
+                  <div className="text-center">{t("analytics.table.approved")}</div>
+                  <div className="text-right">{t("analytics.table.pending")}</div>
                 </div>
                 {performanceData.length > 0 ? (
                   performanceData.map((project, i) => (
                     <div key={i} className="grid grid-cols-4 p-4 border-b border-zinc-800/20 last:border-0 hover:bg-zinc-900/20 transition-colors items-center">
                       <div className="col-span-2 flex items-center gap-3">
                         <div className={`h-8 w-8 rounded-lg flex items-center justify-center text-xs font-bold ${i === 0 ? "bg-amber-500/10 text-amber-500 border border-amber-500/20" :
-                            i === 1 ? "bg-zinc-800 text-zinc-400" :
-                              "bg-zinc-900 text-zinc-600"
+                          i === 1 ? "bg-zinc-800 text-zinc-400" :
+                            "bg-zinc-900 text-zinc-600"
                           }`}>
                           #{i + 1}
                         </div>
@@ -518,7 +520,7 @@ export function Analytics() {
                   ))
                 ) : (
                   <div className="p-8 text-center text-zinc-500 text-sm">
-                    Nenhum dado disponível para o período selecionado.
+                    {t("analytics.table.no_data")}
                   </div>
                 )}
               </div>

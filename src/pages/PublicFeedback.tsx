@@ -24,9 +24,9 @@ interface FileData {
 
 interface CommentData {
   id: string;
-  x: number;
-  y: number;
-  text: string;
+  position_x: number;
+  position_y: number;
+  content: string;
   user_name: string;
   created_at: string;
 }
@@ -61,6 +61,9 @@ export function PublicFeedback() {
       if (error) throw error;
 
       setFile(fileData);
+      if (fileData?.projects?.name) {
+        document.title = `Feedback | ${fileData.projects.name}`;
+      }
       if (fileData?.status === "approved") setApproved(true);
 
       const { data: commentsData } = await supabase
@@ -71,7 +74,7 @@ export function PublicFeedback() {
       setComments(commentsData || []);
     } catch (error) {
       console.error("Error loading file:", error);
-      toast.error("Design not found or access denied.");
+      toast.error("Design não encontrado ou acesso negado.");
     } finally {
       setLoading(false);
     }
@@ -95,8 +98,8 @@ export function PublicFeedback() {
   const saveComment = async () => {
     if (!commentText.trim() || !guestName.trim() || !tempPin) {
       if (!guestName.trim())
-        toast.error("Please enter your name so we know who you are.");
-      else toast.error("Please write a comment.");
+        toast.error("Por favor, digite seu nome para identificarmos seu feedback.");
+      else toast.error("Escreva seu comentário antes de enviar.");
       return;
     }
 
@@ -107,9 +110,9 @@ export function PublicFeedback() {
         .from("comments")
         .insert({
           file_id: fileId,
-          x: tempPin.x,
-          y: tempPin.y,
-          text: commentText,
+          position_x: tempPin.x,
+          position_y: tempPin.y,
+          content: commentText,
           user_name: guestName,
         })
         .select()
@@ -120,17 +123,17 @@ export function PublicFeedback() {
       setComments([...comments, data]);
       setTempPin(null);
       setCommentText("");
-      toast.success("Feedback added!");
+      toast.success("Feedback adicionado!");
       setShowSidebar(true); // Abre a sidebar para ver o comentário novo
     } catch (error) {
-      toast.error("Error saving comment");
+      toast.error("Erro ao salvar comentário.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleApprove = async () => {
-    if (!confirm("Are you sure you want to approve this design?")) return;
+    if (!confirm("Tem certeza que deseja aprovar este design?")) return;
 
     const { error } = await supabase
       .from("files")
@@ -145,9 +148,9 @@ export function PublicFeedback() {
         origin: { y: 0.6 },
         colors: ["#3b82f6", "#10b981", "#ffffff"],
       });
-      toast.success("Design Approved! 🎉");
+      toast.success("Design Aprovado! 🎉");
     } else {
-      toast.error("Error approving design");
+      toast.error("Erro ao aprovar design.");
     }
   };
 
@@ -165,9 +168,12 @@ export function PublicFeedback() {
     );
 
   return (
-    <div className="h-screen bg-[#050505] flex flex-col text-white overflow-hidden font-sans selection:bg-blue-500/30">
+    <div className="h-screen bg-black flex flex-col text-white overflow-hidden font-sans selection:bg-blue-500/30 relative">
+      {/* GLOBAL OVERLAYS */}
+      <div className="pointer-events-none fixed inset-0 z-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
+
       {/* HEADER (Minimalista) */}
-      <header className="h-16 border-b border-zinc-800 bg-[#050505]/80 backdrop-blur-md flex items-center px-6 justify-between z-50 sticky top-0">
+      <header className="h-16 border-b border-zinc-800/50 bg-black/60 backdrop-blur-xl flex items-center px-6 justify-between z-50 sticky top-0 relative">
         <div className="flex items-center gap-4">
           {file.projects?.custom_logo_url ? (
             <img
@@ -202,12 +208,11 @@ export function PublicFeedback() {
             variant="ghost"
             size="sm"
             onClick={() => setShowSidebar(!showSidebar)}
-            className={`hidden md:flex text-zinc-400 hover:text-white ${
-              showSidebar ? "bg-zinc-900" : ""
-            }`}
+            className={`hidden md:flex text-zinc-400 hover:text-white ${showSidebar ? "bg-zinc-900" : ""
+              }`}
           >
             <MessageSquare className="h-4 w-4 mr-2" />
-            {showSidebar ? "Hide Comments" : "Show Comments"}
+            {showSidebar ? "Ocultar Comentários" : "Ver Comentários"}
             <span className="ml-2 bg-zinc-800 text-zinc-300 text-[10px] px-1.5 py-0.5 rounded-full">
               {comments.length}
             </span>
@@ -216,31 +221,30 @@ export function PublicFeedback() {
           {approved ? (
             <div className="flex items-center gap-2 text-emerald-400 bg-emerald-950/30 px-4 py-2 rounded-full border border-emerald-900/50 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
               <CheckCircle2 className="h-4 w-4" />
-              <span className="font-bold text-xs tracking-wider">APPROVED</span>
+              <span className="font-bold text-xs tracking-wider">APROVADO</span>
             </div>
           ) : (
             <Button
               onClick={handleApprove}
               className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm px-6 shadow-lg shadow-emerald-900/20 transition-all hover:scale-105 active:scale-95"
             >
-              Approve Design
+              Aprovar Design
             </Button>
           )}
         </div>
       </header>
 
-      <div className="flex-1 flex overflow-hidden relative">
+      <div className="flex-1 flex overflow-hidden relative z-10">
         {/* ÁREA DA IMAGEM (CANVAS) */}
-        <div className="flex-1 bg-[#0A0A0A] relative overflow-auto flex items-center justify-center p-8 md:p-16 cursor-grab active:cursor-grabbing scrollbar-thin scrollbar-track-transparent scrollbar-thumb-zinc-800">
+        <div className="flex-1 bg-[#030303] relative overflow-auto flex items-center justify-center p-8 md:p-16 cursor-grab active:cursor-grabbing scrollbar-thin scrollbar-track-transparent scrollbar-thumb-zinc-800">
           {/* Background Grid Sutil */}
-          <div className="absolute inset-0 pointer-events-none bg-[size:20px_20px] bg-grid-zinc-800/[0.05]" />
+          <div className="absolute inset-0 pointer-events-none bg-[size:40px_40px] bg-grid-white/[0.01]" />
 
-          <div className="relative group inline-block shadow-2xl shadow-black/50 rounded-sm transition-transform duration-300">
+          <div className="relative group inline-block shadow-[0_40px_80px_-20px_rgba(0,0,0,0.9)] rounded-sm transition-transform duration-300">
             {/* MENSAGEM DE INSTRUÇÃO NO HOVER */}
             {!approved && !tempPin && (
               <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/70 backdrop-blur-sm text-white text-xs px-3 py-1.5 rounded-full border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-40 flex items-center gap-2">
-                <MousePointerClick className="h-3 w-3" /> Click anywhere to
-                comment
+                <MousePointerClick className="h-3 w-3" /> Clique em qualquer lugar para comentar
               </div>
             )}
 
@@ -248,9 +252,8 @@ export function PublicFeedback() {
               ref={imgRef}
               src={file.url}
               alt="Design Preview"
-              className={`max-w-full max-h-[85vh] block rounded-sm select-none ring-1 ring-zinc-800 ${
-                approved ? "opacity-90 grayscale-[0.2]" : "cursor-crosshair"
-              }`}
+              className={`max-w-full max-h-[85vh] block rounded-sm select-none ring-1 ring-zinc-800 ${approved ? "opacity-90 grayscale-[0.2]" : "cursor-crosshair"
+                }`}
               onClick={handleImageClick}
               draggable={false}
             />
@@ -262,7 +265,7 @@ export function PublicFeedback() {
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 className="absolute w-8 h-8 -ml-4 -mt-4 z-30 group/pin"
-                style={{ left: `${c.x}%`, top: `${c.y}%` }}
+                style={{ left: `${c.position_x}%`, top: `${c.position_y}%` }}
               >
                 <div className="w-8 h-8 bg-blue-600 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-white text-xs font-bold relative z-10 cursor-pointer hover:scale-110 transition-transform">
                   {i + 1}
@@ -272,7 +275,7 @@ export function PublicFeedback() {
                   <span className="font-bold text-zinc-400 block text-[10px]">
                     {c.user_name}
                   </span>
-                  {c.text}
+                  {c.content}
                   <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-black" />
                 </div>
               </motion.div>
@@ -298,7 +301,7 @@ export function PublicFeedback() {
                   <div className="mt-4 bg-[#18181B] border border-zinc-700 rounded-xl shadow-2xl p-4 relative z-10">
                     <div className="flex justify-between items-center mb-3">
                       <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">
-                        New Comment
+                        Novo Comentário
                       </span>
                       <button onClick={() => setTempPin(null)}>
                         <X className="h-4 w-4 text-zinc-500 hover:text-white transition-colors" />
@@ -311,14 +314,14 @@ export function PublicFeedback() {
                         <input
                           autoFocus
                           className="w-full bg-zinc-900 border border-zinc-800 rounded-lg py-2 pl-9 pr-3 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 transition-all"
-                          placeholder="Your Name"
+                          placeholder="Seu Nome"
                           value={guestName}
                           onChange={(e) => setGuestName(e.target.value)}
                         />
                       </div>
                       <textarea
                         className="w-full bg-zinc-900 border border-zinc-800 rounded-lg p-3 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 resize-none transition-all"
-                        placeholder="What would you like to change?"
+                        placeholder="O que você gostaria de mudar?"
                         rows={3}
                         value={commentText}
                         onChange={(e) => setCommentText(e.target.value)}
@@ -336,7 +339,7 @@ export function PublicFeedback() {
                           {isSubmitting ? (
                             <Loader2 className="h-3 w-3 animate-spin" />
                           ) : (
-                            "Post Comment"
+                            "Publicar Comentário"
                           )}
                         </Button>
                       </div>
@@ -359,7 +362,7 @@ export function PublicFeedback() {
             >
               <div className="p-4 border-b border-zinc-800 flex items-center justify-between bg-[#050505]">
                 <h3 className="font-semibold text-sm text-zinc-200">
-                  Feedback List
+                  Lista de Feedbacks
                 </h3>
                 <Button
                   variant="ghost"
@@ -378,7 +381,7 @@ export function PublicFeedback() {
                       <MessageSquare className="h-5 w-5 opacity-50" />
                     </div>
                     <p className="text-xs text-center px-4">
-                      Click anywhere on the image to leave a comment.
+                      Clique em qualquer lugar na imagem para deixar um comentário.
                     </p>
                   </div>
                 ) : (
@@ -400,8 +403,8 @@ export function PublicFeedback() {
                               {new Date(c.created_at).toLocaleDateString()}
                             </span>
                           </div>
-                          <p className="text-sm text-zinc-400 leading-relaxed">
-                            {c.text}
+                          <p className="text-sm text-zinc-400 leading-relaxed font-light">
+                            {c.content}
                           </p>
                         </div>
                       </div>

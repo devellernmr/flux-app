@@ -18,12 +18,12 @@ export function ProjectList({ projects, onDelete }: ProjectListProps) {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="border border-dashed border-zinc-800 rounded-[32px] h-80 flex flex-col items-center justify-center text-zinc-600 bg-zinc-900/10 backdrop-blur-sm"
+        className="border border-dashed border-white/10 rounded-[32px] h-80 flex flex-col items-center justify-center text-zinc-400 bg-white/5 backdrop-blur-sm"
       >
-        <div className="p-4 bg-zinc-900/50 rounded-full border border-zinc-800/50 mb-4">
-          <Grid className="h-8 w-8 opacity-20" />
+        <div className="p-4 bg-white/5 rounded-full border border-white/10 mb-4">
+          <Grid className="h-8 w-8 opacity-40" />
         </div>
-        <p className="text-sm font-bold uppercase tracking-widest opacity-40">Nenhum fluxo encontrado</p>
+        <p className="text-sm font-bold uppercase tracking-widest opacity-60">Nenhum fluxo encontrado</p>
       </motion.div>
     );
   }
@@ -41,23 +41,23 @@ export function ProjectList({ projects, onDelete }: ProjectListProps) {
           className="group h-full"
         >
           <Link to={`/project/${project.id}`} className="block h-full">
-            <div className="h-full relative bg-zinc-900/30 border border-zinc-800/80 hover:border-blue-500/40 rounded-[32px] p-6 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col">
+            <div className="h-full relative bg-[#080808] border border-white/10 hover:border-blue-500/50 rounded-[32px] p-6 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.9)] overflow-hidden flex flex-col backdrop-blur-md">
 
               {/* Background Glow */}
               <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 blur-[60px] group-hover:bg-blue-500/10 transition-colors" />
 
               <div className="flex justify-between items-start mb-6">
                 <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 bg-zinc-900 border border-zinc-800 rounded-2xl flex items-center justify-center group-hover:border-blue-500/40 group-hover:text-blue-400 transition-all duration-300 text-zinc-500 shadow-xl group-hover:bg-blue-500/5">
+                  <div className="h-12 w-12 bg-zinc-900 border border-white/10 rounded-2xl flex items-center justify-center group-hover:border-blue-500/40 group-hover:text-blue-400 transition-all duration-300 text-zinc-300 shadow-xl group-hover:bg-blue-500/5">
                     <Folder className="h-5 w-5" />
                   </div>
                   <div className="space-y-1">
                     {project.category && (
-                      <span className="text-[9px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 uppercase tracking-[0.1em] font-black">
+                      <span className="text-[9px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30 uppercase tracking-[0.1em] font-black">
                         {project.category}
                       </span>
                     )}
-                    <div className="flex items-center gap-2 text-[10px] text-zinc-500 font-bold group-hover:text-zinc-400">
+                    <div className="flex items-center gap-2 text-[10px] text-zinc-300 font-bold group-hover:text-white transition-colors">
                       <Clock className="h-3 w-3" />
                       {format(new Date(project.created_at), "d 'de' MMM", { locale: ptBR })}
                     </div>
@@ -90,13 +90,22 @@ export function ProjectList({ projects, onDelete }: ProjectListProps) {
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                       <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]"></span>
                     </span>
-                    <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest group-hover:text-emerald-500/80 transition-colors">Ativo</span>
+                    <span className="text-[10px] font-black text-zinc-300 uppercase tracking-widest group-hover:text-emerald-500 transition-colors">Ativo</span>
                   </div>
 
+                  {project.member_count > 0 && (
+                    <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-blue-500/10 border border-blue-500/20 shadow-[0_0_10px_rgba(59,130,246,0.1)]">
+                      <Users className="h-3 w-3 text-blue-400" />
+                      <span className="text-[9px] font-black text-blue-400 uppercase tracking-tighter">
+                        Time ({project.member_count})
+                      </span>
+                    </div>
+                  )}
+
                   {project.isShared && (
-                    <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-zinc-900/80 border border-zinc-800">
-                      <Users className="h-3 w-3 text-zinc-500" />
-                      <span className="text-[9px] font-black text-zinc-500 uppercase tracking-tighter">Colab.</span>
+                    <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-purple-500/10 border border-purple-500/20 shadow-[0_0_10px_rgba(168,85,247,0.1)]">
+                      <Users className="h-3 w-3 text-purple-400" />
+                      <span className="text-[9px] font-black text-purple-400 uppercase tracking-tighter">Convidado</span>
                     </div>
                   )}
                 </div>

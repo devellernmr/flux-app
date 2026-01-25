@@ -1,0 +1,157 @@
+{
+    "login": {
+        "title_signup": "Eleva tu Workflow.",
+        "title_signin": "Bienvenido de nuevo.",
+        "subtitle_signup": "Gestión inteligente para agencias de élite.",
+        "subtitle_signin": "Accede a tu centro de mando de Fluxs.",
+        "google_login": "Continuar con Google",
+        "email_divider": "O continuar con email",
+        "label_email": "Email corporativo",
+        "label_password": "Contraseña",
+        "placeholder_email": "nombre@empresa.com",
+        "terms_text": "Estoy de acuerdo con los",
+        "terms_link": "Términos de Uso",
+        "privacy_link": "Política de Privacidad",
+        "btn_signup": "Crear Cuenta Gratis",
+        "btn_signin": "Entrar",
+        "footer_no_account": "¿No tienes una cuenta?",
+        "footer_has_account": "¿Ya tienes una cuenta?",
+        "link_signup": "Regístrate",
+        "link_signin": "Iniciar Sesión",
+        "auth_error_google": "Error de conexión con Google",
+        "auth_error_signup": "Error al crear la cuenta",
+        "auth_error_signin": "Credenciales inválidas",
+        "auth_success_signup": "¡Cuenta creada! Por favor, revisa tu email.",
+        "decorative_badge": "Fluxs Aprobado."
+    },
+    "common": {
+        "loading": "Cargando...",
+        "save": "Guardar",
+        "cancel": "Cancelar",
+        "delete": "Eliminar",
+        "back": "Volver",
+        "logout": "Cerrar sesión",
+        "settings": "Configuración",
+        "admin": "Panel de Admin",
+        "language": "Idioma",
+        "language_short": "Lenguaje"
+    },
+    "project_dashboard": {
+        "deadline_label": "Plazo",
+        "expected_delivery": "Entrega Prevista",
+        "briefing_label": "Briefing",
+        "approvals_label": "Aprobaciones",
+        "pending": "Pendientes",
+        "tutorial_support_label": "Tutorial y Soporte",
+        "fluxs_guide": "Guía de Fluxs. 🎯"
+    },
+    "roadmap": {
+        "title": "Hoja de Ruta",
+        "ai_generated": "Generado por IA",
+        "in_progress": "En Progreso",
+        "completed": "Completado",
+        "steps": {
+            "briefing": {
+                "label": "Briefing",
+                "desc": "Borrador"
+            },
+            "sent": {
+                "label": "Envío",
+                "desc": "Enviado"
+            },
+            "response": {
+                "label": "Respuesta",
+                "desc": "Respuesta"
+            },
+            "developed": {
+                "label": "Desarr.",
+                "desc": "En Desarr."
+            },
+            "feedback": {
+                "label": "Feedback",
+                "desc": "Revisión"
+            },
+            "approved": {
+                "label": "Aprobado",
+                "desc": "Aprobado"
+            }
+        }
+    },
+    "activity": {
+        "unified_timeline": "Línea de Tiempo Unificada",
+        "no_activity": "Ninguna actividad aún.",
+        "type_message": "Escribe un mensaje...",
+        "you": "Tú",
+        "client": "Cliente",
+        "commented_on": "comentó en",
+        "a_file": "un archivo"
+    },
+    "analytics": {
+        "title": "Informes",
+        "subtitle": "Rastrea el desempeño financiero y operativo de tu agencia en tiempo real con métricas predictivas.",
+        "intelligence_hub": "Centro de Inteligencia",
+        "tabs": {
+            "7d": "7 DÍAS",
+            "30d": "30 DÍAS",
+            "90d": "3 MESES"
+        },
+        "export_btn": "EXPORTAR",
+        "export_pdf": "Informe PDF",
+        "export_csv": "Datos CSV",
+        "sections": {
+            "production": "Producción y Eficiencia",
+            "finance": "Finanzas y Pipeline",
+            "performance": "Rendimiento del Proyecto",
+            "top_active": "Top 5 Activos"
+        },
+        "cards": {
+            "active_projects": "Proyectos Activos",
+            "approval_rate": "Tasa de Aprobación",
+            "files_sent": "Archivos Enviados",
+            "files_pending": "Archivos Pendientes",
+            "total_pipeline": "Pipeline Total",
+            "est_profit": "Beneficio Est.",
+            "avg_margin": "Margen Prom."
+        },
+        "table": {
+            "project_name": "Nombre del Proyecto",
+            "approved": "Aprobados",
+            "pending": "Pendientes",
+            "no_data": "No hay datos disponibles para el período seleccionado."
+        }
+    },
+    "sidebar": {
+        "dashboard": "Tablero",
+        "analytics": "Informes",
+        "briefing": "Briefing",
+        "identity": "Identidad",
+        "deliveries": "Entregas",
+        "files": "Archivos",
+        "team": "Equipo",
+        "finance": "Finanzas",
+        "help": "Ayuda",
+        "workflow": "Flujo de trabajo",
+        "back_btn": "Volver",
+        "assist": "Fluxs. Assist",
+        "tutorial_desc": "Abrir tutorial interactivo",
+        "support_node": "Support Node",
+        "help_center": "Centro de Ayuda",
+        "activity_fluxs": "Flujos de Actividad",
+        "level": "Nivel"
+    },
+    "languages": {
+        "en": "Inglés",
+        "pt": "Português",
+        "es": "Español",
+        "fr": "Francés"
+    },
+    "profile": {
+        "title": "Perfil de la Agencia",
+        "subtitle": "Información visible para tus clientes.",
+        "agency_name": "Nombre de la Agencia",
+        "avatar_url": "URL del Avatar",
+        "manager_name": "Nombre del Responsable",
+        "contact_email": "Email de Contacto",
+        "save_btn": "Guardar Cambios"
+    }
+}
