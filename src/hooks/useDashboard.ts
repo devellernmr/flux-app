@@ -43,7 +43,21 @@ export function useDashboard() {
     const fetchData = useCallback(async () => {
         const {
             data: { user },
+            error: userError,
         } = await supabase.auth.getUser();
+        
+        if (userError || !user) {
+            console.error("Auth Error:", userError);
+            setIsInitialLoading(false);
+            
+            // Only force logout if it's clearly an invalid session to avoid loops on temporary failures
+            // But usually 403 on getUser means invalid.
+            await supabase.auth.signOut();
+            toast.error("Sessão expirada. Faça login novamente.");
+            navigate("/login"); 
+            return;
+        }
+
         setUser(user);
 
         if (user) {

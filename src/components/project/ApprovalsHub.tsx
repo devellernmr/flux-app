@@ -38,7 +38,7 @@ export function ApprovalsHub({ projectId }: { projectId: string }) {
           table: "files",
           filter: `project_id=eq.${projectId}`,
         },
-        () => fetchFiles()
+        () => fetchFiles(),
       )
       .subscribe();
 
@@ -98,10 +98,11 @@ export function ApprovalsHub({ projectId }: { projectId: string }) {
             <button
               key={s}
               onClick={() => setFilter(s)}
-              className={`whitespace-nowrap px-3 md:px-4 py-1.5 rounded-lg text-[10px] md:text-xs font-bold uppercase tracking-wider transition-all ${filter === s
-                ? "bg-zinc-800 text-white shadow-lg border border-white/5"
-                : "text-zinc-500 hover:text-zinc-300"
-                }`}
+              className={`whitespace-nowrap px-3 md:px-4 py-1.5 rounded-lg text-[10px] md:text-xs font-bold uppercase tracking-wider transition-all ${
+                filter === s
+                  ? "bg-zinc-800 text-white shadow-lg border border-white/5"
+                  : "text-zinc-500 hover:text-zinc-300"
+              }`}
             >
               {s === "all"
                 ? "Todos"
@@ -145,15 +146,22 @@ export function ApprovalsHub({ projectId }: { projectId: string }) {
             <div className="flex items-center justify-between mb-1.5 md:mb-2">
               <item.icon className="h-3.5 w-3.5 md:h-4 md:w-4 text-zinc-500" />
               <span
-                className={`text-[9px] md:text-[10px] font-bold uppercase tracking-widest ${item.color === "emerald" ? "text-emerald-500" :
-                  item.color === "amber" ? "text-amber-500" :
-                    item.color === "rose" ? "text-rose-500" : "text-zinc-500"
-                  }`}
+                className={`text-[9px] md:text-[10px] font-bold uppercase tracking-widest ${
+                  item.color === "emerald"
+                    ? "text-emerald-500"
+                    : item.color === "amber"
+                      ? "text-amber-500"
+                      : item.color === "rose"
+                        ? "text-rose-500"
+                        : "text-zinc-500"
+                }`}
               >
                 {item.label}
               </span>
             </div>
-            <div className="text-xl md:text-2xl font-bold text-white tabular-nums">{item.value}</div>
+            <div className="text-xl md:text-2xl font-bold text-white tabular-nums">
+              {item.value}
+            </div>
           </div>
         ))}
       </div>
@@ -216,32 +224,53 @@ export function ApprovalsHub({ projectId }: { projectId: string }) {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex justify-center">
-                        <span
-                          className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-tighter border ${file.status === "approved"
-                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                            : file.status === "rejected"
-                              ? "bg-rose-500/10 text-rose-400 border-rose-500/20"
-                              : "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                        {file.name.match(/^(Asset|Assets|Client)_/i) ||
+                        file.name.includes("_Briefing_") ? (
+                          <span className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                            Asset Cliente
+                          </span>
+                        ) : (
+                          <span
+                            className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-tighter border ${
+                              file.status === "approved"
+                                ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                                : file.status === "rejected"
+                                  ? "bg-rose-500/10 text-rose-400 border-rose-500/20"
+                                  : "bg-amber-500/10 text-amber-400 border-amber-500/20"
                             }`}
-                        >
-                          {file.status === "approved"
-                            ? "Aprovado"
-                            : file.status === "rejected"
-                              ? "Com Ajustes"
-                              : "Pendente"}
-                        </span>
+                          >
+                            {file.status === "approved"
+                              ? "Aprovado"
+                              : file.status === "rejected"
+                                ? "Com Ajustes"
+                                : "Pendente"}
+                          </span>
+                        )}
                       </div>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => navigate(`/feedback/${file.id}`)}
-                        className="h-8 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800"
-                      >
-                        <Eye className="h-3.5 w-3.5 mr-2" />
-                        Ver Review
-                      </Button>
+                      {file.name.match(/^(Asset|Assets|Client)_/i) ||
+                      file.name.includes("_Briefing_") ? (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => window.open(file.url, "_blank")}
+                          className="h-8 rounded-lg text-blue-400 hover:text-white hover:bg-blue-500/10"
+                        >
+                          <ExternalLink className="h-3.5 w-3.5 mr-2" />
+                          Baixar Arquivo
+                        </Button>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => navigate(`/feedback/${file.id}`)}
+                          className="h-8 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800"
+                        >
+                          <Eye className="h-3.5 w-3.5 mr-2" />
+                          Ver Review
+                        </Button>
+                      )}
                     </td>
                   </tr>
                 ))

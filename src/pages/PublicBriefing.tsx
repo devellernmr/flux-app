@@ -4,41 +4,22 @@ import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import {
-  CheckCircle2,
-  Loader2,
-  ArrowRight,
-  Sparkles,
-  UploadCloud,
-  FileText,
-  Trash2,
-} from "lucide-react";
+import { CheckCircle2, Loader2, ArrowRight, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
+import { LanguageSelector } from "@/components/LanguageSelector";
+import { BriefingFileUploader } from "@/components/BriefingFileUploader";
 
-// --- FUNÇÃO "INTELIGENTE" PARA NOMEAR ARQUIVOS ---
-const getGroupNameFromLabel = (label: string): string => {
-  const lowerLabel = label.toLowerCase();
-  if (lowerLabel.includes("logo")) return "Logo";
-  if (lowerLabel.includes("referência") || lowerLabel.includes("inspiração"))
-    return "Referencias";
-  if (lowerLabel.includes("manual") || lowerLabel.includes("brandbook"))
-    return "Brandbook";
-  if (lowerLabel.includes("foto") || lowerLabel.includes("imagem"))
-    return "Imagens";
-  return "Assets";
-};
-
+// --- PUBLIC BRIEFING ---
 export function PublicBriefing() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const [briefing, setBriefing] = useState<any>(null);
   const [blocks, setBlocks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [completed, setCompleted] = useState(false);
-  const [uploadingState, setUploadingState] = useState<{
-    [key: number]: boolean;
-  }>({});
 
   useEffect(() => {
     async function fetchBriefing() {
@@ -49,7 +30,7 @@ export function PublicBriefing() {
         .eq("id", id)
         .single();
       if (error) {
-        toast.error("Briefing não encontrado.");
+        toast.error(t("public_briefing.toast.not_found"));
         setLoading(false);
         return;
       }
@@ -69,44 +50,9 @@ export function PublicBriefing() {
     setBlocks(newBlocks);
   };
 
-  const handleFileUpload = async (
-    index: number,
-    file: File,
-    blockLabel: string
-  ) => {
-    if (!file || !briefing?.projects?.id) return;
-    try {
-      setUploadingState((prev) => ({ ...prev, [index]: true }));
-      const projectId = briefing.projects.id;
-      const groupName = getGroupNameFromLabel(blockLabel);
-      const fileExt = file.name.split(".").pop();
-      const finalFileName = `${groupName}_Briefing_v01.${fileExt}`;
-      const storagePath = `${projectId}/${Date.now()}_${file.name}`;
-      const { error: uploadError } = await supabase.storage
-        .from("project-files")
-        .upload(storagePath, file);
-      if (uploadError) throw uploadError;
-      const {
-        data: { publicUrl },
-      } = supabase.storage.from("project-files").getPublicUrl(storagePath);
-      await supabase.from("files").insert({
-        project_id: projectId,
-        name: finalFileName,
-        url: publicUrl,
-        status: "pending",
-      });
-      handleInputChange(index, publicUrl);
-      toast.success("Arquivo enviado!");
-    } catch (error: any) {
-      toast.error("Erro no upload.");
-    } finally {
-      setUploadingState((prev) => ({ ...prev, [index]: false }));
-    }
-  };
-
   const submitBriefing = async () => {
     if (!blocks.some((b) => b.answer?.trim().length > 0)) {
-      toast.warning("Responda algo.");
+      toast.warning(t("public_briefing.toast.answer_required"));
       return;
     }
     setSubmitting(true);
@@ -114,10 +60,10 @@ export function PublicBriefing() {
       .from("briefings")
       .update({ content: blocks, status: "sent" })
       .eq("id", id);
-    if (error) toast.error("Erro ao enviar.");
+    if (error) toast.error(t("public_briefing.toast.submit_error"));
     else {
       setCompleted(true);
-      toast.success("Sucesso!");
+      toast.success(t("public_briefing.toast.success"));
       window.scrollTo(0, 0);
     }
     setSubmitting(false);
@@ -144,13 +90,17 @@ export function PublicBriefing() {
           <div className="w-20 h-20 bg-emerald-500/10 rounded-[32px] border border-emerald-500/20 flex items-center justify-center mx-auto mb-8 shadow-[0_0_40px_rgba(16,185,129,0.1)]">
             <CheckCircle2 className="h-10 w-10 text-emerald-500" />
           </div>
-          <h1 className="text-3xl font-black text-white tracking-tighter mb-4 leading-none">Briefing Enviado!</h1>
+          <h1 className="text-3xl font-black text-white tracking-tighter mb-4 leading-none">
+            {t("public_briefing.success.title")}
+          </h1>
           <p className="text-zinc-500 font-medium leading-relaxed mb-10">
-            Recebemos seus dados com sucesso. Nossa inteligência está processando tudo e nossa equipe entrará em contato em breve.
+            {t("public_briefing.success.message")}
           </p>
           <div className="space-y-4">
             <div className="h-px w-full bg-white/5 mb-6" />
-            <p className="text-[10px] font-black text-zinc-700 uppercase tracking-[0.2em]">Powered by Fluxs Intelligence</p>
+            <p className="text-[10px] font-black text-zinc-700 uppercase tracking-[0.2em]">
+              {t("public_briefing.success.powered_by")}
+            </p>
           </div>
         </motion.div>
       </div>
@@ -159,10 +109,10 @@ export function PublicBriefing() {
   const progress =
     blocks.length > 0
       ? Math.round(
-        (blocks.filter((b) => b.answer?.trim().length > 0).length /
-          blocks.length) *
-        100
-      )
+          (blocks.filter((b) => b.answer?.trim().length > 0).length /
+            blocks.length) *
+            100,
+        )
       : 0;
 
   return (
@@ -209,15 +159,23 @@ export function PublicBriefing() {
               {briefing?.projects?.name}
             </h1>
             <p className="text-zinc-500 font-medium tracking-tight">
-              Central de Coleta Dinâmica • <span className="text-zinc-400">Fluxs Intel</span>
+              {t("public_briefing.header.subtitle")} •{" "}
+              <span className="text-zinc-400">
+                {t("public_briefing.header.intel")}
+              </span>
             </p>
+            <LanguageSelector />
           </div>
         </div>
 
         {/* Form */}
         <div className="space-y-12">
           {blocks.map((block: any, index: number) => (
-            <div key={index} className="space-y-4 animate-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${index * 100}ms` }}>
+            <div
+              key={index}
+              className="space-y-4 animate-in slide-in-from-bottom-4 duration-500"
+              style={{ animationDelay: `${index * 100}ms` }}
+            >
               <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] ml-2">
                 {block.label}
               </label>
@@ -228,57 +186,13 @@ export function PublicBriefing() {
                   placeholder={block.placeholder}
                   className="bg-zinc-900/40 border-zinc-800 focus:border-blue-500/50 min-h-[160px] rounded-3xl p-6 text-white placeholder:text-zinc-700 transition-all text-sm leading-relaxed"
                 />
-              ) : block.type === "file" ? (
-                <div className="relative border border-dashed border-zinc-800 rounded-3xl p-10 text-center bg-zinc-900/20 group hover:border-blue-500/30 transition-all backdrop-blur-sm shadow-xl hover:bg-zinc-900/30">
-                  {block.answer ? (
-                    <div className="flex items-center justify-between bg-zinc-950 p-4 rounded-2xl border border-zinc-800 group-hover:border-blue-500/20">
-                      <div className="flex items-center gap-4">
-                        <div className="p-3 bg-blue-500/10 rounded-xl">
-                          <FileText className="h-6 w-6 text-blue-400" />
-                        </div>
-                        <div className="text-left">
-                          <span className="block text-sm font-bold text-white">Arquivo anexado</span>
-                          <span className="block text-[10px] text-zinc-500 uppercase tracking-widest">Documento v01</span>
-                        </div>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-10 w-10 text-zinc-500 hover:text-red-400 hover:bg-red-400/10 rounded-xl transition-all"
-                        onClick={() => handleInputChange(index, "")}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center gap-4 py-4">
-                      <div className="h-16 w-16 bg-zinc-900 rounded-2xl flex items-center justify-center border border-zinc-800 group-hover:scale-110 transition-transform">
-                        <UploadCloud className="h-8 w-8 text-zinc-500 group-hover:text-blue-400 transition-colors" />
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-sm font-bold text-white">
-                          {uploadingState[index]
-                            ? "Enviando arquivo..."
-                            : "Subir Arquivo de Referência"}
-                        </p>
-                        <p className="text-[10px] text-zinc-500 font-medium">Clique ou arraste para enviar</p>
-                      </div>
-                      <input
-                        type="file"
-                        onChange={(e) =>
-                          e.target.files?.[0] &&
-                          handleFileUpload(
-                            index,
-                            e.target.files[0],
-                            block.label
-                          )
-                        }
-                        className="absolute inset-0 opacity-0 cursor-pointer"
-                        disabled={uploadingState[index]}
-                      />
-                    </div>
-                  )}
-                </div>
+              ) : block.type === "upload" ? (
+                <BriefingFileUploader
+                  value={block.answer || ""}
+                  onChange={(val) => handleInputChange(index, val)}
+                  projectId={briefing?.projects?.id}
+                  blockLabel={block.label}
+                />
               ) : (
                 <Input
                   value={block.answer || ""}
@@ -298,11 +212,14 @@ export function PublicBriefing() {
             disabled={submitting}
           >
             {submitting ? <Loader2 className="animate-spin h-5 w-5" /> : null}
-            {submitting ? "PROCESSANDO..." : "FINALIZAR E ENVIAR BRIEFING"}
+            {submitting
+              ? t("public_briefing.form.processing")
+              : t("public_briefing.form.submit_button")}
             {!submitting && <ArrowRight className="h-5 w-5" />}
           </Button>
           <div className="flex items-center gap-2 text-[10px] font-black text-zinc-600 uppercase tracking-[0.2em]">
-            <Sparkles className="h-3 w-3" /> Powered by Fluxs Intelligence
+            <Sparkles className="h-3 w-3" />{" "}
+            {t("public_briefing.form.powered_by")}
           </div>
         </div>
       </div>

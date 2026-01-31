@@ -36,9 +36,13 @@ export function usePlan() {
   const fetchPlanAndUsage = async () => {
     const {
       data: { user },
+      error
     } = await supabase.auth.getUser();
 
-    if (!user) return;
+    if (error || !user) {
+      setLoading(false);
+      return;
+    }
 
     // 1. BUSCA O PLANO
     const { data: sub } = await supabase

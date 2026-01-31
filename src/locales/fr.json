@@ -1,157 +1,220 @@
 {
-    "login": {
-        "title_signup": "Élevez votre Workflow.",
-        "title_signin": "Bon retour.",
-        "subtitle_signup": "Gestion intelligente pour agences d'élite.",
-        "subtitle_signin": "Accédez à votre centre de commande Fluxs.",
-        "google_login": "Continuer avec Google",
-        "email_divider": "Ou continuez avec l'e-mail",
-        "label_email": "Email professionnel",
-        "label_password": "Mot de passe",
-        "placeholder_email": "nom@entreprise.com",
-        "terms_text": "J'accepte les",
-        "terms_link": "Conditions d'utilisation",
-        "privacy_link": "Politique de confidentialité",
-        "btn_signup": "Créer un compte gratuit",
-        "btn_signin": "Se connecter",
-        "footer_no_account": "Vous n'avez pas de compte ?",
-        "footer_has_account": "Vous avez déjà un compte ?",
-        "link_signup": "S'inscrire",
-        "link_signin": "Se connecter",
-        "auth_error_google": "Erreur de connexion Google",
-        "auth_error_signup": "Erreur lors de la création du compte",
-        "auth_error_signin": "Identifiants invalides",
-        "auth_success_signup": "Compte créé ! Veuillez vérifier votre e-mail.",
-        "decorative_badge": "Fluxs Approuvé."
+  "login": {
+    "title_signup": "Élevez votre Workflow.",
+    "title_signin": "Bon retour.",
+    "subtitle_signup": "Gestion intelligente pour agences d'élite.",
+    "subtitle_signin": "Accédez à votre centre de commande Fluxs.",
+    "google_login": "Continuer avec Google",
+    "email_divider": "Ou continuez avec l'e-mail",
+    "label_email": "Email professionnel",
+    "label_password": "Mot de passe",
+    "placeholder_email": "nom@entreprise.com",
+    "terms_text": "J'accepte les",
+    "terms_link": "Conditions d'utilisation",
+    "privacy_link": "Politique de confidentialité",
+    "btn_signup": "Créer un compte gratuit",
+    "btn_signin": "Se connecter",
+    "footer_no_account": "Vous n'avez pas de compte ?",
+    "footer_has_account": "Vous avez déjà un compte ?",
+    "link_signup": "S'inscrire",
+    "link_signin": "Se connecter",
+    "auth_error_google": "Erreur de connexion Google",
+    "auth_error_signup": "Erreur lors de la création du compte",
+    "auth_error_signin": "Identifiants invalides",
+    "auth_success_signup": "Compte créé ! Veuillez vérifier votre e-mail.",
+    "decorative_badge": "Fluxs Approuvé."
+  },
+  "common": {
+    "loading": "Chargement...",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "back": "Retour",
+    "logout": "Se déconnecter",
+    "settings": "Paramètres",
+    "admin": "Panneau Admin",
+    "language": "Langue",
+    "language_short": "Langue"
+  },
+  "project_dashboard": {
+    "deadline_label": "Date Limite",
+    "expected_delivery": "Livraison Prévue",
+    "briefing_label": "Briefing",
+    "approvals_label": "Approbations",
+    "pending": "En Attente",
+    "tutorial_support_label": "Tutoriel et Support",
+    "fluxs_guide": "Guide Fluxs. 🎯"
+  },
+  "roadmap": {
+    "title": "Feuille de Route",
+    "ai_generated": "Généré par IA",
+    "in_progress": "En Cours",
+    "completed": "Terminé",
+    "steps": {
+      "briefing": {
+        "label": "Briefing",
+        "desc": "Brouillon"
+      },
+      "sent": {
+        "label": "Envoi",
+        "desc": "Envoyé"
+      },
+      "response": {
+        "label": "Réponse",
+        "desc": "Réponse"
+      },
+      "developed": {
+        "label": "Développé",
+        "desc": "En Dév."
+      },
+      "feedback": {
+        "label": "Retour",
+        "desc": "Révision"
+      },
+      "approved": {
+        "label": "Approuvé",
+        "desc": "Approuvé"
+      }
+    }
+  },
+  "activity": {
+    "unified_timeline": "Chronologie Unifiée",
+    "no_activity": "Aucune activité pour le moment.",
+    "type_message": "Tapez un message...",
+    "you": "Vous",
+    "client": "Client",
+    "commented_on": "a commenté sur",
+    "a_file": "un fichier"
+  },
+  "analytics": {
+    "title": "Rapports",
+    "subtitle": "Suivez la performance financière et opérationnelle de votre agence en temps réel avec des indicateurs prédictifs.",
+    "intelligence_hub": "Pôle Intelligence",
+    "tabs": {
+      "7d": "7 JOURS",
+      "30d": "30 JOURS",
+      "90d": "3 MOIS"
     },
-    "common": {
-        "loading": "Chargement...",
-        "save": "Enregistrer",
-        "cancel": "Annuler",
-        "delete": "Supprimer",
-        "back": "Retour",
-        "logout": "Se déconnecter",
-        "settings": "Paramètres",
-        "admin": "Panneau Admin",
-        "language": "Langue",
-        "language_short": "Langue"
+    "export_btn": "EXPORTER",
+    "export_pdf": "Rapport PDF",
+    "export_csv": "Données CSV",
+    "sections": {
+      "production": "Production & Efficacité",
+      "finance": "Finance & Pipeline",
+      "performance": "Performance du Projet",
+      "top_active": "Top 5 Actifs"
     },
-    "project_dashboard": {
-        "deadline_label": "Date Limite",
-        "expected_delivery": "Livraison Prévue",
-        "briefing_label": "Briefing",
-        "approvals_label": "Approbations",
-        "pending": "En Attente",
-        "tutorial_support_label": "Tutoriel et Support",
-        "fluxs_guide": "Guide Fluxs. 🎯"
+    "cards": {
+      "active_projects": "Projets Actifs",
+      "approval_rate": "Taux d'Approbation",
+      "files_sent": "Fichiers Envoyés",
+      "files_pending": "Fichiers en Attente",
+      "total_pipeline": "Pipeline Total",
+      "est_profit": "Profit Est.",
+      "avg_margin": "Marge Moy."
     },
-    "roadmap": {
-        "title": "Feuille de Route",
-        "ai_generated": "Généré par IA",
-        "in_progress": "En Cours",
-        "completed": "Terminé",
-        "steps": {
-            "briefing": {
-                "label": "Briefing",
-                "desc": "Brouillon"
-            },
-            "sent": {
-                "label": "Envoi",
-                "desc": "Envoyé"
-            },
-            "response": {
-                "label": "Réponse",
-                "desc": "Réponse"
-            },
-            "developed": {
-                "label": "Développé",
-                "desc": "En Dév."
-            },
-            "feedback": {
-                "label": "Retour",
-                "desc": "Révision"
-            },
-            "approved": {
-                "label": "Approuvé",
-                "desc": "Approuvé"
-            }
-        }
+    "table": {
+      "project_name": "Nom du Projet",
+      "approved": "Approuvé",
+      "pending": "En Attente",
+      "no_data": "Aucune donnée disponible pour la période sélectionnée."
+    }
+  },
+  "sidebar": {
+    "dashboard": "Tableau de Bord",
+    "analytics": "Rapports",
+    "briefing": "Briefing",
+    "identity": "Identité",
+    "deliveries": "Livrables",
+    "files": "Fichiers",
+    "team": "Équipe",
+    "finance": "Finance",
+    "help": "Aide",
+    "workflow": "Flux de travail",
+    "back_btn": "Retour",
+    "assist": "Fluxs. Assist",
+    "tutorial_desc": "Ouvrir le tutoriel interactif",
+    "support_node": "Support Node",
+    "help_center": "Centre d'Aide",
+    "activity_fluxs": "Flux d'Activité",
+    "level": "Niveau"
+  },
+  "languages": {
+    "en": "Anglais",
+    "pt": "Portugais",
+    "es": "Espagnol",
+    "fr": "Français"
+  },
+  "profile": {
+    "title": "Profil de l'agence",
+    "subtitle": "Informations visibles pour vos clients.",
+    "agency_name": "Nom de l'agence",
+    "avatar_url": "URL de l'avatar",
+    "manager_name": "Nom du responsable",
+    "contact_email": "Email de contact",
+    "save_btn": "Enregistrer les modifications"
+  },
+  "public_briefing": {
+    "toast": {
+      "not_found": "Briefing introuvable.",
+      "file_uploaded": "Fichier téléchargé !",
+      "upload_error": "Erreur de téléchargement.",
+      "answer_required": "Veuillez répondre quelque chose.",
+      "submit_error": "Erreur d'envoi.",
+      "success": "Succès !"
     },
-    "activity": {
-        "unified_timeline": "Chronologie Unifiée",
-        "no_activity": "Aucune activité pour le moment.",
-        "type_message": "Tapez un message...",
-        "you": "Vous",
-        "client": "Client",
-        "commented_on": "a commenté sur",
-        "a_file": "un fichier"
+    "success": {
+      "title": "Briefing Envoyé !",
+      "message": "Nous avons bien reçu vos données. Notre intelligence traite tout et notre équipe vous contactera bientôt.",
+      "powered_by": "Powered by Fluxs Intelligence"
     },
-    "analytics": {
-        "title": "Rapports",
-        "subtitle": "Suivez la performance financière et opérationnelle de votre agence en temps réel avec des indicateurs prédictifs.",
-        "intelligence_hub": "Pôle Intelligence",
-        "tabs": {
-            "7d": "7 JOURS",
-            "30d": "30 JOURS",
-            "90d": "3 MOIS"
-        },
-        "export_btn": "EXPORTER",
-        "export_pdf": "Rapport PDF",
-        "export_csv": "Données CSV",
-        "sections": {
-            "production": "Production & Efficacité",
-            "finance": "Finance & Pipeline",
-            "performance": "Performance du Projet",
-            "top_active": "Top 5 Actifs"
-        },
-        "cards": {
-            "active_projects": "Projets Actifs",
-            "approval_rate": "Taux d'Approbation",
-            "files_sent": "Fichiers Envoyés",
-            "files_pending": "Fichiers en Attente",
-            "total_pipeline": "Pipeline Total",
-            "est_profit": "Profit Est.",
-            "avg_margin": "Marge Moy."
-        },
-        "table": {
-            "project_name": "Nom du Projet",
-            "approved": "Approuvé",
-            "pending": "En Attente",
-            "no_data": "Aucune donnée disponible pour la période sélectionnée."
-        }
+    "header": {
+      "subtitle": "Centre de Collecte Dynamique",
+      "intel": "Fluxs Intel"
+    },
+    "form": {
+      "file_attached": "Fichier joint",
+      "document_version": "Document v01",
+      "uploading": "Téléchargement du fichier...",
+      "upload_reference": "Télécharger Fichier de Référence",
+      "upload_hint": "Cliquez ou glissez pour télécharger",
+      "processing": "TRAITEMENT...",
+      "submit_button": "FINALISER ET ENVOYER LE BRIEFING",
+      "powered_by": "Powered by Fluxs Intelligence"
+    }
+  },
+  "public_feedback": {
+    "toast": {
+      "not_found": "Design introuvable ou accès refusé.",
+      "name_required": "Veuillez entrer votre nom pour identifier votre feedback.",
+      "comment_required": "Écrivez votre commentaire avant d'envoyer.",
+      "comment_added": "Feedback ajouté !",
+      "comment_error": "Erreur lors de l'enregistrement du commentaire.",
+      "approve_error": "Erreur lors de l'approbation du design.",
+      "approved": "Design Approuvé ! 🎉"
+    },
+    "header": {
+      "hide_comments": "Masquer les Commentaires",
+      "show_comments": "Afficher les Commentaires",
+      "approved": "APPROUVÉ",
+      "approve_button": "Approuver le Design"
+    },
+    "canvas": {
+      "click_to_comment": "Cliquez n'importe où pour commenter",
+      "file_not_found": "Fichier introuvable."
+    },
+    "comment_modal": {
+      "title": "Nouveau Commentaire",
+      "name_placeholder": "Votre Nom",
+      "comment_placeholder": "Que souhaitez-vous changer ?",
+      "submit_button": "Publier le Commentaire"
     },
     "sidebar": {
-        "dashboard": "Tableau de Bord",
-        "analytics": "Rapports",
-        "briefing": "Briefing",
-        "identity": "Identité",
-        "deliveries": "Livrables",
-        "files": "Fichiers",
-        "team": "Équipe",
-        "finance": "Finance",
-        "help": "Aide",
-        "workflow": "Flux de travail",
-        "back_btn": "Retour",
-        "assist": "Fluxs. Assist",
-        "tutorial_desc": "Ouvrir le tutoriel interactif",
-        "support_node": "Support Node",
-        "help_center": "Centre d'Aide",
-        "activity_fluxs": "Flux d'Activité",
-        "level": "Niveau"
+      "title": "Liste des Feedbacks",
+      "empty_message": "Cliquez n'importe où sur l'image pour laisser un commentaire."
     },
-    "languages": {
-        "en": "Anglais",
-        "pt": "Portugais",
-        "es": "Espagnol",
-        "fr": "Français"
-    },
-    "profile": {
-        "title": "Profil de l'agence",
-        "subtitle": "Informations visibles pour vos clients.",
-        "agency_name": "Nom de l'agence",
-        "avatar_url": "URL de l'avatar",
-        "manager_name": "Nom du responsable",
-        "contact_email": "Email de contact",
-        "save_btn": "Enregistrer les modifications"
+    "confirm": {
+      "approve": "Êtes-vous sûr de vouloir approuver ce design ?"
     }
+  }
 }

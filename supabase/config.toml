@@ -402,3 +402,18 @@ entrypoint = "./functions/stripe-webhook/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/stripe-webhook/*.html" ]
+
+[functions.generate-milestones]
+enabled = true
+verify_jwt = true
+entrypoint = "./functions/generate-milestones/index.ts"
+
+[functions.analyze-feedback]
+enabled = true
+verify_jwt = true
+entrypoint = "./functions/analyze-feedback/index.ts"
+
+[functions.generate-briefing]
+enabled = true
+verify_jwt = true
+entrypoint = "./functions/generate-briefing/index.ts"

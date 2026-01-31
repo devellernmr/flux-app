@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { Loader2 } from "lucide-react";
 import { Login } from "@/pages/Login";
+import { LandingPage } from "@/pages/LandingPage";
 import { Toaster } from "@/components/ui/sonner";
 import { Dashboard } from "@/pages/Dashboard";
 import { ProjectOverview } from "@/pages/ProjectOverview";
@@ -39,7 +40,9 @@ const AdminRoute = ({ element, session }: AdminRouteProps) => {
     return (
       <div className="bg-black text-white h-screen flex flex-col items-center justify-center gap-4">
         <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
-        <p className="text-zinc-500 font-bold uppercase tracking-widest text-xs">Verificando Credenciais...</p>
+        <p className="text-zinc-500 font-bold uppercase tracking-widest text-xs">
+          Verificando Credenciais...
+        </p>
       </div>
     );
   }
@@ -93,9 +96,12 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Landing Page */}
+        <Route path="/" element={<LandingPage />} />
+
         {/* Auth */}
         <Route
-          path="/"
+          path="/login"
           element={<PublicRoute element={<Login />} session={session} />}
         />
 
@@ -112,7 +118,9 @@ function App() {
         {/* Admin */}
         <Route
           path="/admin"
-          element={<AdminRoute element={<AdminDashboard />} session={session} />}
+          element={
+            <AdminRoute element={<AdminDashboard />} session={session} />
+          }
         />
 
         {/* Overview */}

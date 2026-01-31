@@ -17,6 +17,7 @@ import { useAdmin } from "@/hooks/useAdmin";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import type { User, PlanType } from "@/types";
 import { useTranslation } from "react-i18next";
+import { LanguageSelector } from "@/components/LanguageSelector";
 
 interface SidebarProps {
   user: User | null;
@@ -25,7 +26,7 @@ interface SidebarProps {
   activeMenu: string;
   setActiveMenu: (menu: string) => void;
   onLogout: () => void;
-  onShowTutorial?: () => void;
+  onShowTutorial?: (configId?: string) => void;
   canAccessAnalytics?: boolean;
 }
 
@@ -61,7 +62,12 @@ export function Sidebar({
   ];
 
   if (isAdmin) {
-    menuItems.push({ id: "admin", label: t("common.admin"), icon: Shield, path: "/admin" });
+    menuItems.push({
+      id: "admin",
+      label: t("common.admin"),
+      icon: Shield,
+      path: "/admin",
+    });
   }
 
   const handleNavigation = (item: any) => {
@@ -94,10 +100,11 @@ export function Sidebar({
           key={item.id}
           id={`sidebar-nav-${item.id}`}
           onClick={() => handleNavigation(item)}
-          className={`w-full group flex items-center gap-4 px-4 py-3.5 rounded-2xl text-[13px] font-bold transition-all duration-300 relative overflow-hidden ${activeMenu === item.id
-            ? "bg-white text-black shadow-2xl shadow-white/5"
-            : "text-zinc-500 hover:text-zinc-200 hover:bg-zinc-900/50"
-            }`}
+          className={`w-full group flex items-center gap-4 px-4 py-3.5 rounded-2xl text-[13px] font-bold transition-all duration-300 relative overflow-hidden ${
+            activeMenu === item.id
+              ? "bg-white text-black shadow-2xl shadow-white/5"
+              : "text-zinc-500 hover:text-zinc-200 hover:bg-zinc-900/50"
+          }`}
         >
           {activeMenu === item.id && (
             <motion.div
@@ -106,8 +113,12 @@ export function Sidebar({
               transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
             />
           )}
-          <item.icon className={`h-4 w-4 relative z-10 ${activeMenu === item.id ? "text-black" : "group-hover:text-blue-400 transition-colors"}`} />
-          <span className="relative z-10 uppercase tracking-tight">{item.label}</span>
+          <item.icon
+            className={`h-4 w-4 relative z-10 ${activeMenu === item.id ? "text-black" : "group-hover:text-blue-400 transition-colors"}`}
+          />
+          <span className="relative z-10 uppercase tracking-tight">
+            {item.label}
+          </span>
         </button>
       ))}
     </nav>
@@ -116,13 +127,16 @@ export function Sidebar({
   return (
     <aside className="w-80 bg-[#030303] border-r border-zinc-900/50 hidden md:flex flex-col sticky top-0 h-screen z-20">
       <div className="p-8 pb-2">
-        <div className="flex items-center gap-3 px-2">
-          <div className="h-9 w-9 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/20">
-            <Sparkles className="h-5 w-5 text-white" />
+        <div className="flex items-center justify-between px-2">
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/20">
+              <Sparkles className="h-5 w-5 text-white" />
+            </div>
+            <span className="text-xl font-black tracking-tighter text-white">
+              FLUXS.
+            </span>
           </div>
-          <span className="text-xl font-black tracking-tighter text-white">
-            FLUXS.
-          </span>
+          <LanguageSelector />
         </div>
       </div>
 
@@ -132,15 +146,19 @@ export function Sidebar({
       <div className="px-5 mt-auto mb-6">
         <button
           id="sidebar-help-btn"
-          onClick={onShowTutorial}
+          onClick={() => onShowTutorial?.("dashboard")}
           className="w-full flex items-center gap-4 px-4 py-4 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 hover:border-zinc-700 transition-all group"
         >
           <div className="p-2 bg-blue-500/10 rounded-xl group-hover:scale-110 transition-transform">
             <Zap className="h-4 w-4 text-blue-500" />
           </div>
           <div className="flex flex-col items-start leading-tight">
-            <span className="text-[11px] font-black text-zinc-300 uppercase tracking-tighter">{t("sidebar.support_node")}</span>
-            <span className="text-[9px] text-zinc-600 font-medium">{t("sidebar.help_center")}</span>
+            <span className="text-[11px] font-black text-zinc-300 uppercase tracking-tighter">
+              {t("sidebar.support_node")}
+            </span>
+            <span className="text-[9px] text-zinc-600 font-medium">
+              {t("sidebar.help_center")}
+            </span>
           </div>
         </button>
       </div>
@@ -151,14 +169,18 @@ export function Sidebar({
           <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest mb-3">
             <span className="text-zinc-500">{t("sidebar.activity_fluxs")}</span>
             <span className="text-blue-500">
-              {plan === "starter" ? `${usage.projects}/2` : `∞ ${t("sidebar.level")}`}
+              {plan === "starter"
+                ? `${usage.projects}/2`
+                : `∞ ${t("sidebar.level")}`}
             </span>
           </div>
           {plan === "starter" ? (
             <div className="h-1.5 bg-zinc-900 rounded-full overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
-                animate={{ width: `${Math.min((usage.projects / 2) * 100, 100)}%` }}
+                animate={{
+                  width: `${Math.min((usage.projects / 2) * 100, 100)}%`,
+                }}
                 className="h-full bg-gradient-to-r from-blue-600 to-blue-400 rounded-full"
               />
             </div>

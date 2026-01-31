@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { LegalModals } from "@/components/LegalModals";
 import { useTranslation } from "react-i18next";
+import { LanguageSelector } from "@/components/LanguageSelector";
 
 export function Login() {
   const { t } = useTranslation();
@@ -66,7 +67,9 @@ export function Login() {
       if (isSignUp) {
         const { error } = await supabase.auth.signUp({ email, password });
         if (error) {
-          toast.error(t("login.auth_error_signup"), { description: error.message });
+          toast.error(t("login.auth_error_signup"), {
+            description: error.message,
+          });
         } else {
           toast.success(t("login.auth_success_signup"));
         }
@@ -77,7 +80,9 @@ export function Login() {
         });
 
         if (error) {
-          toast.error(t("login.auth_error_signin"), { description: error.message });
+          toast.error(t("login.auth_error_signin"), {
+            description: error.message,
+          });
         } else {
           const redirectTo = resolveRedirect();
           window.location.href = redirectTo;
@@ -94,11 +99,16 @@ export function Login() {
       <div className="flex flex-col justify-center items-center p-8 lg:p-16 relative z-10">
         <div className="w-full max-w-[380px] space-y-8">
           {/* Logo Mobile/Desktop */}
-          <div className="flex items-center gap-3 mb-10">
-            <div className="h-10 w-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-900/40">
-              <Sparkles className="h-6 w-6 text-white" />
+          <div className="flex items-center justify-between gap-3 mb-10 w-full">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-900/40">
+                <Sparkles className="h-6 w-6 text-white" />
+              </div>
+              <span className="text-2xl font-black tracking-tighter text-white">
+                FLUXS.
+              </span>
             </div>
-            <span className="text-2xl font-black tracking-tighter text-white">FLUXS.</span>
+            <LanguageSelector />
           </div>
 
           <div className="space-y-3">
@@ -170,7 +180,10 @@ export function Login() {
                   />
                   <CheckCircle2 className="absolute w-3 h-3 text-white opacity-0 peer-checked:opacity-100 pointer-events-none left-0.5 top-0.5" />
                 </div>
-                <label htmlFor="terms" className="text-[11px] text-zinc-500 leading-tight cursor-pointer select-none">
+                <label
+                  htmlFor="terms"
+                  className="text-[11px] text-zinc-500 leading-tight cursor-pointer select-none"
+                >
                   {t("login.terms_text")}{" "}
                   <button
                     type="button"
@@ -186,7 +199,8 @@ export function Login() {
                     className="text-zinc-300 hover:text-white transition-colors underline underline-offset-2"
                   >
                     {t("login.privacy_link")}
-                  </button>.
+                  </button>
+                  .
                 </label>
               </div>
 
@@ -208,7 +222,9 @@ export function Login() {
           </div>
 
           <div className="text-center text-sm text-zinc-500">
-            {isSignUp ? t("login.footer_has_account") : t("login.footer_no_account")}
+            {isSignUp
+              ? t("login.footer_has_account")
+              : t("login.footer_no_account")}
             <button
               onClick={() => setIsSignUp(!isSignUp)}
               className="ml-2 text-blue-400 hover:text-blue-300 font-medium underline-offset-4 hover:underline transition-all"
@@ -237,8 +253,9 @@ export function Login() {
           style={{
             top: "50%",
             left: "50%",
-            transform: `translate(-50%, -50%) translate(${(mousePosition.x - window.innerWidth / 2) / 20
-              }px, ${(mousePosition.y - window.innerHeight / 2) / 20}px)`,
+            transform: `translate(-50%, -50%) translate(${
+              (mousePosition.x - window.innerWidth / 2) / 20
+            }px, ${(mousePosition.y - window.innerHeight / 2) / 20}px)`,
           }}
         />
 
@@ -271,7 +288,11 @@ export function Login() {
                 <div className="h-2.5 w-2/3 bg-slate-800 rounded-full overflow-hidden">
                   <motion.div
                     animate={{ x: ["-100%", "100%"] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                    transition={{
+                      duration: 3,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
                     className="h-full w-1/2 bg-blue-500/30 blur-sm"
                   />
                 </div>

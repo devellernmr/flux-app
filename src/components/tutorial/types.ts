@@ -3,7 +3,7 @@ export interface TutorialStep {
     title: string;
     description: string;
     position?: "top" | "bottom" | "left" | "right" | "center";
-    action?: () => void; // Optional action to run when step starts (e.g., changing tabs)
+    action?: (handler?: (targetId: string) => void) => void; // Optional action to run when step starts (e.g., changing tabs)
 }
 
 export interface TutorialConfig {
@@ -20,4 +20,5 @@ export interface TutorialContextType {
     nextStep: () => void;
     prevStep: () => void;
     targetRect: DOMRect | null;
+    setNavigationHandler: (handler: (targetId: string) => void) => void;
 }

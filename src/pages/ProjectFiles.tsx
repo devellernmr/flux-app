@@ -57,7 +57,7 @@ export function ProjectFiles({ projectId }: { projectId: string }) {
   const [uploading, setUploading] = useState(false);
   const [activeTab, setActiveTab] = useState("design");
   const [uploadTargetGroup, setUploadTargetGroup] = useState<string | null>(
-    null
+    null,
   );
 
   // --- TRAVAS DE PLANO ---
@@ -88,7 +88,7 @@ export function ProjectFiles({ projectId }: { projectId: string }) {
           table: "files",
           filter: `project_id=eq.${projectId}`,
         },
-        () => fetchFiles()
+        () => fetchFiles(),
       )
       .subscribe();
     return () => {
@@ -110,10 +110,10 @@ export function ProjectFiles({ projectId }: { projectId: string }) {
 
     const allFiles = data || [];
     const clientAssets = allFiles.filter(
-      (f) => f.name.startsWith("Asset_") || f.name.startsWith("Client_")
+      (f) => f.name.startsWith("Asset_") || f.name.startsWith("Client_"),
     );
     const designFiles = allFiles.filter(
-      (f) => !f.name.startsWith("Asset_") && !f.name.startsWith("Client_")
+      (f) => !f.name.startsWith("Asset_") && !f.name.startsWith("Client_"),
     );
 
     setBriefingFiles(clientAssets);
@@ -134,7 +134,7 @@ export function ProjectFiles({ projectId }: { projectId: string }) {
       name: key,
       files: groups[key].sort(
         (a, b) =>
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
       ),
     }));
 
@@ -144,7 +144,7 @@ export function ProjectFiles({ projectId }: { projectId: string }) {
   const handleFileUpload = async (
     event: React.ChangeEvent<HTMLInputElement>,
     type: "design" | "client",
-    targetGroupName?: string
+    targetGroupName?: string,
   ) => {
     // --- TRAVA DE UPLOAD (Opcional, se quiser limitar storage no futuro) ---
     // if (!can("upload_file")) {
@@ -171,7 +171,7 @@ export function ProjectFiles({ projectId }: { projectId: string }) {
         if (targetGroupName) {
           const safeBaseName = targetGroupName.replace(/\s+/g, "_");
           const currentGroup = designGroups.find(
-            (g) => g.name === targetGroupName
+            (g) => g.name === targetGroupName,
           );
           const designOnlyFiles =
             currentGroup?.files.filter((f) => !f.name.includes("Briefing")) ||
@@ -272,7 +272,7 @@ export function ProjectFiles({ projectId }: { projectId: string }) {
   const triggerGroupUpload = (groupName: string) => {
     setUploadTargetGroup(groupName);
     const input = document.getElementById(
-      "upload-btn-design"
+      "upload-btn-design",
     ) as HTMLInputElement;
     if (input) input.click();
   };
@@ -419,8 +419,8 @@ export function ProjectFiles({ projectId }: { projectId: string }) {
                   {uploading
                     ? "Enviando..."
                     : activeTab === "design"
-                    ? "Nova Entrega"
-                    : "Adicionar Asset"}
+                      ? "Nova Entrega"
+                      : "Adicionar Asset"}
                 </span>
               </label>
             </div>
@@ -586,8 +586,8 @@ export function ProjectFiles({ projectId }: { projectId: string }) {
                               isBriefingFile
                                 ? "bg-purple-600/90 text-white"
                                 : isLatest
-                                ? "bg-blue-600/90 text-white"
-                                : "bg-zinc-900/80 text-zinc-400"
+                                  ? "bg-blue-600/90 text-white"
+                                  : "bg-zinc-900/80 text-zinc-400"
                             }`}
                           >
                             {badgeLabel}
@@ -614,26 +614,39 @@ export function ProjectFiles({ projectId }: { projectId: string }) {
                         )}
 
                         <div className="absolute inset-x-0 bottom-0 p-2.5 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex items-center gap-2 translate-y-[2px] sm:translate-y-full sm:group-hover:translate-y-0 transition-transform duration-300">
-                          <Button
-                            onClick={() =>
-                              openReview(file.url, file.name, file.id)
-                            }
-                            className="flex-1 h-8 bg-white/95 hover:bg-white text-zinc-900 text-xs font-semibold rounded-lg shadow-lg backdrop-blur-sm active:scale-95 transition-all border-0"
-                          >
-                            <Eye className="w-3.5 h-3.5 mr-1.5 opacity-70" />
-                            Ver
-                          </Button>
-                          <Button
-                            onClick={() => copyReviewLink(file.id)}
-                            size="icon"
-                            className="h-8 w-8 bg-zinc-800/60 hover:bg-zinc-700/80 text-white border border-white/10 rounded-lg backdrop-blur-md shadow-lg active:scale-95 transition-all"
-                          >
-                            {!can("share_client") ? (
-                              <Lock className="w-3.5 h-3.5 text-zinc-400" />
-                            ) : (
-                              <Share2 className="w-3.5 h-3.5" />
-                            )}
-                          </Button>
+                          {file.name.match(/^(Asset|Assets|Client)_/i) ||
+                          file.name.includes("_Briefing_") ? (
+                            <Button
+                              onClick={() => window.open(file.url, "_blank")}
+                              className="flex-1 h-8 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-lg shadow-lg backdrop-blur-sm active:scale-95 transition-all border-0"
+                            >
+                              <UploadCloud className="w-3.5 h-3.5 mr-1.5 opacity-70" />
+                              Baixar
+                            </Button>
+                          ) : (
+                            <>
+                              <Button
+                                onClick={() =>
+                                  openReview(file.url, file.name, file.id)
+                                }
+                                className="flex-1 h-8 bg-white/95 hover:bg-white text-zinc-900 text-xs font-semibold rounded-lg shadow-lg backdrop-blur-sm active:scale-95 transition-all border-0"
+                              >
+                                <Eye className="w-3.5 h-3.5 mr-1.5 opacity-70" />
+                                Ver
+                              </Button>
+                              <Button
+                                onClick={() => copyReviewLink(file.id)}
+                                size="icon"
+                                className="h-8 w-8 bg-zinc-800/60 hover:bg-zinc-700/80 text-white border border-white/10 rounded-lg backdrop-blur-md shadow-lg active:scale-95 transition-all"
+                              >
+                                {!can("share_client") ? (
+                                  <Lock className="w-3.5 h-3.5 text-zinc-400" />
+                                ) : (
+                                  <Share2 className="w-3.5 h-3.5" />
+                                )}
+                              </Button>
+                            </>
+                          )}
                         </div>
                       </div>
 

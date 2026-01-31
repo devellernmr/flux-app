@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -9,13 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Plus,
-  Loader2,
-  Menu,
-  Sparkles,
-  AlertTriangle,
-} from "lucide-react";
+import { Plus, Loader2, Menu, Sparkles, AlertTriangle } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { NotificationSystem } from "@/components/NotificationSystem";
 
@@ -25,12 +20,18 @@ import { AIBriefingGenerator } from "@/components/AIBriefingGenerator";
 import { DashboardStats } from "@/components/dashboard/Stats";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { ProjectList } from "@/components/dashboard/ProjectList";
-import { DashboardStatsSkeleton, ProjectCardSkeleton } from "@/components/dashboard/Skeleton";
+import {
+  DashboardStatsSkeleton,
+  ProjectCardSkeleton,
+} from "@/components/dashboard/Skeleton";
 import { SubscriptionPlans } from "@/components/dashboard/SubscriptionPlans";
 import { useDashboard } from "@/hooks/useDashboard";
 
 // NEW TUTORIAL SYSTEM
-import { TutorialProvider, useTutorial } from "@/components/tutorial/TutorialContext";
+import {
+  TutorialProvider,
+  useTutorial,
+} from "@/components/tutorial/TutorialContext";
 import { TutorialOverlay } from "@/components/tutorial/TutorialOverlay";
 import { SettingsLayout } from "@/components/settings/SettingsLayout";
 import { useTranslation } from "react-i18next";
@@ -80,7 +81,11 @@ function DashboardContent() {
   } = useDashboard();
 
   const { t } = useTranslation();
-  const { startTutorial } = useTutorial();
+  const { startTutorial, setNavigationHandler } = useTutorial();
+
+  useEffect(() => {
+    setNavigationHandler(setActiveMenu);
+  }, [setActiveMenu]);
 
   if (planLoading) {
     return (
@@ -97,7 +102,9 @@ function DashboardContent() {
         <div className="space-y-8 animate-in fade-in duration-700">
           <DashboardStatsSkeleton />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
-            {[1, 2, 3, 4].map((i) => <ProjectCardSkeleton key={i} />)}
+            {[1, 2, 3, 4].map((i) => (
+              <ProjectCardSkeleton key={i} />
+            ))}
           </div>
         </div>
       );
@@ -191,13 +198,16 @@ function DashboardContent() {
         usage={usage}
         onLogout={handleLogout}
         user={user}
-        onShowTutorial={startTutorial}
+        onShowTutorial={() => startTutorial("dashboard")}
         canAccessAnalytics={can("analytics")}
       />
 
       {/* --- SIDEBAR MOBILE --- */}
       <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-        <SheetContent side="left" className="p-0 bg-black border-r border-zinc-900 w-80">
+        <SheetContent
+          side="left"
+          className="p-0 bg-black border-r border-zinc-900 w-80"
+        >
           <Sidebar
             activeMenu={activeMenu}
             setActiveMenu={(menu) => {
@@ -223,7 +233,9 @@ function DashboardContent() {
         <header className="md:hidden flex items-center justify-between p-4 border-b border-zinc-800/50 bg-black/50 backdrop-blur-xl sticky top-0 z-30">
           <div className="flex items-center gap-2">
             <div className="h-8 w-8 bg-gradient-to-tr from-blue-600 to-purple-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-900/20">
-              <span className="font-black text-white text-xs tracking-tighter">FLX</span>
+              <span className="font-black text-white text-xs tracking-tighter">
+                FLX
+              </span>
             </div>
             <span className="font-bold text-white tracking-tight">Fluxs.</span>
           </div>
@@ -253,7 +265,9 @@ function DashboardContent() {
             <div className="h-12 w-12 bg-zinc-900 rounded-2xl border border-zinc-800 flex items-center justify-center mb-4 shadow-xl">
               <Sparkles className="h-6 w-6 text-blue-500" />
             </div>
-            <DialogTitle className="text-2xl font-black text-white tracking-tight">{t("dashboard.create_modal_title")}</DialogTitle>
+            <DialogTitle className="text-2xl font-black text-white tracking-tight">
+              {t("dashboard.create_modal_title")}
+            </DialogTitle>
             <DialogDescription className="text-zinc-400">
               {t("dashboard.create_modal_desc")}
             </DialogDescription>
@@ -261,7 +275,9 @@ function DashboardContent() {
 
           <div className="p-8 pt-4 space-y-6">
             <div className="space-y-2">
-              <Label className="text-xs font-bold text-zinc-500 uppercase tracking-widest ml-1">{t("dashboard.project_name_label")}</Label>
+              <Label className="text-xs font-bold text-zinc-500 uppercase tracking-widest ml-1">
+                {t("dashboard.project_name_label")}
+              </Label>
               <Input
                 placeholder={t("dashboard.project_name_placeholder")}
                 value={newProjectName}
@@ -288,8 +304,12 @@ function DashboardContent() {
                   <Sparkles className="h-5 w-5 text-blue-400" />
                 </div>
                 <div className="text-left">
-                  <span className="block font-bold text-white mb-0.5">{t("dashboard.use_ai_btn")}</span>
-                  <span className="block text-xs text-zinc-500">{t("dashboard.use_ai_desc")}</span>
+                  <span className="block font-bold text-white mb-0.5">
+                    {t("dashboard.use_ai_btn")}
+                  </span>
+                  <span className="block text-xs text-zinc-500">
+                    {t("dashboard.use_ai_desc")}
+                  </span>
                 </div>
               </Button>
             </div>
@@ -317,7 +337,11 @@ function DashboardContent() {
                 disabled={isCreating || !newProjectName.trim()}
                 className="flex-1 bg-white text-black hover:bg-zinc-200 rounded-xl font-bold shadow-lg shadow-white/5"
               >
-                {isCreating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
+                {isCreating ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Plus className="mr-2 h-4 w-4" />
+                )}
                 {t("dashboard.create_btn")}
               </Button>
             </div>
@@ -349,7 +373,9 @@ function DashboardContent() {
             <div className="mx-auto bg-red-500/10 p-3 rounded-full w-fit mb-2">
               <AlertTriangle className="h-6 w-6 text-red-500" />
             </div>
-            <DialogTitle className="text-center">{t("dashboard.delete_confirm_title")}</DialogTitle>
+            <DialogTitle className="text-center">
+              {t("dashboard.delete_confirm_title")}
+            </DialogTitle>
             <DialogDescription className="text-center text-zinc-500">
               {t("dashboard.delete_confirm_desc")}
             </DialogDescription>
@@ -389,5 +415,5 @@ export function Dashboard() {
     <TutorialProvider>
       <DashboardContent />
     </TutorialProvider>
-  )
+  );
 }

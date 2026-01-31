@@ -45,40 +45,72 @@ export function UpgradeModal({
   const highlights = [
     {
       id: "ai",
-      icon: <Sparkles className="w-10 h-10 text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.6)]" />,
+      icon: (
+        <Sparkles className="w-10 h-10 text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.6)]" />
+      ),
       title: "Potencialize com IA",
       subtitle: "Briefings e Roadmaps Automáticos",
-      description: "Deixe a inteligência artificial cuidar do trabalho estratégico e técnico por você.",
+      description:
+        "Deixe a inteligência artificial cuidar do trabalho estratégico e técnico por você.",
       gradient: "from-indigo-600 via-purple-700 to-[#0A0A0A]",
-      benefits: ["Briefings ilimitados", "Roadmaps dinâmicos", "Assistente inteligente", "Automação total"],
+      benefits: [
+        "Briefings ilimitados",
+        "Roadmaps dinâmicos",
+        "Assistente inteligente",
+        "Automação total",
+      ],
     },
     {
       id: "finance",
-      icon: <DollarSign className="w-10 h-10 text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.6)]" />,
+      icon: (
+        <DollarSign className="w-10 h-10 text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.6)]" />
+      ),
       title: "Financeiro Master",
       subtitle: "Controle de Lucros e Gastos",
-      description: "Gerencie orçamentos, custos de equipe e rentabilidade real de cada fluxo.",
+      description:
+        "Gerencie orçamentos, custos de equipe e rentabilidade real de cada fluxo.",
       gradient: "from-emerald-600 via-emerald-800 to-[#0A0A0A]",
-      benefits: ["Gestão de orçamentos", "Cálculo de lucro real", "Relatórios de ROI", "Previsão de ganhos"],
+      benefits: [
+        "Gestão de orçamentos",
+        "Cálculo de lucro real",
+        "Relatórios de ROI",
+        "Previsão de ganhos",
+      ],
     },
     {
       id: "brand",
-      icon: <Check className="w-10 h-10 text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.6)]" />,
+      icon: (
+        <Check className="w-10 h-10 text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.6)]" />
+      ),
       title: "White-Label Premium",
       subtitle: "Sua Marca em Primeiro Lugar",
-      description: "Remova a marca do Fluxs e utilize seu próprio domínio e identidade visual.",
+      description:
+        "Remova a marca do Fluxs e utilize seu próprio domínio e identidade visual.",
       gradient: "from-blue-600 via-blue-800 to-[#0A0A0A]",
-      benefits: ["Domínio personalizado", "Logotipo exclusivo", "Cores da sua agência", "Layout exclusivo"],
+      benefits: [
+        "Domínio personalizado",
+        "Logotipo exclusivo",
+        "Cores da sua agência",
+        "Layout exclusivo",
+      ],
     },
     {
       id: "analytics",
-      icon: <BarChart3 className="w-10 h-10 text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.6)]" />,
+      icon: (
+        <BarChart3 className="w-10 h-10 text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.6)]" />
+      ),
       title: "Analytics Avançado",
       subtitle: "Dados que Geram Valor",
-      description: "Acompanhe a performance de todo o seu time e a saúde dos seus projetos em tempo real.",
+      description:
+        "Acompanhe a performance de todo o seu time e a saúde dos seus projetos em tempo real.",
       gradient: "from-amber-500 via-amber-700 to-[#0A0A0A]",
-      benefits: ["Taxa de conversão", "Tempo de aprovação", "KPIs de produtividade", "Exportação em PDF/Excel"],
-    }
+      benefits: [
+        "Taxa de conversão",
+        "Tempo de aprovação",
+        "KPIs de produtividade",
+        "Exportação em PDF/Excel",
+      ],
+    },
   ];
 
   const [activeIndex, setActiveIndex] = useState(0);
@@ -198,8 +230,11 @@ export function UpgradeModal({
                     {highlights.map((_, i) => (
                       <div
                         key={i}
-                        className={`h-1.5 rounded-full transition-all duration-500 ${activeIndex === i ? "w-8 bg-white" : "w-1.5 bg-white/20"
-                          }`}
+                        className={`h-1.5 rounded-full transition-all duration-500 ${
+                          activeIndex === i
+                            ? "w-8 bg-white"
+                            : "w-1.5 bg-white/20"
+                        }`}
                       />
                     ))}
                   </div>
@@ -224,7 +259,9 @@ export function UpgradeModal({
                             <div className="flex-shrink-0 w-6 h-6 bg-white/10 rounded-full flex items-center justify-center">
                               <Check className="w-3.5 h-3.5 text-white" />
                             </div>
-                            <span className="text-sm font-semibold text-zinc-300">{benefit}</span>
+                            <span className="text-sm font-semibold text-zinc-300">
+                              {benefit}
+                            </span>
                           </div>
                         ))}
                       </motion.div>
@@ -248,26 +285,39 @@ export function UpgradeModal({
                       {/* Pro Plan */}
                       <div
                         onClick={() => setSelectedPlan("pro")}
-                        className={`relative p-5 rounded-[24px] border-2 cursor-pointer transition-all duration-500 group overflow-hidden ${selectedPlan === "pro"
-                          ? "border-blue-500 bg-blue-500/10"
-                          : "border-zinc-800 bg-zinc-900/20 hover:border-zinc-700"
-                          }`}
+                        className={`relative p-5 rounded-[24px] border-2 cursor-pointer transition-all duration-500 group overflow-hidden ${
+                          selectedPlan === "pro"
+                            ? "border-blue-500 bg-blue-500/10"
+                            : "border-zinc-800 bg-zinc-900/20 hover:border-zinc-700"
+                        }`}
                       >
                         <div className="flex flex-col gap-4">
                           <div className="flex justify-between items-start">
-                            <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${selectedPlan === "pro" ? "border-blue-500 bg-blue-500" : "border-zinc-700"}`}>
-                              {selectedPlan === "pro" && <Check className="w-3 h-3 text-white" />}
+                            <div
+                              className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${selectedPlan === "pro" ? "border-blue-500 bg-blue-500" : "border-zinc-700"}`}
+                            >
+                              {selectedPlan === "pro" && (
+                                <Check className="w-3 h-3 text-white" />
+                              )}
                             </div>
                             <div className="text-right">
-                              <span className="text-2xl font-black text-white">R$ 49</span>
-                              <span className="text-[10px] text-zinc-500 block">/mês</span>
+                              <span className="text-2xl font-black text-white">
+                                R$ 49
+                              </span>
+                              <span className="text-[10px] text-zinc-500 block">
+                                /mês
+                              </span>
                             </div>
                           </div>
                           <div>
-                            <span className={`font-black text-lg ${selectedPlan === "pro" ? "text-blue-400" : "text-white"}`}>
+                            <span
+                              className={`font-black text-lg ${selectedPlan === "pro" ? "text-blue-400" : "text-white"}`}
+                            >
                               Professional
                             </span>
-                            <p className="text-xs text-zinc-500 mt-1">Ideal para freelancers em escala.</p>
+                            <p className="text-xs text-zinc-500 mt-1">
+                              Ideal para freelancers em escala.
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -275,29 +325,42 @@ export function UpgradeModal({
                       {/* Agency Plan */}
                       <div
                         onClick={() => setSelectedPlan("agency")}
-                        className={`relative p-5 rounded-[24px] border-2 cursor-pointer transition-all duration-500 group overflow-hidden ${selectedPlan === "agency"
-                          ? "border-purple-500 bg-purple-500/10"
-                          : "border-zinc-800 bg-zinc-900/20 hover:border-zinc-700"
-                          }`}
+                        className={`relative p-5 rounded-[24px] border-2 cursor-pointer transition-all duration-500 group overflow-hidden ${
+                          selectedPlan === "agency"
+                            ? "border-purple-500 bg-purple-500/10"
+                            : "border-zinc-800 bg-zinc-900/20 hover:border-zinc-700"
+                        }`}
                       >
                         <div className="absolute top-0 right-0 px-4 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-[9px] font-black uppercase tracking-tighter rounded-bl-xl">
                           Agência de Elite
                         </div>
                         <div className="flex flex-col gap-4">
                           <div className="flex justify-between items-start">
-                            <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${selectedPlan === "agency" ? "border-purple-500 bg-purple-500" : "border-zinc-700"}`}>
-                              {selectedPlan === "agency" && <Check className="w-3 h-3 text-white" />}
+                            <div
+                              className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${selectedPlan === "agency" ? "border-purple-500 bg-purple-500" : "border-zinc-700"}`}
+                            >
+                              {selectedPlan === "agency" && (
+                                <Check className="w-3 h-3 text-white" />
+                              )}
                             </div>
                             <div className="text-right">
-                              <span className="text-2xl font-black text-white">R$ 199</span>
-                              <span className="text-[10px] text-zinc-500 block">/mês</span>
+                              <span className="text-2xl font-black text-white">
+                                R$ 149
+                              </span>
+                              <span className="text-[10px] text-zinc-500 block">
+                                /mês
+                              </span>
                             </div>
                           </div>
                           <div>
-                            <span className={`font-black text-lg ${selectedPlan === "agency" ? "text-purple-400" : "text-white"}`}>
+                            <span
+                              className={`font-black text-lg ${selectedPlan === "agency" ? "text-purple-400" : "text-white"}`}
+                            >
                               Agency
                             </span>
-                            <p className="text-xs text-zinc-500 mt-1">Para times que dominam o mercado.</p>
+                            <p className="text-xs text-zinc-500 mt-1">
+                              Para times que dominam o mercado.
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -308,10 +371,11 @@ export function UpgradeModal({
                   <div className="flex flex-col gap-6">
                     <Button
                       onClick={handleUpgrade}
-                      className={`w-full font-black h-16 rounded-2xl shadow-2xl transition-all text-white text-base group uppercase tracking-widest ${selectedPlan === "pro"
-                        ? "bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 shadow-blue-500/30"
-                        : "bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 shadow-purple-500/30"
-                        }`}
+                      className={`w-full font-black h-16 rounded-2xl shadow-2xl transition-all text-white text-base group uppercase tracking-widest ${
+                        selectedPlan === "pro"
+                          ? "bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 shadow-blue-500/30"
+                          : "bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 shadow-purple-500/30"
+                      }`}
                     >
                       <Zap className="w-5 h-5 mr-3 fill-current group-hover:rotate-12 transition-transform" />
                       Assinar Plano {selectedPlan === "pro" ? "Pro" : "Agency"}

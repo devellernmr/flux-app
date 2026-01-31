@@ -13,6 +13,8 @@ import {
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "react-i18next";
+import { LanguageSelector } from "@/components/LanguageSelector";
 
 interface FileData {
   id: string;
@@ -32,6 +34,7 @@ interface CommentData {
 }
 
 export function PublicFeedback() {
+  const { t } = useTranslation();
   const { fileId } = useParams();
   const [file, setFile] = useState<FileData | null>(null);
   const [comments, setComments] = useState<CommentData[]>([]);
@@ -74,14 +77,19 @@ export function PublicFeedback() {
       setComments(commentsData || []);
     } catch (error) {
       console.error("Error loading file:", error);
-      toast.error("Design não encontrado ou acesso negado.");
+      toast.error(t("public_feedback.toast.not_found"));
     } finally {
       setLoading(false);
     }
   };
 
   const handleImageClick = (e: React.MouseEvent<HTMLImageElement>) => {
-    if (approved) return;
+    if (
+      approved ||
+      file?.name.startsWith("Client_") ||
+      file?.name.startsWith("Asset_")
+    )
+      return;
     if (!imgRef.current) return;
 
     // Se já tiver um pin aberto, fecha ele ou move? Vamos fechar o anterior e abrir novo.
@@ -98,8 +106,8 @@ export function PublicFeedback() {
   const saveComment = async () => {
     if (!commentText.trim() || !guestName.trim() || !tempPin) {
       if (!guestName.trim())
-        toast.error("Por favor, digite seu nome para identificarmos seu feedback.");
-      else toast.error("Escreva seu comentário antes de enviar.");
+        toast.error(t("public_feedback.toast.name_required"));
+      else toast.error(t("public_feedback.toast.comment_required"));
       return;
     }
 
@@ -123,17 +131,17 @@ export function PublicFeedback() {
       setComments([...comments, data]);
       setTempPin(null);
       setCommentText("");
-      toast.success("Feedback adicionado!");
+      toast.success(t("public_feedback.toast.comment_added"));
       setShowSidebar(true); // Abre a sidebar para ver o comentário novo
     } catch (error) {
-      toast.error("Erro ao salvar comentário.");
+      toast.error(t("public_feedback.toast.comment_error"));
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleApprove = async () => {
-    if (!confirm("Tem certeza que deseja aprovar este design?")) return;
+    if (!confirm(t("public_feedback.confirm.approve"))) return;
 
     const { error } = await supabase
       .from("files")
@@ -148,9 +156,9 @@ export function PublicFeedback() {
         origin: { y: 0.6 },
         colors: ["#3b82f6", "#10b981", "#ffffff"],
       });
-      toast.success("Design Aprovado! 🎉");
+      toast.success(t("public_feedback.toast.approved"));
     } else {
-      toast.error("Erro ao aprovar design.");
+      toast.error(t("public_feedback.toast.approve_error"));
     }
   };
 
@@ -163,7 +171,7 @@ export function PublicFeedback() {
   if (!file)
     return (
       <div className="h-screen bg-[#050505] flex items-center justify-center text-zinc-500">
-        File not found.
+        {t("public_feedback.canvas.file_not_found")}
       </div>
     );
 
@@ -208,11 +216,14 @@ export function PublicFeedback() {
             variant="ghost"
             size="sm"
             onClick={() => setShowSidebar(!showSidebar)}
-            className={`hidden md:flex text-zinc-400 hover:text-white ${showSidebar ? "bg-zinc-900" : ""
-              }`}
+            className={`hidden md:flex text-zinc-400 hover:text-white ${
+              showSidebar ? "bg-zinc-900" : ""
+            }`}
           >
             <MessageSquare className="h-4 w-4 mr-2" />
-            {showSidebar ? "Ocultar Comentários" : "Ver Comentários"}
+            {showSidebar
+              ? t("public_feedback.header.hide_comments")
+              : t("public_feedback.header.show_comments")}
             <span className="ml-2 bg-zinc-800 text-zinc-300 text-[10px] px-1.5 py-0.5 rounded-full">
               {comments.length}
             </span>
@@ -221,16 +232,27 @@ export function PublicFeedback() {
           {approved ? (
             <div className="flex items-center gap-2 text-emerald-400 bg-emerald-950/30 px-4 py-2 rounded-full border border-emerald-900/50 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
               <CheckCircle2 className="h-4 w-4" />
-              <span className="font-bold text-xs tracking-wider">APROVADO</span>
+              <span className="font-bold text-xs tracking-wider">
+                {t("public_feedback.header.approved")}
+              </span>
             </div>
+          ) : file.name.match(/^(Asset|Assets|Client)_/i) ||
+            file.name.includes("_Briefing_") ? (
+            <Button
+              onClick={() => window.open(file.url, "_blank")}
+              className="bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm px-6 shadow-lg shadow-blue-900/20 transition-all hover:scale-105 active:scale-95"
+            >
+              Baixar Arquivo
+            </Button>
           ) : (
             <Button
               onClick={handleApprove}
               className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm px-6 shadow-lg shadow-emerald-900/20 transition-all hover:scale-105 active:scale-95"
             >
-              Aprovar Design
+              {t("public_feedback.header.approve_button")}
             </Button>
           )}
+          <LanguageSelector />
         </div>
       </header>
 
@@ -242,18 +264,23 @@ export function PublicFeedback() {
 
           <div className="relative group inline-block shadow-[0_40px_80px_-20px_rgba(0,0,0,0.9)] rounded-sm transition-transform duration-300">
             {/* MENSAGEM DE INSTRUÇÃO NO HOVER */}
-            {!approved && !tempPin && (
-              <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/70 backdrop-blur-sm text-white text-xs px-3 py-1.5 rounded-full border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-40 flex items-center gap-2">
-                <MousePointerClick className="h-3 w-3" /> Clique em qualquer lugar para comentar
-              </div>
-            )}
+            {!approved &&
+              !tempPin &&
+              !file.name.match(/^(Asset|Assets|Client)_/i) &&
+              !file.name.includes("_Briefing_") && (
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/70 backdrop-blur-sm text-white text-xs px-3 py-1.5 rounded-full border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-40 flex items-center gap-2">
+                  <MousePointerClick className="h-3 w-3" />{" "}
+                  {t("public_feedback.canvas.click_to_comment")}
+                </div>
+              )}
 
             <img
               ref={imgRef}
               src={file.url}
               alt="Design Preview"
-              className={`max-w-full max-h-[85vh] block rounded-sm select-none ring-1 ring-zinc-800 ${approved ? "opacity-90 grayscale-[0.2]" : "cursor-crosshair"
-                }`}
+              className={`max-w-full max-h-[85vh] block rounded-sm select-none ring-1 ring-zinc-800 ${
+                approved ? "opacity-90 grayscale-[0.2]" : "cursor-crosshair"
+              }`}
               onClick={handleImageClick}
               draggable={false}
             />
@@ -301,7 +328,7 @@ export function PublicFeedback() {
                   <div className="mt-4 bg-[#18181B] border border-zinc-700 rounded-xl shadow-2xl p-4 relative z-10">
                     <div className="flex justify-between items-center mb-3">
                       <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">
-                        Novo Comentário
+                        {t("public_feedback.comment_modal.title")}
                       </span>
                       <button onClick={() => setTempPin(null)}>
                         <X className="h-4 w-4 text-zinc-500 hover:text-white transition-colors" />
@@ -314,14 +341,18 @@ export function PublicFeedback() {
                         <input
                           autoFocus
                           className="w-full bg-zinc-900 border border-zinc-800 rounded-lg py-2 pl-9 pr-3 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 transition-all"
-                          placeholder="Seu Nome"
+                          placeholder={t(
+                            "public_feedback.comment_modal.name_placeholder",
+                          )}
                           value={guestName}
                           onChange={(e) => setGuestName(e.target.value)}
                         />
                       </div>
                       <textarea
                         className="w-full bg-zinc-900 border border-zinc-800 rounded-lg p-3 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 resize-none transition-all"
-                        placeholder="O que você gostaria de mudar?"
+                        placeholder={t(
+                          "public_feedback.comment_modal.comment_placeholder",
+                        )}
                         rows={3}
                         value={commentText}
                         onChange={(e) => setCommentText(e.target.value)}
@@ -339,7 +370,7 @@ export function PublicFeedback() {
                           {isSubmitting ? (
                             <Loader2 className="h-3 w-3 animate-spin" />
                           ) : (
-                            "Publicar Comentário"
+                            t("public_feedback.comment_modal.submit_button")
                           )}
                         </Button>
                       </div>
@@ -362,7 +393,7 @@ export function PublicFeedback() {
             >
               <div className="p-4 border-b border-zinc-800 flex items-center justify-between bg-[#050505]">
                 <h3 className="font-semibold text-sm text-zinc-200">
-                  Lista de Feedbacks
+                  {t("public_feedback.sidebar.title")}
                 </h3>
                 <Button
                   variant="ghost"
@@ -381,7 +412,8 @@ export function PublicFeedback() {
                       <MessageSquare className="h-5 w-5 opacity-50" />
                     </div>
                     <p className="text-xs text-center px-4">
-                      Clique em qualquer lugar na imagem para deixar um comentário.
+                      Clique em qualquer lugar na imagem para deixar um
+                      comentário.
                     </p>
                   </div>
                 ) : (

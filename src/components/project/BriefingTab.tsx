@@ -9,7 +9,6 @@ import {
   CheckCircle2,
   UploadCloud,
   FileText,
-  Image as ImageIcon,
   Copy,
   Save,
   Sparkles,
@@ -115,7 +114,9 @@ export function TemplateCard({ icon, title, desc, color, onClick }: any) {
       <h3 className="font-semibold text-zinc-200 text-xs md:text-sm group-hover:text-white relative z-10">
         {title}
       </h3>
-      <p className="text-[10px] md:text-xs text-zinc-500 mt-1 relative z-10 line-clamp-2 md:line-clamp-none">{desc}</p>
+      <p className="text-[10px] md:text-xs text-zinc-500 mt-1 relative z-10 line-clamp-2 md:line-clamp-none">
+        {desc}
+      </p>
     </button>
   );
 }
@@ -124,13 +125,13 @@ export function TemplateCard({ icon, title, desc, color, onClick }: any) {
 
 interface BriefingTabProps {
   briefingStatus:
-  | "empty"
-  | "draft"
-  | "sent"
-  | "awaiting_response"
-  | "approved"
-  | "active"
-  | "completed";
+    | "empty"
+    | "draft"
+    | "sent"
+    | "awaiting_response"
+    | "approved"
+    | "active"
+    | "completed";
   isEditing: boolean;
   setIsEditing: (value: boolean) => void;
   blocks: BriefingBlock[];
@@ -150,214 +151,254 @@ interface BriefingTabProps {
   itemVariants: any;
 }
 
-export const BriefingTab = memo(({
-  briefingStatus,
-  isEditing,
-  setIsEditing,
-  blocks,
-  setBlocks,
-  can,
-  onShowUpgrade,
-  onCopyLink,
-  onApprove,
-  onLoadTemplate,
-  onOpenResetDialog,
-  onSave,
-  isSaving,
-  onUpdateBlock,
-  onRemoveBlock,
-  onAddBlock,
-  containerVariants,
-  itemVariants,
-}: BriefingTabProps) => {
-  const [isAIGeneratorOpen, setIsAIGeneratorOpen] = useState(false);
+export const BriefingTab = memo(
+  ({
+    briefingStatus,
+    isEditing,
+    setIsEditing,
+    blocks,
+    setBlocks,
+    can,
+    onShowUpgrade,
+    onCopyLink,
+    onApprove,
+    onLoadTemplate,
+    onOpenResetDialog,
+    onSave,
+    isSaving,
+    onUpdateBlock,
+    onRemoveBlock,
+    onAddBlock,
+    containerVariants,
+    itemVariants,
+  }: BriefingTabProps) => {
+    const [isAIGeneratorOpen, setIsAIGeneratorOpen] = useState(false);
 
-  const handleAIUse = (result: any) => {
-    // Transform AI questions into blocks
-    const newBlocks: BriefingBlock[] = result.questions.map((q: string) => ({
-      id: Math.random().toString(36).substr(2, 9),
-      type: "textarea",
-      label: q,
-      placeholder: "Resposta aqui...",
-      required: true,
-      answer: "",
-    }));
+    const handleAIUse = (result: any) => {
+      // Transform AI questions into blocks
+      const newBlocks: BriefingBlock[] = result.questions.map((q: string) => ({
+        id: Math.random().toString(36).substr(2, 9),
+        type: "textarea",
+        label: q,
+        placeholder: "Resposta aqui...",
+        required: true,
+        answer: "",
+      }));
 
-    // Replace existing blocks with new AI blocks
-    setBlocks(newBlocks);
-    setIsEditing(true);
-    setIsAIGeneratorOpen(false);
-    toast.success("Perguntas da IA adicionadas (as anteriores foram removidas)!");
-  };
-  return (
-    <div className="max-w-4xl mx-auto">
-      <div className="mb-6 md:mb-8 flex items-end justify-between">
-        <div>
-          <h2 className="text-2xl md:text-3xl font-semibold text-white tracking-tight">
-            Briefing
-          </h2>
-          <p className="text-zinc-400 mt-1 text-sm">
-            Dados estratégicos e alinhamento.
-          </p>
+      // Replace existing blocks with new AI blocks
+      setBlocks(newBlocks);
+      setIsEditing(true);
+      setIsAIGeneratorOpen(false);
+      toast.success(
+        "Perguntas da IA adicionadas (as anteriores foram removidas)!",
+      );
+    };
+    return (
+      <div className="max-w-4xl mx-auto">
+        <div className="mb-6 md:mb-8 flex items-end justify-between">
+          <div>
+            <h2 className="text-2xl md:text-3xl font-semibold text-white tracking-tight">
+              Briefing
+            </h2>
+            <p className="text-zinc-400 mt-1 text-sm">
+              Dados estratégicos e alinhamento.
+            </p>
+          </div>
         </div>
-      </div>
 
-      {/* SEÇÃO PRINCIPAL: Card de Conteúdo */}
-      <div
-        id="project-briefing-viewer"
-        className="bg-zinc-900/20 border border-zinc-800/60 rounded-3xl p-4 md:p-10 backdrop-blur-sm relative overflow-hidden shadow-xl shadow-black/20"
-      >
-        {/* 
+        {/* SEÇÃO PRINCIPAL: Card de Conteúdo */}
+        <div
+          id="project-briefing-viewer"
+          className="bg-zinc-900/20 border border-zinc-800/60 rounded-3xl p-4 md:p-10 backdrop-blur-sm relative overflow-hidden shadow-xl shadow-black/20"
+        >
+          {/* 
           CENÁRIO 1: MODO VISUALIZAÇÃO (Já Salvo)
           Exibe: Ação de Sucesso (Topo) + Respostas (Baixo)
       */}
-        {(briefingStatus === "sent" ||
-          briefingStatus === "approved" ||
-          briefingStatus === "awaiting_response") &&
+          {(briefingStatus === "sent" ||
+            briefingStatus === "approved" ||
+            briefingStatus === "awaiting_response") &&
           !isEditing ? (
-          <div className="space-y-8">
-            {/* COMPONENTE DE AÇÃO APROVADO OU SUCESSO AQUI */}
-            {briefingStatus === "approved" ? (
-              <BriefingApprovedAction />
-            ) : (
-              <BriefingSuccessAction onCopyLink={onCopyLink} />
-            )}
-            {/* Divisor Visual */}
-            <div className="flex justify-between items-center border-b border-zinc-800/50 pb-6 pt-2">
-              <div className="flex items-center gap-3">
-                <div className="h-2.5 w-2.5 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.6)] animate-pulse" />
-                <h3 className="font-medium text-zinc-200 text-sm tracking-wide uppercase">
-                  Respostas do Cliente
-                </h3>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsEditing(true)}
-                className="text-zinc-500 hover:text-white hover:bg-zinc-800 h-8 text-xs gap-2 px-3 rounded-full border border-transparent hover:border-zinc-700 transition-all"
-              >
-                <PenLine className="h-3.5 w-3.5" />{" "}
-                <span className="hidden sm:inline">Editar</span>
-              </Button>
-            </div>
-
-            {/* Lista de Respostas (Opacidade reduzida para foco no topo) */}
-            <motion.div
-              id="project-briefing-questions"
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-              className="grid gap-6 opacity-90 hover:opacity-100 transition-opacity duration-300"
-            >
-              {blocks.map((block: any, i) => (
-                <motion.div
-                  key={block.id}
-                  variants={itemVariants as any}
-                  className="group relative p-5 md:p-6 rounded-2xl bg-zinc-950/40 border border-zinc-800/40 hover:border-zinc-700/60 transition-all hover:shadow-lg hover:shadow-black/40 overflow-hidden"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-
-                  <div className="flex items-center gap-3 mb-4 relative z-10">
-                    <span className="flex items-center justify-center h-7 w-7 rounded-lg bg-blue-500/10 text-[11px] font-bold text-blue-400 border border-blue-500/20 font-mono">
-                      {i + 1 < 10 ? `0${i + 1}` : i + 1}
-                    </span>
-                    <h3 className="text-sm font-semibold text-zinc-200 tracking-tight leading-snug">
-                      {block.label}
-                    </h3>
-                  </div>
-
-                  {/* Conteúdo da Resposta */}
-                  <div className="pl-0 md:pl-10 relative z-10">
-                    {block.type === "upload" ? (
-                      block.answer ? (
-                        <div className="flex items-center gap-3 p-3 rounded-lg bg-zinc-900 border border-zinc-800 max-w-sm">
-                          <div className="h-10 w-10 bg-zinc-800 rounded flex items-center justify-center text-blue-500">
-                            {block.answer.match(/\.(jpg|jpeg|png|gif)$/i) ? (
-                              <ImageIcon className="h-5 w-5" />
-                            ) : (
-                              <FileText className="h-5 w-5" />
-                            )}
-                          </div>
-                          <div className="flex-1 overflow-hidden">
-                            <p className="text-sm text-zinc-300 truncate font-medium">
-                              Arquivo Anexado
-                            </p>
-                            <a
-                              href={block.answer}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-xs text-blue-500 hover:underline truncate block"
-                            >
-                              Baixar
-                            </a>
-                          </div>
-                        </div>
-                      ) : (
-                        <span className="italic text-zinc-600 flex items-center gap-2">
-                          <UploadCloud className="h-4 w-4" /> Nenhum arquivo.
-                        </span>
-                      )
-                    ) : (
-                      <p className="text-sm text-zinc-300 leading-7 whitespace-pre-wrap font-light">
-                        {block.answer || (
-                          <span className="italic text-zinc-600">
-                            Ainda não respondido.
-                          </span>
-                        )}
-                      </p>
-                    )}
-                  </div>
-                </motion.div>
-              ))}
-            </motion.div>
-            {/* No final da exibição das respostas, adicione: */}
-
-            {briefingStatus === "sent" && (
-              <div className="mt-8 pt-6 border-t border-zinc-800 flex justify-end">
+            <div className="space-y-8">
+              {/* COMPONENTE DE AÇÃO APROVADO OU SUCESSO AQUI */}
+              {briefingStatus === "approved" ? (
+                <BriefingApprovedAction />
+              ) : (
+                <BriefingSuccessAction onCopyLink={onCopyLink} />
+              )}
+              {/* Divisor Visual */}
+              <div className="flex justify-between items-center border-b border-zinc-800/50 pb-6 pt-2">
+                <div className="flex items-center gap-3">
+                  <div className="h-2.5 w-2.5 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.6)] animate-pulse" />
+                  <h3 className="font-medium text-zinc-200 text-sm tracking-wide uppercase">
+                    Respostas do Cliente
+                  </h3>
+                </div>
                 <Button
-                  onClick={onApprove}
-                  className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-6"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsEditing(true)}
+                  className="text-zinc-500 hover:text-white hover:bg-zinc-800 h-8 text-xs gap-2 px-3 rounded-full border border-transparent hover:border-zinc-700 transition-all"
                 >
-                  <CheckCircle2 className="mr-2 h-4 w-4" />
-                  Aprovar e Iniciar Desenvolvimento
+                  <PenLine className="h-3.5 w-3.5" />{" "}
+                  <span className="hidden sm:inline">Editar</span>
                 </Button>
               </div>
-            )}
-          </div>
-        ) : (
-          <div id="project-briefing-content" className="space-y-6">
-            {briefingStatus === "empty" && !isEditing && (
-              <div
-                id="project-briefing-templates"
-                className="grid grid-cols-1 md:grid-cols-3 gap-4"
-              >
-                <TemplateCard
-                  onClick={() => onLoadTemplate("custom")}
-                  icon={<Plus className="h-5 w-5" />}
-                  title="Em Branco"
-                  desc="Começar do zero"
-                  color="blue"
-                />
-                <TemplateCard
-                  onClick={() => onLoadTemplate("branding")}
-                  icon={<Palette className="h-5 w-5" />}
-                  title="Identidade"
-                  desc="Branding & Logo"
-                  color="pink"
-                />
-                <TemplateCard
-                  onClick={() => onLoadTemplate("landing_page")}
-                  icon={<Globe className="h-5 w-5" />}
-                  title="Website"
-                  desc="Landing Pages"
-                  color="emerald"
-                />
-              </div>
-            )}
 
-            {(isEditing ||
-              briefingStatus === "draft" ||
-              briefingStatus === "sent") && (
+              {/* Lista de Respostas (Opacidade reduzida para foco no topo) */}
+              <motion.div
+                id="project-briefing-questions"
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+                className="grid gap-6 opacity-90 hover:opacity-100 transition-opacity duration-300"
+              >
+                {blocks.map((block: any, i) => (
+                  <motion.div
+                    key={block.id}
+                    variants={itemVariants as any}
+                    className="group relative p-5 md:p-6 rounded-2xl bg-zinc-950/40 border border-zinc-800/40 hover:border-zinc-700/60 transition-all hover:shadow-lg hover:shadow-black/40 overflow-hidden"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
+                    <div className="flex items-center gap-3 mb-4 relative z-10">
+                      <span className="flex items-center justify-center h-7 w-7 rounded-lg bg-blue-500/10 text-[11px] font-bold text-blue-400 border border-blue-500/20 font-mono">
+                        {i + 1 < 10 ? `0${i + 1}` : i + 1}
+                      </span>
+                      <h3 className="text-sm font-semibold text-zinc-200 tracking-tight leading-snug">
+                        {block.label}
+                      </h3>
+                    </div>
+
+                    {/* Conteúdo da Resposta */}
+                    <div className="pl-0 md:pl-10 relative z-10">
+                      {block.type === "upload" ? (
+                        block.answer ? (
+                          <div className="flex flex-wrap gap-3">
+                            {(() => {
+                              let fileList: string[] = [];
+                              try {
+                                if (
+                                  block.answer.startsWith("[") ||
+                                  block.answer.startsWith("{")
+                                ) {
+                                  fileList = JSON.parse(block.answer);
+                                  if (!Array.isArray(fileList))
+                                    fileList = [block.answer];
+                                } else {
+                                  fileList = [block.answer];
+                                }
+                              } catch (e) {
+                                fileList = [block.answer];
+                              }
+
+                              return fileList.map(
+                                (url: string, idx: number) => (
+                                  <div
+                                    key={idx}
+                                    className="flex items-center gap-3 p-3 rounded-xl bg-zinc-900 border border-zinc-800 max-w-[240px] group/file"
+                                  >
+                                    <div className="h-10 w-10 bg-zinc-800 rounded-lg overflow-hidden flex items-center justify-center text-blue-500 shrink-0 border border-white/5">
+                                      {url.match(
+                                        /\.(jpg|jpeg|png|gif|webp)$/i,
+                                      ) ? (
+                                        <img
+                                          src={url}
+                                          alt="Preview"
+                                          className="h-full w-full object-cover"
+                                        />
+                                      ) : (
+                                        <FileText className="h-5 w-5" />
+                                      )}
+                                    </div>
+                                    <div className="flex-1 overflow-hidden">
+                                      <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-0.5">
+                                        {url.match(
+                                          /\.(jpg|jpeg|png|gif|webp)$/i,
+                                        )
+                                          ? "Imagem"
+                                          : "Doc"}
+                                      </p>
+                                      <a
+                                        href={url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-xs text-zinc-300 hover:text-white truncate block font-medium hover:underline"
+                                      >
+                                        Ver Arquivo
+                                      </a>
+                                    </div>
+                                  </div>
+                                ),
+                              );
+                            })()}
+                          </div>
+                        ) : (
+                          <span className="italic text-zinc-600 flex items-center gap-2">
+                            <UploadCloud className="h-4 w-4" /> Nenhum arquivo.
+                          </span>
+                        )
+                      ) : (
+                        <p className="text-sm text-zinc-300 leading-7 whitespace-pre-wrap font-light">
+                          {block.answer || (
+                            <span className="italic text-zinc-600">
+                              Ainda não respondido.
+                            </span>
+                          )}
+                        </p>
+                      )}
+                    </div>
+                  </motion.div>
+                ))}
+              </motion.div>
+              {/* No final da exibição das respostas, adicione: */}
+
+              {briefingStatus === "sent" && (
+                <div className="mt-8 pt-6 border-t border-zinc-800 flex justify-end">
+                  <Button
+                    onClick={onApprove}
+                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-6"
+                  >
+                    <CheckCircle2 className="mr-2 h-4 w-4" />
+                    Aprovar e Iniciar Desenvolvimento
+                  </Button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div id="project-briefing-content" className="space-y-6">
+              {briefingStatus === "empty" && !isEditing && (
+                <div
+                  id="project-briefing-templates"
+                  className="grid grid-cols-1 md:grid-cols-3 gap-4"
+                >
+                  <TemplateCard
+                    onClick={() => onLoadTemplate("custom")}
+                    icon={<Plus className="h-5 w-5" />}
+                    title="Em Branco"
+                    desc="Começar do zero"
+                    color="blue"
+                  />
+                  <TemplateCard
+                    onClick={() => onLoadTemplate("branding")}
+                    icon={<Palette className="h-5 w-5" />}
+                    title="Identidade"
+                    desc="Branding & Logo"
+                    color="pink"
+                  />
+                  <TemplateCard
+                    onClick={() => onLoadTemplate("landing_page")}
+                    icon={<Globe className="h-5 w-5" />}
+                    title="Website"
+                    desc="Landing Pages"
+                    color="emerald"
+                  />
+                </div>
+              )}
+
+              {(isEditing ||
+                briefingStatus === "draft" ||
+                briefingStatus === "sent") && (
                 <div id="project-briefing-editor" className="space-y-6 pt-4">
                   <div className="flex justify-between items-center mb-6 border-b border-zinc-800 pb-4">
                     <h3 className="font-medium text-zinc-200">
@@ -477,17 +518,18 @@ export const BriefingTab = memo(({
                   </div>
                 </div>
               )}
-          </div>
-        )}
-      </div>
+            </div>
+          )}
+        </div>
 
-      <AIBriefingGenerator
-        isOpen={isAIGeneratorOpen}
-        onClose={() => setIsAIGeneratorOpen(false)}
-        onUse={handleAIUse}
-      />
-    </div>
-  );
-});
+        <AIBriefingGenerator
+          isOpen={isAIGeneratorOpen}
+          onClose={() => setIsAIGeneratorOpen(false)}
+          onUse={handleAIUse}
+        />
+      </div>
+    );
+  },
+);
 
 BriefingTab.displayName = "BriefingTab";

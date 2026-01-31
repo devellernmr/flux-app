@@ -1,220 +1,283 @@
 {
-    "login": {
-        "title_signup": "Eleve seu Workflow.",
-        "title_signin": "Bem-vindo de volta.",
-        "subtitle_signup": "Gestão inteligente para agências de elite.",
-        "subtitle_signin": "Acesse sua central de comando do Fluxs.",
-        "google_login": "Continuar com Google",
-        "email_divider": "Ou continue com email",
-        "label_email": "Email corporativo",
-        "label_password": "Senha",
-        "placeholder_email": "nome@empresa.com",
-        "terms_text": "Eu concordo com os",
-        "terms_link": "Termos de Uso",
-        "privacy_link": "Política de Privacidade",
-        "btn_signup": "Criar Conta Grátis",
-        "btn_signin": "Entrar",
-        "footer_no_account": "Não tem uma conta?",
-        "footer_has_account": "Já tem uma conta?",
-        "link_signup": "Cadastre-se",
-        "link_signin": "Fazer Login",
-        "auth_error_google": "Erro no Google",
-        "auth_error_signup": "Erro ao criar conta",
-        "auth_error_signin": "Credenciais inválidas",
-        "auth_success_signup": "Conta criada! Verifique seu e-mail.",
-        "decorative_badge": "Fluxs Aprovado."
+  "login": {
+    "title_signup": "Eleve seu Workflow.",
+    "title_signin": "Bem-vindo de volta.",
+    "subtitle_signup": "Gestão inteligente para agências de elite.",
+    "subtitle_signin": "Acesse sua central de comando do Fluxs.",
+    "google_login": "Continuar com Google",
+    "email_divider": "Ou continue com email",
+    "label_email": "Email corporativo",
+    "label_password": "Senha",
+    "placeholder_email": "nome@empresa.com",
+    "terms_text": "Eu concordo com os",
+    "terms_link": "Termos de Uso",
+    "privacy_link": "Política de Privacidade",
+    "btn_signup": "Criar Conta Grátis",
+    "btn_signin": "Entrar",
+    "footer_no_account": "Não tem uma conta?",
+    "footer_has_account": "Já tem uma conta?",
+    "link_signup": "Cadastre-se",
+    "link_signin": "Fazer Login",
+    "auth_error_google": "Erro no Google",
+    "auth_error_signup": "Erro ao criar conta",
+    "auth_error_signin": "Credenciais inválidas",
+    "auth_success_signup": "Conta criada! Verifique seu e-mail.",
+    "decorative_badge": "Fluxs Aprovado."
+  },
+  "common": {
+    "loading": "Carregando...",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "back": "Voltar",
+    "logout": "Sair",
+    "settings": "Configurações",
+    "admin": "Painel Admin",
+    "language": "Idioma",
+    "language_short": "Linguagem"
+  },
+  "languages": {
+    "en": "Inglês",
+    "pt": "Português",
+    "es": "Espanhol",
+    "fr": "Francês"
+  },
+  "profile": {
+    "title": "Perfil da Agência",
+    "subtitle": "Informações visíveis para seus clientes.",
+    "agency_name": "Nome da Agência",
+    "avatar_url": "URL do Avatar",
+    "manager_name": "Nome do Responsável",
+    "contact_email": "Email de Contato",
+    "save_btn": "Salvar Alterações"
+  },
+  "overview": {
+    "activity_title": "Atividade do Fluxs.",
+    "intel_title": "Fluxs. de Inteligência",
+    "tabs": {
+      "fluxs": "Fluxs.",
+      "docs": "Docs",
+      "brand": "Brand",
+      "tasks": "Tasks",
+      "cloud": "Cloud",
+      "fin": "Fin",
+      "team": "Team"
     },
-    "common": {
-        "loading": "Carregando...",
-        "save": "Salvar",
-        "cancel": "Cancelar",
-        "delete": "Excluir",
-        "back": "Voltar",
-        "logout": "Sair",
-        "settings": "Configurações",
-        "admin": "Painel Admin",
-        "language": "Idioma",
-        "language_short": "Linguagem"
+    "reset_dialog": {
+      "title": "Resetar Workflow?",
+      "desc": "Esta ação removerá todos os dados do briefing permanentemente.",
+      "keep_btn": "Manter Dados",
+      "reset_btn": "Resetar Agora"
+    }
+  },
+  "dashboard": {
+    "active_fluxs": "Fluxos Ativos",
+    "manage_desc": "Gerencie seus projetos e briefings em andamento.",
+    "new_project": "Novo Fluxs.",
+    "create_modal_title": "Criar Novo Fluxs.",
+    "create_modal_desc": "Dê um nome ao seu projeto. Nossa IA pode ajudar a configurá-lo depois.",
+    "project_name_label": "Nome do Projeto",
+    "project_name_placeholder": "Ex: Rebranding Nike, App Delivery...",
+    "use_ai_btn": "Usar Assistente IA",
+    "use_ai_desc": "Gera briefing e estrutura automaticamente",
+    "cancel_btn": "Cancelar",
+    "create_btn": "Criar Projeto",
+    "loading_projects": "Carregando fluxos...",
+    "no_projects": "Nenhum fluxo encontrado",
+    "delete_confirm_title": "Excluir projeto?",
+    "delete_confirm_desc": "Essa ação é irreversível.",
+    "delete_btn": "Excluir Definitivamente"
+  },
+  "project_dashboard": {
+    "deadline_label": "Prazo",
+    "expected_delivery": "Entrega Prevista",
+    "briefing_label": "Briefing",
+    "approvals_label": "Aprovações",
+    "pending": "Pendentes",
+    "tutorial_support_label": "Tutorial & Suporte",
+    "fluxs_guide": "Guia do Fluxs. 🎯"
+  },
+  "roadmap": {
+    "title": "Roadmap do Projeto",
+    "ai_generated": "Gerado por IA",
+    "in_progress": "Em Progresso",
+    "completed": "Concluído",
+    "steps": {
+      "briefing": {
+        "label": "Briefing",
+        "desc": "Rascunho"
+      },
+      "sent": {
+        "label": "Envio",
+        "desc": "Enviado"
+      },
+      "response": {
+        "label": "Resposta",
+        "desc": "Resposta"
+      },
+      "developed": {
+        "label": "Desenv.",
+        "desc": "Em Desenv."
+      },
+      "feedback": {
+        "label": "Feedback",
+        "desc": "Revisão"
+      },
+      "approved": {
+        "label": "Aprovado",
+        "desc": "Aprovado"
+      }
+    }
+  },
+  "activity": {
+    "unified_timeline": "Timeline Unificada",
+    "no_activity": "Nenhuma atividade ainda.",
+    "type_message": "Digite uma mensagem...",
+    "you": "Você",
+    "client": "Cliente",
+    "commented_on": "comentou em",
+    "a_file": "um arquivo"
+  },
+  "stats": {
+    "welcome": "Bem-vindo",
+    "network_online": "Rede Online",
+    "command_desc": "Seu centro de comando está pronto para novas integrações hoje.",
+    "workspace": "Workspace",
+    "active": "Ativo",
+    "online": "Online",
+    "next_deadline": "Próxima Meta",
+    "immediate_impact": "Impacto Imediato",
+    "fluxs_up_to_date": "Fluxs. em Dia",
+    "no_deadline": "Nenhum prazo crítico detectado.",
+    "tips": {
+      "ai_briefing": {
+        "title": "Briefing com IA",
+        "desc": "Gere perguntas estratégicas automaticamente para seus clientes."
+      },
+      "agile_roadmap": {
+        "title": "Roadmap Ágil",
+        "desc": "Mantenha o progresso visível movendo os cards de entrega."
+      },
+      "public_links": {
+        "title": "Links Públicos",
+        "desc": "Compartilhe o briefing e receba aprovações sem login."
+      }
+    }
+  },
+  "analytics": {
+    "title": "Relatórios",
+    "subtitle": "Acompanhe a performance financeira e operacional da sua agência em tempo real com métricas preditivas.",
+    "intelligence_hub": "Intelligence Hub",
+    "tabs": {
+      "7d": "7 DIAS",
+      "30d": "30 DIAS",
+      "90d": "3 MESES"
     },
-    "languages": {
-        "en": "Inglês",
-        "pt": "Português",
-        "es": "Espanhol",
-        "fr": "Francês"
+    "export_btn": "EXPORTAR",
+    "export_pdf": "Relatório PDF",
+    "export_csv": "Dados CSV",
+    "sections": {
+      "production": "Produção & Eficiência",
+      "finance": "Financeiro & Pipeline",
+      "performance": "Desempenho por Projeto",
+      "top_active": "Top 5 Ativos"
     },
-    "profile": {
-        "title": "Perfil da Agência",
-        "subtitle": "Informações visíveis para seus clientes.",
-        "agency_name": "Nome da Agência",
-        "avatar_url": "URL do Avatar",
-        "manager_name": "Nome do Responsável",
-        "contact_email": "Email de Contato",
-        "save_btn": "Salvar Alterações"
+    "cards": {
+      "active_projects": "Projetos Ativos",
+      "approval_rate": "Taxa de Aprovação",
+      "files_sent": "Arquivos Enviados",
+      "files_pending": "Arquivos Pendentes",
+      "total_pipeline": "Pipeline Total",
+      "est_profit": "Lucro Estimado",
+      "avg_margin": "Margem Média"
     },
-    "overview": {
-        "activity_title": "Atividade do Fluxs.",
-        "intel_title": "Fluxs. de Inteligência",
-        "tabs": {
-            "fluxs": "Fluxs.",
-            "docs": "Docs",
-            "brand": "Brand",
-            "tasks": "Tasks",
-            "cloud": "Cloud",
-            "fin": "Fin",
-            "team": "Team"
-        },
-        "reset_dialog": {
-            "title": "Resetar Workflow?",
-            "desc": "Esta ação removerá todos os dados do briefing permanentemente.",
-            "keep_btn": "Manter Dados",
-            "reset_btn": "Resetar Agora"
-        }
+    "table": {
+      "project_name": "Nome do Projeto",
+      "approved": "Aprovados",
+      "pending": "Pendências",
+      "no_data": "Nenhum dado disponível para o período selecionado."
+    }
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "analytics": "Relatórios",
+    "briefing": "Briefing",
+    "identity": "Identidade",
+    "deliveries": "Entregas",
+    "files": "Arquivos",
+    "team": "Equipe",
+    "finance": "Financeiro",
+    "help": "Ajuda",
+    "workflow": "Workflow",
+    "back_btn": "Voltar",
+    "assist": "Fluxs. Assist",
+    "tutorial_desc": "Abrir tutorial interativo",
+    "support_node": "Support Node",
+    "help_center": "Central de Ajuda",
+    "activity_fluxs": "Fluxos de Atividade",
+    "level": "Nível"
+  },
+  "public_briefing": {
+    "toast": {
+      "not_found": "Briefing não encontrado.",
+      "file_uploaded": "Arquivo enviado!",
+      "upload_error": "Erro no upload.",
+      "answer_required": "Responda algo.",
+      "submit_error": "Erro ao enviar.",
+      "success": "Sucesso!"
     },
-    "dashboard": {
-        "active_fluxs": "Fluxos Ativos",
-        "manage_desc": "Gerencie seus projetos e briefings em andamento.",
-        "new_project": "Novo Fluxs.",
-        "create_modal_title": "Criar Novo Fluxs.",
-        "create_modal_desc": "Dê um nome ao seu projeto. Nossa IA pode ajudar a configurá-lo depois.",
-        "project_name_label": "Nome do Projeto",
-        "project_name_placeholder": "Ex: Rebranding Nike, App Delivery...",
-        "use_ai_btn": "Usar Assistente IA",
-        "use_ai_desc": "Gera briefing e estrutura automaticamente",
-        "cancel_btn": "Cancelar",
-        "create_btn": "Criar Projeto",
-        "loading_projects": "Carregando fluxos...",
-        "no_projects": "Nenhum fluxo encontrado",
-        "delete_confirm_title": "Excluir projeto?",
-        "delete_confirm_desc": "Essa ação é irreversível.",
-        "delete_btn": "Excluir Definitivamente"
+    "success": {
+      "title": "Briefing Enviado!",
+      "message": "Recebemos seus dados com sucesso. Nossa inteligência está processando tudo e nossa equipe entrará em contato em breve.",
+      "powered_by": "Powered by Fluxs Intelligence"
     },
-    "project_dashboard": {
-        "deadline_label": "Prazo",
-        "expected_delivery": "Entrega Prevista",
-        "briefing_label": "Briefing",
-        "approvals_label": "Aprovações",
-        "pending": "Pendentes",
-        "tutorial_support_label": "Tutorial & Suporte",
-        "fluxs_guide": "Guia do Fluxs. 🎯"
+    "header": {
+      "subtitle": "Central de Coleta Dinâmica",
+      "intel": "Fluxs Intel"
     },
-    "roadmap": {
-        "title": "Roadmap do Projeto",
-        "ai_generated": "Gerado por IA",
-        "in_progress": "Em Progresso",
-        "completed": "Concluído",
-        "steps": {
-            "briefing": {
-                "label": "Briefing",
-                "desc": "Rascunho"
-            },
-            "sent": {
-                "label": "Envio",
-                "desc": "Enviado"
-            },
-            "response": {
-                "label": "Resposta",
-                "desc": "Resposta"
-            },
-            "developed": {
-                "label": "Desenv.",
-                "desc": "Em Desenv."
-            },
-            "feedback": {
-                "label": "Feedback",
-                "desc": "Revisão"
-            },
-            "approved": {
-                "label": "Aprovado",
-                "desc": "Aprovado"
-            }
-        }
+    "form": {
+      "file_attached": "Arquivo anexado",
+      "document_version": "Documento v01",
+      "uploading": "Enviando arquivo...",
+      "upload_reference": "Subir Arquivo de Referência",
+      "upload_hint": "Clique ou arraste para enviar",
+      "processing": "PROCESSANDO...",
+      "submit_button": "FINALIZAR E ENVIAR BRIEFING",
+      "powered_by": "Powered by Fluxs Intelligence"
+    }
+  },
+  "public_feedback": {
+    "toast": {
+      "not_found": "Design não encontrado ou acesso negado.",
+      "name_required": "Por favor, digite seu nome para identificarmos seu feedback.",
+      "comment_required": "Escreva seu comentário antes de enviar.",
+      "comment_added": "Feedback adicionado!",
+      "comment_error": "Erro ao salvar comentário.",
+      "approve_error": "Erro ao aprovar design.",
+      "approved": "Design Aprovado! 🎉"
     },
-    "activity": {
-        "unified_timeline": "Timeline Unificada",
-        "no_activity": "Nenhuma atividade ainda.",
-        "type_message": "Digite uma mensagem...",
-        "you": "Você",
-        "client": "Cliente",
-        "commented_on": "comentou em",
-        "a_file": "um arquivo"
+    "header": {
+      "hide_comments": "Ocultar Comentários",
+      "show_comments": "Ver Comentários",
+      "approved": "APROVADO",
+      "approve_button": "Aprovar Design"
     },
-    "stats": {
-        "welcome": "Bem-vindo",
-        "network_online": "Rede Online",
-        "command_desc": "Seu centro de comando está pronto para novas integrações hoje.",
-        "workspace": "Workspace",
-        "active": "Ativo",
-        "online": "Online",
-        "next_deadline": "Próxima Meta",
-        "immediate_impact": "Impacto Imediato",
-        "fluxs_up_to_date": "Fluxs. em Dia",
-        "no_deadline": "Nenhum prazo crítico detectado.",
-        "tips": {
-            "ai_briefing": {
-                "title": "Briefing com IA",
-                "desc": "Gere perguntas estratégicas automaticamente para seus clientes."
-            },
-            "agile_roadmap": {
-                "title": "Roadmap Ágil",
-                "desc": "Mantenha o progresso visível movendo os cards de entrega."
-            },
-            "public_links": {
-                "title": "Links Públicos",
-                "desc": "Compartilhe o briefing e receba aprovações sem login."
-            }
-        }
+    "canvas": {
+      "click_to_comment": "Clique em qualquer lugar para comentar",
+      "file_not_found": "Arquivo não encontrado."
     },
-    "analytics": {
-        "title": "Relatórios",
-        "subtitle": "Acompanhe a performance financeira e operacional da sua agência em tempo real com métricas preditivas.",
-        "intelligence_hub": "Intelligence Hub",
-        "tabs": {
-            "7d": "7 DIAS",
-            "30d": "30 DIAS",
-            "90d": "3 MESES"
-        },
-        "export_btn": "EXPORTAR",
-        "export_pdf": "Relatório PDF",
-        "export_csv": "Dados CSV",
-        "sections": {
-            "production": "Produção & Eficiência",
-            "finance": "Financeiro & Pipeline",
-            "performance": "Desempenho por Projeto",
-            "top_active": "Top 5 Ativos"
-        },
-        "cards": {
-            "active_projects": "Projetos Ativos",
-            "approval_rate": "Taxa de Aprovação",
-            "files_sent": "Arquivos Enviados",
-            "files_pending": "Arquivos Pendentes",
-            "total_pipeline": "Pipeline Total",
-            "est_profit": "Lucro Estimado",
-            "avg_margin": "Margem Média"
-        },
-        "table": {
-            "project_name": "Nome do Projeto",
-            "approved": "Aprovados",
-            "pending": "Pendências",
-            "no_data": "Nenhum dado disponível para o período selecionado."
-        }
+    "comment_modal": {
+      "title": "Novo Comentário",
+      "name_placeholder": "Seu Nome",
+      "comment_placeholder": "O que você gostaria de mudar?",
+      "submit_button": "Publicar Comentário"
     },
     "sidebar": {
-        "dashboard": "Dashboard",
-        "analytics": "Relatórios",
-        "briefing": "Briefing",
-        "identity": "Identidade",
-        "deliveries": "Entregas",
-        "files": "Arquivos",
-        "team": "Equipe",
-        "finance": "Financeiro",
-        "help": "Ajuda",
-        "workflow": "Workflow",
-        "back_btn": "Voltar",
-        "assist": "Fluxs. Assist",
-        "tutorial_desc": "Abrir tutorial interativo",
-        "support_node": "Support Node",
-        "help_center": "Central de Ajuda",
-        "activity_fluxs": "Fluxos de Atividade",
-        "level": "Nível"
+      "title": "Lista de Feedbacks",
+      "empty_message": "Clique em qualquer lugar na imagem para deixar um comentário."
+    },
+    "confirm": {
+      "approve": "Tem certeza que deseja aprovar este design?"
     }
+  }
 }

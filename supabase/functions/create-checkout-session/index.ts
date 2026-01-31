@@ -9,6 +9,9 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
+  // LOG PARA VERIFICAR DEPLOY
+  console.log("🚀 [v2.0.3] Iniciando create-checkout-session")
+
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
@@ -47,16 +50,33 @@ serve(async (req) => {
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser()
     if (userError || !user) throw new Error('Usuário não autenticado')
 
-    // ⚠️ SUBSTITUA PELOS SEUS PRICE IDS REAIS DO STRIPE
+    // ✅ Usando variáveis de ambiente para os Price IDs (Mais seguro e flexível)
     const prices: Record<string, string> = {
-      'pro': 'price_1SbUtdGoW23H3x15iq8rjnhW',    // Troque isso pelo seu Price ID real
-      'agency': 'price_1SbUuOGoW23H3x15Ighe0AiA',  // Troque isso pelo seu Price ID real
+      'pro': Deno.env.get('STRIPE_PRO_PRICE_ID') || 'price_1Svp6UK455PYItaBoorrK3OM',
+      'agency': Deno.env.get('STRIPE_AGENCY_PRICE_ID') || 'price_1SvpGCK455PYItaBtaUxFM27',
     }
     
     const priceId = prices[planIdParam]
+    
+    // --- DIAGNÓSTICOS ---
+    console.log(`🔍 Diagnóstico:`)
+    console.log(`   - Plan ID recebido: ${planIdParam}`)
+    console.log(`   - Price ID mapeado: ${priceId}`)
+    console.log(`   - Stripe Key Prefix: ${stripeKey.substring(0, 7)}...`)
+    
     if (!priceId) {
       throw new Error(`Plano '${planIdParam}' não encontrado. Price IDs configurados: ${Object.keys(prices).join(', ')}`)
     }
+
+    // Verificar se o preço existe no Stripe antes de tentar o checkout
+    try {
+      const stripePrice = await stripe.prices.retrieve(priceId)
+      console.log(`   - Preço no Stripe: ${stripePrice.active ? 'Ativo' : 'Inativo'} | Moeda: ${stripePrice.currency}`)
+    } catch (err: any) {
+      console.error(`   - ❌ Erro ao validar preço no Stripe: ${err.message}`)
+      throw new Error(`O Price ID '${priceId}' não foi encontrado na conta Stripe associada a esta chave (${stripeKey.substring(0, 7)}...). Verifique se você está usando a chave de Teste ou Live correta.`)
+    }
+    // ----------------------
 
     console.log(`✅ Checkout para: ${user.email} | Plano: ${planIdParam} | Price: ${priceId}`)
 
@@ -66,6 +86,7 @@ serve(async (req) => {
       customer_email: user.email,
       line_items: [{ price: priceId, quantity: 1 }],
       mode: 'subscription',
+      payment_method_types: ['card'],
       success_url: `${origin}/dashboard?success=true`,
       cancel_url: `${origin}/dashboard?canceled=true`,
       metadata: {

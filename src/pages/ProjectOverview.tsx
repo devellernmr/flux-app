@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, X, Zap } from "lucide-react";
@@ -30,11 +30,15 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 
-import { TutorialProvider } from "@/components/tutorial/TutorialContext";
+import {
+  TutorialProvider,
+  useTutorial,
+} from "@/components/tutorial/TutorialContext";
 import { TutorialOverlay } from "@/components/tutorial/TutorialOverlay";
 
 export function ProjectOverviewContent() {
   const { id } = useParams();
+  const { setNavigationHandler } = useTutorial();
   const { can, plan } = usePlan();
   const {
     user,
@@ -80,8 +84,12 @@ export function ProjectOverviewContent() {
 
   const [activeTab, setActiveTab] = useState("dashboard");
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const [upgradeFeatureName, setUpgradeFeatureName] = useState("Financeiro Avançado");
-  const [isActivityOpen, setIsActivityOpen] = useState(window.innerWidth >= 1600);
+  const [upgradeFeatureName, setUpgradeFeatureName] = useState(
+    "Financeiro Avançado",
+  );
+  const [isActivityOpen, setIsActivityOpen] = useState(
+    window.innerWidth >= 1600,
+  );
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileActivityOpen, setIsMobileActivityOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -91,6 +99,10 @@ export function ProjectOverviewContent() {
     if (window.innerWidth >= 1280) setIsActivityOpen(!isActivityOpen);
     else setIsMobileActivityOpen(true);
   };
+
+  useEffect(() => {
+    setNavigationHandler(setActiveTab);
+  }, [setActiveTab]);
 
   if (loading)
     return (
@@ -108,7 +120,10 @@ export function ProjectOverviewContent() {
       {/* Platinum Background System */}
       <div className="fixed inset-0 z-0 pointer-events-none opacity-20 overflow-hidden">
         <div className="absolute -top-[10%] -left-[5%] w-[60%] h-[60%] bg-blue-600/5 blur-[120px] rounded-full animate-pulse" />
-        <div className="absolute -bottom-[10%] -right-[5%] w-[60%] h-[60%] bg-purple-600/5 blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '3s' }} />
+        <div
+          className="absolute -bottom-[10%] -right-[5%] w-[60%] h-[60%] bg-purple-600/5 blur-[120px] rounded-full animate-pulse"
+          style={{ animationDelay: "3s" }}
+        />
         <div className="absolute inset-0 bg-[size:40px_40px] bg-grid-white/[0.01]" />
       </div>
 
@@ -167,7 +182,9 @@ export function ProjectOverviewContent() {
                   <div className="p-2 bg-zinc-900 border border-zinc-800 rounded-xl">
                     <Zap className="h-4 w-4 text-blue-500" />
                   </div>
-                  <span className="text-sm font-black text-white uppercase tracking-widest">Atividade do Fluxs.</span>
+                  <span className="text-sm font-black text-white uppercase tracking-widest">
+                    Atividade do Fluxs.
+                  </span>
                 </div>
                 <Button
                   variant="ghost"
@@ -224,10 +241,11 @@ export function ProjectOverviewContent() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`whitespace-nowrap px-5 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all duration-500 border ${activeTab === tab.id
-                ? "bg-white text-black border-white shadow-[0_10px_20px_-5px_rgba(255,255,255,0.1)]"
-                : "bg-zinc-900/50 border-zinc-800/80 text-zinc-500"
-                }`}
+              className={`whitespace-nowrap px-5 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all duration-500 border ${
+                activeTab === tab.id
+                  ? "bg-white text-black border-white shadow-[0_10px_20px_-5px_rgba(255,255,255,0.1)]"
+                  : "bg-zinc-900/50 border-zinc-800/80 text-zinc-500"
+              }`}
             >
               {tab.label}
             </button>
@@ -295,8 +313,8 @@ export function ProjectOverviewContent() {
                   {activeTab === "members" && (
                     <TeamManager key="members" projectId={id!} />
                   )}
-                  {activeTab === "finance" && (
-                    can("finance") ? (
+                  {activeTab === "finance" &&
+                    (can("finance") ? (
                       <FinanceTab
                         key="finance"
                         projectId={id!}
@@ -313,9 +331,16 @@ export function ProjectOverviewContent() {
                           <div className="mb-6 inline-flex items-center justify-center w-16 h-16 bg-purple-500/10 rounded-full">
                             <Zap className="w-8 h-8 text-purple-500" />
                           </div>
-                          <h3 className="text-2xl font-bold text-white mb-2">Financeiro Avançado</h3>
+                          <h3 className="text-2xl font-bold text-white mb-2">
+                            Financeiro Avançado
+                          </h3>
                           <p className="text-zinc-400 mb-6">
-                            O módulo de Financeiro está disponível apenas no plano <span className="text-purple-400 font-bold">Agency</span>.
+                            O módulo de Financeiro está disponível apenas no
+                            plano{" "}
+                            <span className="text-purple-400 font-bold">
+                              Agency
+                            </span>
+                            .
                           </p>
                           <Button
                             onClick={() => setShowUpgradeModal(true)}
@@ -326,8 +351,7 @@ export function ProjectOverviewContent() {
                           </Button>
                         </div>
                       </div>
-                    )
-                  )}
+                    ))}
                   {activeTab === "help" && <HelpTab key="help" />}
                 </motion.div>
               </AnimatePresence>
@@ -339,7 +363,9 @@ export function ProjectOverviewContent() {
                   <div className="p-8 border-b border-white/5 bg-zinc-900/10 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
-                      <h2 className="text-[11px] font-black text-white uppercase tracking-[0.2em]">Fluxs. de Inteligência</h2>
+                      <h2 className="text-[11px] font-black text-white uppercase tracking-[0.2em]">
+                        Fluxs. de Inteligência
+                      </h2>
                     </div>
                   </div>
                   <div className="flex-1 overflow-hidden p-6">
@@ -376,7 +402,9 @@ export function ProjectOverviewContent() {
       <Dialog open={showResetDialog} onOpenChange={setShowResetDialog}>
         <DialogContent className="bg-zinc-950 border-white/5 rounded-[32px] overflow-hidden">
           <DialogHeader>
-            <DialogTitle className="text-xl font-black text-white tracking-tighter">Resetar Workflow?</DialogTitle>
+            <DialogTitle className="text-xl font-black text-white tracking-tighter">
+              Resetar Workflow?
+            </DialogTitle>
             <DialogDescription className="text-zinc-500 font-medium">
               Esta ação removerá todos os dados do briefing permanentemente.
             </DialogDescription>
