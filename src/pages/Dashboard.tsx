@@ -249,7 +249,7 @@ function DashboardContent() {
           </Button>
         </header>
 
-        <div className="p-4 md:p-8 lg:p-12 mb-20 max-w-[1600px] mx-auto">
+        <div className="p-4 md:p-8 lg:p-12 mb-20 max-w-[1600px] mx-auto w-full">
           {renderContent()}
         </div>
       </main>

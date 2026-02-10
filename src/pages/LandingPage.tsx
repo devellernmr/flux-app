@@ -57,7 +57,7 @@ const Navbar = () => {
             href="#pricing"
             className="text-sm font-medium text-zinc-400 hover:text-white transition-colors"
           >
-            Planos
+            Preços
           </a>
         </div>
         <div className="flex items-center gap-4">
@@ -78,271 +78,6 @@ const Navbar = () => {
   );
 };
 
-const HeroAnimation = () => {
-  return (
-    <div className="relative w-full max-w-4xl mx-auto aspect-[16/10] bg-[#0A0A0A] border border-white/10 rounded-xl shadow-2xl overflow-hidden flex flex-col font-sans select-none">
-      {/* Fake Browser Header */}
-      <div className="h-9 bg-[#0A0A0A] border-b border-white/5 flex items-center px-4 gap-2">
-        <div className="flex gap-1.5">
-          <div className="w-2.5 h-2.5 rounded-full bg-zinc-700/50" />
-          <div className="w-2.5 h-2.5 rounded-full bg-zinc-700/50" />
-          <div className="w-2.5 h-2.5 rounded-full bg-zinc-700/50" />
-        </div>
-        <div className="mx-auto bg-zinc-900/50 px-3 py-1 rounded-md border border-white/5 text-[10px] text-zinc-500 font-medium flex items-center gap-1.5">
-          <Lock className="w-2.5 h-2.5 opacity-70" />
-          fluxs.app/v/design-system-v2
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 flex relative">
-        {/* Sidebar */}
-        <div className="w-56 hidden md:flex flex-col gap-4 border-r border-white/5 bg-zinc-950/30 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-6 h-6 rounded bg-blue-600 flex items-center justify-center text-[10px] font-bold text-white">
-              F.
-            </div>
-            <div className="h-3 w-16 bg-zinc-800 rounded animate-pulse" />
-          </div>
-          <div className="space-y-2">
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="h-8 w-full rounded-lg bg-white/5 border border-white/5 flex items-center px-3"
-              >
-                <div className="h-2 w-20 bg-zinc-800 rounded" />
-              </div>
-            ))}
-          </div>
-          <div className="mt-auto space-y-2">
-            <div className="h-20 w-full rounded-lg bg-blue-500/10 border border-blue-500/20 p-3">
-              <div className="h-2 w-12 bg-blue-500/30 rounded mb-2" />
-              <div className="h-2 w-24 bg-blue-500/20 rounded" />
-            </div>
-          </div>
-        </div>
-
-        {/* Main Canvas */}
-        <div className="flex-1 bg-[#050505] relative overflow-hidden flex flex-col">
-          {/* Header */}
-          <div className="h-14 border-b border-white/5 flex items-center justify-between px-6 bg-[#0A0A0A]/50 backdrop-blur-sm">
-            <div>
-              <div className="h-3 w-32 bg-zinc-800 rounded mb-1.5" />
-              <div className="h-2 w-20 bg-zinc-900 rounded" />
-            </div>
-            {/* Status Badge */}
-            <motion.div
-              animate={{
-                backgroundColor: [
-                  "rgba(251, 191, 36, 0.1)", // Yellow base
-                  "rgba(251, 191, 36, 0.1)",
-                  "rgba(34, 197, 94, 0.1)", // Green
-                  "rgba(34, 197, 94, 0.1)",
-                ],
-                borderColor: [
-                  "rgba(251, 191, 36, 0.2)",
-                  "rgba(251, 191, 36, 0.2)",
-                  "rgba(34, 197, 94, 0.2)",
-                  "rgba(34, 197, 94, 0.2)",
-                ],
-              }}
-              transition={{
-                duration: 8,
-                times: [0, 0.65, 0.66, 1],
-                repeat: Infinity,
-              }}
-              className="px-2.5 py-1 rounded-full border text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5"
-            >
-              <motion.div
-                animate={{
-                  backgroundColor: ["#fbbf24", "#fbbf24", "#22c55e", "#22c55e"],
-                }}
-                transition={{
-                  duration: 8,
-                  times: [0, 0.65, 0.66, 1],
-                  repeat: Infinity,
-                }}
-                className="w-1.5 h-1.5 rounded-full shadow-[0_0_8px_rgba(0,0,0,0.5)]"
-              />
-              <span className="relative overflow-hidden w-24 h-3 block">
-                <motion.span
-                  className="absolute inset-0 text-yellow-500"
-                  animate={{ y: ["0%", "0%", "-100%", "-100%"] }}
-                  transition={{
-                    duration: 8,
-                    times: [0, 0.65, 0.66, 1],
-                    repeat: Infinity,
-                  }}
-                >
-                  Em Revisão
-                </motion.span>
-                <motion.span
-                  className="absolute inset-0 text-green-500"
-                  initial={{ y: "100%" }}
-                  animate={{ y: ["100%", "100%", "0%", "0%"] }}
-                  transition={{
-                    duration: 8,
-                    times: [0, 0.65, 0.66, 1],
-                    repeat: Infinity,
-                  }}
-                >
-                  Aprovado
-                </motion.span>
-              </span>
-            </motion.div>
-          </div>
-
-          {/* Design Mockup */}
-          <div className="p-8 flex-1 flex items-center justify-center relative">
-            <div className="w-full max-w-sm aspect-square bg-[#0F0F0F] rounded-xl border border-white/5 shadow-2xl relative overflow-hidden group">
-              {/* Abstract Art */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-blue-600 rounded-full blur-[60px] opacity-20" />
-              <div className="absolute inset-4 border border-zinc-800 rounded-lg flex items-center justify-center">
-                <div className="grid grid-cols-2 gap-4 w-full p-4">
-                  <div className="h-20 bg-zinc-800/30 rounded-lg" />
-                  <div className="h-20 bg-zinc-800/30 rounded-lg" />
-                  <div className="h-20 bg-zinc-800/30 rounded-lg col-span-2" />
-                </div>
-              </div>
-
-              {/* Comment Pin Animation */}
-              <motion.div
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{
-                  scale: [0, 1.2, 1, 1, 0],
-                  opacity: [0, 1, 1, 1, 0],
-                }}
-                transition={{
-                  duration: 8,
-                  times: [0.15, 0.2, 0.25, 0.55, 0.6],
-                  repeat: Infinity,
-                }}
-                className="absolute top-1/3 left-1/2 -ml-3"
-              >
-                <div className="relative">
-                  <div className="w-6 h-6 rounded-full bg-blue-600 border-2 border-white shadow-xl flex items-center justify-center relative z-10">
-                    <span className="text-[10px] font-bold text-white">1</span>
-                  </div>
-                  {/* Tooltip */}
-                  <motion.div
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 1.8 }}
-                    className="absolute left-full top-0 ml-2 w-32 bg-white rounded-lg p-2 shadow-xl z-20"
-                  >
-                    <div className="h-1.5 w-16 bg-zinc-200 rounded mb-1.5" />
-                    <div className="h-1.5 w-10 bg-zinc-200 rounded" />
-                  </motion.div>
-                </div>
-              </motion.div>
-            </div>
-          </div>
-
-          {/* Bottom Action Bar */}
-          <div className="h-16 border-t border-white/5 bg-[#0A0A0A] flex items-center justify-between px-6">
-            <div className="flex -space-x-2">
-              {[1, 2].map((i) => (
-                <div
-                  key={i}
-                  className="w-8 h-8 rounded-full bg-zinc-800 border-2 border-[#0A0A0A]"
-                />
-              ))}
-              <div className="w-8 h-8 rounded-full bg-zinc-900 border-2 border-[#0A0A0A] border-dashed flex items-center justify-center text-[10px] text-zinc-500">
-                +
-              </div>
-            </div>
-
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              animate={{
-                backgroundColor: ["#27272A", "#27272A", "#22C55E", "#22C55E"], // zinc-800 -> green-500
-                color: ["#A1A1AA", "#A1A1AA", "#FFFFFF", "#FFFFFF"],
-              }}
-              transition={{
-                duration: 8,
-                times: [0, 0.65, 0.66, 1],
-                repeat: Infinity,
-              }}
-              className="px-6 py-2.5 rounded-lg bg-zinc-800 text-sm font-bold text-zinc-400 transition-colors flex items-center gap-2"
-            >
-              <span className="relative w-24 h-5 block overflow-hidden text-center">
-                <motion.span
-                  className="absolute inset-0 flex items-center justify-center gap-2"
-                  animate={{ y: ["0%", "0%", "-150%", "-150%"] }}
-                  transition={{
-                    duration: 8,
-                    times: [0, 0.65, 0.66, 1],
-                    repeat: Infinity,
-                  }}
-                >
-                  Aprovar Arte
-                </motion.span>
-                <motion.span
-                  className="absolute inset-0 flex items-center justify-center gap-2"
-                  initial={{ y: "150%" }}
-                  animate={{ y: ["150%", "150%", "0%", "0%"] }}
-                  transition={{
-                    duration: 8,
-                    times: [0, 0.65, 0.66, 1],
-                    repeat: Infinity,
-                  }}
-                >
-                  <CheckCircle2 className="w-4 h-4" /> Aprovado
-                </motion.span>
-              </span>
-            </motion.button>
-          </div>
-        </div>
-
-        {/* MOUSE POINTER OVERLAY */}
-        <motion.div
-          initial={{ x: "100%", y: "100%", opacity: 0 }}
-          animate={{
-            x: ["130%", "50%", "50%", "90%", "90%", "130%"],
-            y: ["100%", "33%", "33%", "90%", "90%", "100%"],
-            opacity: [0, 1, 1, 1, 1, 0],
-          }}
-          transition={{
-            duration: 8,
-            times: [0, 0.15, 0.55, 0.65, 0.9, 1],
-            ease: "easeInOut",
-            repeat: Infinity,
-          }}
-          className="absolute top-0 left-0 w-full h-full pointer-events-none z-50"
-        >
-          <div className="relative w-full h-full">
-            <MousePointerClick className="w-6 h-6 text-black fill-white drop-shadow-md absolute -translate-x-1/2 -translate-y-1/2" />
-
-            {/* Click Ripple 1 (Comment) */}
-            <motion.div
-              animate={{ scale: [0, 2], opacity: [1, 0] }}
-              transition={{
-                duration: 0.5,
-                delay: 1.2,
-                repeat: Infinity,
-                repeatDelay: 7.5,
-              }}
-              className="absolute -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full border-2 border-white/50"
-            />
-
-            {/* Click Ripple 2 (Approve) */}
-            <motion.div
-              animate={{ scale: [0, 2], opacity: [1, 0] }}
-              transition={{
-                duration: 0.5,
-                delay: 5.2,
-                repeat: Infinity,
-                repeatDelay: 7.5,
-              }}
-              className="absolute -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full border-2 border-green-500/50"
-            />
-          </div>
-        </motion.div>
-      </div>
-    </div>
-  );
-};
-
 const Hero = () => {
   return (
     <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden">
@@ -353,42 +88,30 @@ const Hero = () => {
             Nova Era para Agências
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-black text-white tracking-tighter leading-[1.1]">
-            Aprovação de Clientes <br />
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-black text-white tracking-tighter leading-[1.1]">
+            Aprovação de clientes <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-600">
-              3x mais rápida.
+              até 3x mais rápida. Sem WhatsApp.
             </span>
           </h1>
 
           <p className="text-lg md:text-xl text-zinc-400 font-medium max-w-2xl mx-auto leading-relaxed">
-            Transforme o Caos Criativo em uma Operação de Elite. Centralize
-            briefings, arquivos e feedbacks em um único link que seu cliente
-            realmente ama abrir.
+            Centralize briefings, arquivos e feedbacks em um único link. <br />
+            Chega de áudio confuso, refação infinita e cliente perdido.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
             <Link to="/login" className="w-full sm:w-auto">
               <Button className="w-full sm:w-auto h-14 px-8 bg-blue-600 hover:bg-blue-500 text-white font-bold text-lg rounded-2xl shadow-xl shadow-blue-600/20 transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-2">
-                Criar Workspace em 2 min
+                Criar Workspace em 2 minutos
                 <ArrowRight className="w-5 h-5" />
               </Button>
             </Link>
             <p className="text-xs text-zinc-500 font-medium mt-2 sm:mt-0">
-              Não requer cartão de crédito • Plano Grátis Vitalício
+              Não precisa de cartão • Plano grátis para sempre
             </p>
           </div>
         </div>
-
-        {/* Hero Animation */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="mt-16 md:mt-24 relative max-w-5xl mx-auto"
-        >
-          <div className="absolute -inset-1 bg-gradient-to-b from-blue-500 to-purple-600 rounded-3xl blur opacity-20"></div>
-          <HeroAnimation />
-        </motion.div>
       </div>
 
       {/* Background Ambience */}
@@ -458,7 +181,7 @@ const TrustBar = () => (
   <div className="border-y border-white/5 bg-zinc-950/50 backdrop-blur-sm">
     <div className="max-w-7xl mx-auto px-6 py-10">
       <p className="text-center text-xs font-bold text-zinc-600 uppercase tracking-widest mb-8">
-        +500 Agências e Freelancers organizaram a casa com o Fluxs.
+        Mais de 500 designers e agências já abandonaram o WhatsApp com o Fluxs.
       </p>
       <div className="flex flex-wrap justify-center gap-12 md:gap-20 opacity-30 grayscale mix-blend-screen">
         {/* Placeholder Logos */}
@@ -487,12 +210,12 @@ const ProblemAgitation = () => (
     <div className="max-w-7xl mx-auto px-6 relative z-10">
       <div className="text-center max-w-3xl mx-auto mb-20 space-y-4">
         <h2 className="text-3xl md:text-5xl font-black text-white tracking-tighter">
-          Sua agência ainda vive no{" "}
-          <span className="text-red-500">"Modo Sobrevivência"</span>?
+          Sua agência ainda trabalha no{" "}
+          <span className="text-red-500">Modo Sobrevivência</span>?
         </h2>
         <p className="text-lg text-zinc-400 leading-relaxed">
-          Se sua rotina se resume a apagar incêndios, sua operação está
-          sangrando dinheiro. Identifique o inimigo:
+          Se sua rotina é apagar incêndio, sua operação está vazando tempo,
+          dinheiro e autoridade. Os verdadeiros inimigos:
         </p>
       </div>
 
@@ -501,26 +224,26 @@ const ProblemAgitation = () => (
           {
             icon: MessageSquare,
             color: "text-green-500",
-            title: 'O "Telefone Sem Fio"',
-            desc: "O cliente manda alteração por áudio no WhatsApp, sua equipe esquece, e a refação acontece.",
+            title: "📞 Telefone Sem Fio",
+            desc: "Feedback por áudio vira erro, esquecimento e refação desnecessária.",
           },
           {
             icon: FileBox,
             color: "text-orange-500",
-            title: "O Limbo dos Assets",
-            desc: '"Me manda o logo de novo?". Arquivos importantes se perdem em conversas antigas ou links expirados.',
+            title: "📁 Limbo dos Assets",
+            desc: '"Me manda o arquivo de novo?" vira rotina quando tudo está espalhado.',
           },
           {
             icon: MousePointerClick,
             color: "text-red-500",
-            title: 'Aprovação "Cega"',
-            desc: '"Não gostei, muda algo ali". Feedbacks vagos geram ciclos infinitos de V1, V2, V15...',
+            title: "🎯 Aprovação Cega",
+            desc: '"Muda alguma coisa ali" gera V1, V2, V7… até ninguém aguentar mais.',
           },
           {
             icon: Layers,
             color: "text-purple-500",
-            title: "Percepção Amadora",
-            desc: 'Entregar links soltos de Drive faz sua agência parecer "mais uma", dificultando cobrar tickets altos.',
+            title: "🚫 Percepção Amadora",
+            desc: "Links soltos de Drive fazem sua agência parecer pequena — e barata.",
           },
         ].map((item, i) => (
           <motion.div
@@ -555,7 +278,7 @@ const ValuePillars = () => (
     <div className="max-w-7xl mx-auto px-6">
       <div className="text-center mb-20 space-y-4">
         <h2 className="text-3xl md:text-5xl font-black text-white tracking-tighter">
-          Um fluxo desenhado para Controle Total.
+          Um fluxo criado para eliminar ruído — não criar mais uma ferramenta.
         </h2>
       </div>
 
@@ -563,23 +286,23 @@ const ValuePillars = () => (
         {[
           {
             icon: Zap,
-            title: "Briefing Blindado",
-            subtitle: 'O Fim do "Faz algo criativo aí".',
-            desc: "Envie links de briefing interativos onde o cliente é guiado a dizer exatamente o que precisa. Transformamos ideias vagas em escopos técnicos.",
+            title: "Briefing Guiado",
+            subtitle: 'Chega do "faz algo criativo aí".',
+            desc: "O cliente responde perguntas certas, no momento certo. Você recebe escopo claro, não achismo.",
             gradient: "from-blue-500 to-blue-600",
           },
           {
             icon: LayoutTemplate,
             title: "Gestão Centralizada",
-            subtitle: "Sua verdade em um único lugar.",
-            desc: "Abandone as 10 abas abertas. Visualize o status real de cada projeto, centralize arquivos finais e saiba exatamente quem está devendo o quê.",
+            subtitle: "Tudo em um lugar só.",
+            desc: "Status, arquivos, versões e aprovações em uma tela única. Sem 10 abas abertas e sem procurar conversa antiga.",
             gradient: "from-purple-500 to-purple-600",
           },
           {
             icon: CheckCircle2,
             title: "Aprovação Visual",
-            subtitle: "Feedback preciso. Aprovação rápida.",
-            desc: "Seu cliente clica diretamente na imagem do design para deixar comentários pinados. Sem e-mails longos, apenas feedback acionável.",
+            subtitle: "Feedback preciso. Decisão rápida.",
+            desc: "Seu cliente clica diretamente no design para deixar comentários pinados. Menos interpretação, mais decisão.",
             gradient: "from-emerald-500 to-emerald-600",
           },
         ].map((card, i) => (
@@ -633,24 +356,14 @@ const FeatureHighlight = () => (
           <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter leading-tight">
             A tecnologia é nossa. <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
-              A fama é sua.
+              A autoridade é sua.
             </span>
           </h2>
           <p className="text-lg text-zinc-400 leading-relaxed">
-            Não envie seus clientes para uma ferramenta genérica. Com o{" "}
-            <strong>White-Label do Fluxs</strong>, você personaliza o portal com
-            seu logo, suas cores e seu domínio.
-            <br />
-            <br />
-            Entregue uma "Área do Cliente" exclusiva que transmite autoridade e
-            faz sua agência parecer uma gigante multinacional.
+            Personalize o portal com seu logo, cores e domínio. Entregue uma
+            Área do Cliente que faz sua agência parecer maior, mais organizada e
+            mais profissional.
           </p>
-          <Button
-            variant="outline"
-            className="border-zinc-800 text-white hover:bg-zinc-900 h-12 rounded-xl px-6"
-          >
-            Ver Exemplo de Portal
-          </Button>
         </div>
 
         <div className="relative order-1 lg:order-2">
@@ -688,25 +401,14 @@ const Comparison = () => (
 
       <div className="bg-zinc-900/30 border border-white/5 rounded-3xl overflow-hidden backdrop-blur-sm">
         <div className="grid grid-cols-2 text-center text-sm font-bold uppercase tracking-widest border-b border-white/5">
-          <div className="p-6 bg-red-500/5 text-red-400">Modo Caos (Atual)</div>
-          <div className="p-6 bg-blue-500/5 text-blue-400">
-            Modo Elite (Fluxs)
-          </div>
+          <div className="p-6 bg-red-500/5 text-red-400">Modo Caos</div>
+          <div className="p-6 bg-blue-500/5 text-blue-400">Fluxs</div>
         </div>
         {[
-          [
-            "5 Ferramentas soltas (Zap, Trello, Drive)",
-            "1 Único Centro de Comando",
-          ],
-          ["Cobranças manuais desgastantes", "Status visível e automático"],
-          [
-            "Cliente ansioso perguntando 'como está?'",
-            "Cliente seguro acompanhando progresso",
-          ],
-          [
-            "Refação por falha de interpretação",
-            "Aprovação cirúrgica de primeira",
-          ],
+          ["5 ferramentas desconectadas", "1 centro de comando"],
+          ["Cobrança manual", "Status automático"],
+          ["Cliente inseguro", "Cliente acompanhando"],
+          ["Refação infinita", "Aprovação objetiva"],
         ].map(([bad, good], i) => (
           <div
             key={i}
@@ -741,7 +443,7 @@ const Pricing = () => (
           <div className="mb-8">
             <h3 className="text-xl font-bold text-white mb-2">Starter</h3>
             <p className="text-sm text-zinc-500 h-10">
-              Para freelancers iniciantes.
+              Ideal para testar com cliente real.
             </p>
           </div>
           <div className="text-4xl font-black text-white mb-8 tracking-tighter">
@@ -749,9 +451,9 @@ const Pricing = () => (
           </div>
           <div className="space-y-4 mb-8 flex-1">
             {[
-              "2 Projetos Ativos",
+              "1 Projeto Ativo",
+              "Branding Fluxs",
               "1GB Armazenamento",
-              "Exportação Básica",
               "Suporte por Email",
             ].map((f) => (
               <div
@@ -789,10 +491,11 @@ const Pricing = () => (
           <div className="space-y-4 mb-8 flex-1">
             {[
               "Projetos Ilimitados",
-              "50GB Armazenamento",
-              "Exportação 4K",
-              "Prioridade no Suporte",
+              "Remove Branding Fluxs",
               "Domínio Personalizado",
+              "50GB Armazenamento",
+              "Exportação em 4K",
+              "Prioridade no Suporte",
             ].map((f) => (
               <div
                 key={f}
@@ -826,11 +529,12 @@ const Pricing = () => (
           </div>
           <div className="space-y-4 mb-8 flex-1">
             {[
-              "Tudo do Pro",
-              "500GB Armazenamento",
-              "Múltiplos Usuários",
+              "Tudo do Professional",
               "White-Label Completo",
+              "Múltiplos Usuários",
+              "500GB Armazenamento",
               "Acesso via API",
+              "Infraestrutura para Escala",
             ].map((f) => (
               <div
                 key={f}
@@ -928,7 +632,8 @@ const Footer = () => (
 
 export function LandingPage() {
   useEffect(() => {
-    document.title = "Fluxs. - O Sistema Operacional para Agências de Elite";
+    document.title =
+      "Fluxs. — O Sistema Operacional de Aprovação para Agências Profissionais";
   }, []);
 
   return (
@@ -950,15 +655,15 @@ export function LandingPage() {
         <div className="absolute inset-0 bg-blue-900/10"></div>
         <div className="max-w-4xl mx-auto px-6 relative z-10 text-center space-y-8">
           <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter">
-            Sua agência merece <br /> esse upgrade.
+            Sua agência não precisa <br /> trabalhar no improviso.
           </h2>
           <p className="text-xl text-blue-200/60 font-medium">
-            Pare de perder tempo gerenciando bagunça. Comece a focar no
-            crescimento.
+            Organize seu processo, encante seus clientes e cobre como
+            profissional.
           </p>
           <Link to="/login">
             <Button className="h-16 px-10 bg-white text-black hover:bg-zinc-200 font-bold text-xl rounded-2xl shadow-2xl hover:scale-105 transition-transform">
-              Começar Agora
+              Começar Grátis Agora
             </Button>
           </Link>
         </div>

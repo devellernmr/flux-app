@@ -12,7 +12,7 @@ interface PlanLimits {
 
 const PLANS: Record<PlanType, PlanLimits> = {
   starter: {
-    projects: 2,
+    projects: 1,
     storage: 1024 * 1024 * 1024 * 1, // 1GB
     features: [], // Lista vazia = bloqueia features extras
   },

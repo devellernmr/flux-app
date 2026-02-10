@@ -228,7 +228,7 @@ export function ProjectOverviewContent() {
         />
 
         {/* --- PLATINUM MOBILE TAB NAVIGATION --- */}
-        <div className="md:hidden flex items-center gap-2 overflow-x-auto no-scrollbar px-6 py-4 border-b border-white/5 bg-[#030303]/80 backdrop-blur-xl sticky top-0 z-20">
+        <div className="md:hidden flex items-center gap-2 overflow-x-auto no-scrollbar px-6 py-4 border-b border-white/5 bg-[#030303]/80 backdrop-blur-xl sticky top-20 z-20">
           {[
             { id: "dashboard", label: "Fluxs." },
             { id: "briefing", label: "Docs" },

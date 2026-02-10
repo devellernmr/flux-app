@@ -167,7 +167,7 @@ export function UpgradeModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="p-0 border-0 bg-transparent shadow-none w-[95vw] max-w-3xl overflow-hidden rounded-[32px]">
+      <DialogContent className="p-0 border-0 bg-transparent shadow-none w-[95vw] max-w-3xl overflow-hidden rounded-[32px] max-h-[90vh]">
         <AnimatePresence mode="wait">
           {open && (
             <motion.div
@@ -180,7 +180,7 @@ export function UpgradeModal({
                 stiffness: 300,
                 duration: 0.4,
               }}
-              className="relative w-full"
+              className="relative w-full overflow-y-auto max-h-[90vh] no-scrollbar rounded-[32px]"
             >
               {/* Glow Effect Dynamically Linked to Carousel */}
               <motion.div
@@ -193,32 +193,32 @@ export function UpgradeModal({
 
               <div className="bg-[#0A0A0A] border border-white/10 rounded-[32px] overflow-hidden shadow-2xl relative">
                 {/* Hero Section with Animation */}
-                <div className="relative overflow-hidden min-h-[360px] md:min-h-[380px] flex flex-col justify-center">
+                <div className="relative overflow-hidden min-h-[320px] md:min-h-[360px] flex flex-col justify-center">
                   <AnimatePresence mode="wait">
                     <motion.div
                       key={activeContent.id}
-                      initial={{ opacity: 0, x: 50, scale: 0.95 }}
-                      animate={{ opacity: 1, x: 0, scale: 1 }}
-                      exit={{ opacity: 0, x: -50, scale: 0.95 }}
-                      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                      className={`absolute inset-0 bg-gradient-to-br ${activeContent.gradient} p-8 md:p-12 flex flex-col items-center justify-center text-center`}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.5, ease: "easeOut" }}
+                      className={`absolute inset-0 bg-gradient-to-br ${activeContent.gradient} p-6 md:p-12 flex flex-col items-center justify-center text-center`}
                     >
-                      <div className="absolute inset-0 opacity-20 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay"></div>
+                      <div className="absolute inset-0 opacity-10 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay"></div>
 
                       <div className="relative z-10 flex flex-col items-center max-w-xl">
-                        <div className="inline-flex items-center justify-center w-20 h-20 bg-white/10 rounded-3xl border border-white/20 backdrop-blur-xl shadow-2xl mb-8">
+                        <div className="inline-flex items-center justify-center w-16 h-16 bg-white/10 rounded-2xl border border-white/20 backdrop-blur-xl shadow-2xl mb-6">
                           {activeContent.icon}
                         </div>
 
-                        <DialogTitle className="text-3xl md:text-5xl font-black text-white leading-tight mb-3 tracking-tighter">
+                        <DialogTitle className="text-3xl md:text-5xl font-black text-white leading-tight mb-2 tracking-tighter">
                           {activeContent.title}
                         </DialogTitle>
 
-                        <p className="text-white text-lg md:text-xl font-bold mb-4 opacity-90">
+                        <p className="text-white text-base md:text-xl font-bold mb-3 opacity-90">
                           {activeContent.subtitle}
                         </p>
 
-                        <DialogDescription className="text-white/70 text-sm md:text-base leading-relaxed max-w-md">
+                        <DialogDescription className="text-white/70 text-xs md:text-base leading-relaxed max-w-md">
                           {activeContent.description}
                         </DialogDescription>
                       </div>
@@ -226,14 +226,14 @@ export function UpgradeModal({
                   </AnimatePresence>
 
                   {/* Progress Indicators */}
-                  <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+                  <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
                     {highlights.map((_, i) => (
                       <div
                         key={i}
-                        className={`h-1.5 rounded-full transition-all duration-500 ${
+                        className={`h-1 rounded-full transition-all duration-500 ${
                           activeIndex === i
-                            ? "w-8 bg-white"
-                            : "w-1.5 bg-white/20"
+                            ? "w-6 bg-white"
+                            : "w-3 bg-white/20 opacity-50"
                         }`}
                       />
                     ))}
@@ -241,25 +241,24 @@ export function UpgradeModal({
                 </div>
 
                 {/* Benefits & Plans Grid */}
-                <div className="p-8 md:p-10 bg-[#0A0A0A]">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-10">
+                <div className="p-6 md:p-8 bg-[#090909]">
+                  <div className="mb-8">
                     <AnimatePresence mode="wait">
                       <motion.div
                         key={`benefits-${activeContent.id}`}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        className="col-span-1 md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-3"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="grid grid-cols-1 sm:grid-cols-2 gap-2"
                       >
                         {activeContent.benefits.map((benefit) => (
                           <div
                             key={benefit}
-                            className="flex items-center gap-3 p-4 rounded-2xl bg-zinc-900/40 border border-white/5"
+                            className="flex items-center gap-3 p-3.5 rounded-xl bg-[#121212] border border-white/[0.03] group hover:border-white/10 transition-colors"
                           >
-                            <div className="flex-shrink-0 w-6 h-6 bg-white/10 rounded-full flex items-center justify-center">
-                              <Check className="w-3.5 h-3.5 text-white" />
+                            <div className="flex-shrink-0 w-5 h-5 bg-zinc-800 rounded-full flex items-center justify-center border border-white/5">
+                              <Check className="w-3 h-3 text-zinc-400" />
                             </div>
-                            <span className="text-sm font-semibold text-zinc-300">
+                            <span className="text-xs font-bold text-zinc-400">
                               {benefit}
                             </span>
                           </div>
@@ -270,53 +269,55 @@ export function UpgradeModal({
 
                   {/* Plan Selection */}
                   <div className="space-y-4 mb-8">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-[11px] font-black text-zinc-500 uppercase tracking-[0.2em]">
-                        Upgrade de Workflow
-                      </h3>
-                      {currentPlan !== "starter" && (
-                        <div className="px-3 py-1 bg-zinc-900 rounded-full border border-white/5 text-[10px] font-bold text-zinc-400">
-                          SEU PLANO: {currentPlan?.toUpperCase()}
-                        </div>
-                      )}
-                    </div>
+                    <h3 className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.2em] ml-1">
+                      Upgrade de Workflow
+                    </h3>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       {/* Pro Plan */}
                       <div
                         onClick={() => setSelectedPlan("pro")}
-                        className={`relative p-5 rounded-[24px] border-2 cursor-pointer transition-all duration-500 group overflow-hidden ${
+                        className={`relative p-5 rounded-[24px] border-2 cursor-pointer transition-all duration-300 ${
                           selectedPlan === "pro"
-                            ? "border-blue-500 bg-blue-500/10"
-                            : "border-zinc-800 bg-zinc-900/20 hover:border-zinc-700"
+                            ? "border-blue-600 bg-blue-600/5 shadow-[0_0_30px_-10px_rgba(59,130,246,0.2)]"
+                            : "border-zinc-800/50 bg-zinc-900/10 hover:border-zinc-700"
                         }`}
                       >
                         <div className="flex flex-col gap-4">
                           <div className="flex justify-between items-start">
                             <div
-                              className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${selectedPlan === "pro" ? "border-blue-500 bg-blue-500" : "border-zinc-700"}`}
+                              className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                                selectedPlan === "pro"
+                                  ? "border-blue-600 bg-blue-600"
+                                  : "border-zinc-800"
+                              }`}
                             >
                               {selectedPlan === "pro" && (
-                                <Check className="w-3 h-3 text-white" />
+                                <Check
+                                  className="w-3.5 h-3.5 text-white"
+                                  strokeWidth={3}
+                                />
                               )}
                             </div>
                             <div className="text-right">
-                              <span className="text-2xl font-black text-white">
-                                R$ 49
-                              </span>
-                              <span className="text-[10px] text-zinc-500 block">
-                                /mês
-                              </span>
+                              <div className="flex flex-col leading-none">
+                                <span className="text-2xl font-black text-white">
+                                  R$ 49
+                                </span>
+                                <span className="text-[10px] text-zinc-600 font-bold mt-1">
+                                  /mês
+                                </span>
+                              </div>
                             </div>
                           </div>
                           <div>
                             <span
-                              className={`font-black text-lg ${selectedPlan === "pro" ? "text-blue-400" : "text-white"}`}
+                              className={`text-base font-black ${selectedPlan === "pro" ? "text-blue-500" : "text-white"}`}
                             >
                               Professional
                             </span>
-                            <p className="text-xs text-zinc-500 mt-1">
-                              Ideal para freelancers em escala.
+                            <p className="text-[10px] text-zinc-600 font-bold mt-1">
+                              Para freelancers em escala.
                             </p>
                           </div>
                         </div>
@@ -325,41 +326,50 @@ export function UpgradeModal({
                       {/* Agency Plan */}
                       <div
                         onClick={() => setSelectedPlan("agency")}
-                        className={`relative p-5 rounded-[24px] border-2 cursor-pointer transition-all duration-500 group overflow-hidden ${
+                        className={`relative p-5 rounded-[24px] border-2 cursor-pointer transition-all duration-300 ${
                           selectedPlan === "agency"
-                            ? "border-purple-500 bg-purple-500/10"
-                            : "border-zinc-800 bg-zinc-900/20 hover:border-zinc-700"
+                            ? "border-purple-600 bg-purple-600/5 shadow-[0_0_30px_-10px_rgba(168,85,247,0.2)]"
+                            : "border-zinc-800/50 bg-zinc-900/10 hover:border-zinc-700"
                         }`}
                       >
-                        <div className="absolute top-0 right-0 px-4 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-[9px] font-black uppercase tracking-tighter rounded-bl-xl">
+                        <div className="absolute top-0 right-0 px-3 py-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-[9px] font-black uppercase tracking-tighter rounded-bl-xl rounded-tr-[22px]">
                           Agência de Elite
                         </div>
                         <div className="flex flex-col gap-4">
                           <div className="flex justify-between items-start">
                             <div
-                              className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${selectedPlan === "agency" ? "border-purple-500 bg-purple-500" : "border-zinc-700"}`}
+                              className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                                selectedPlan === "agency"
+                                  ? "border-purple-600 bg-purple-600"
+                                  : "border-zinc-800"
+                              }`}
                             >
                               {selectedPlan === "agency" && (
-                                <Check className="w-3 h-3 text-white" />
+                                <Check
+                                  className="w-3.5 h-3.5 text-white"
+                                  strokeWidth={3}
+                                />
                               )}
                             </div>
                             <div className="text-right">
-                              <span className="text-2xl font-black text-white">
-                                R$ 149
-                              </span>
-                              <span className="text-[10px] text-zinc-500 block">
-                                /mês
-                              </span>
+                              <div className="flex flex-col leading-none">
+                                <span className="text-2xl font-black text-white">
+                                  R$ 149
+                                </span>
+                                <span className="text-[10px] text-zinc-600 font-bold mt-1">
+                                  /mês
+                                </span>
+                              </div>
                             </div>
                           </div>
                           <div>
                             <span
-                              className={`font-black text-lg ${selectedPlan === "agency" ? "text-purple-400" : "text-white"}`}
+                              className={`text-base font-black ${selectedPlan === "agency" ? "text-purple-500" : "text-white"}`}
                             >
                               Agency
                             </span>
-                            <p className="text-xs text-zinc-500 mt-1">
-                              Para times que dominam o mercado.
+                            <p className="text-[10px] text-zinc-600 font-bold mt-1">
+                              Para times de elite.
                             </p>
                           </div>
                         </div>
@@ -368,30 +378,30 @@ export function UpgradeModal({
                   </div>
 
                   {/* CTA Buttons */}
-                  <div className="flex flex-col gap-6">
+                  <div className="space-y-6">
                     <Button
                       onClick={handleUpgrade}
                       className={`w-full font-black h-16 rounded-2xl shadow-2xl transition-all text-white text-base group uppercase tracking-widest ${
                         selectedPlan === "pro"
-                          ? "bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 shadow-blue-500/30"
-                          : "bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 shadow-purple-500/30"
+                          ? "bg-blue-600 hover:bg-blue-500 shadow-blue-600/20"
+                          : "bg-purple-600 hover:bg-purple-500 shadow-purple-600/20"
                       }`}
                     >
-                      <Zap className="w-5 h-5 mr-3 fill-current group-hover:rotate-12 transition-transform" />
+                      <Zap className="w-4 h-4 mr-2 fill-current group-hover:rotate-12 transition-transform" />
                       Assinar Plano {selectedPlan === "pro" ? "Pro" : "Agency"}
                     </Button>
 
-                    <div className="flex items-center justify-center gap-6">
-                      <div className="flex items-center gap-2 text-[10px] text-zinc-600 font-bold uppercase tracking-widest">
-                        <Check className="w-3 h-3 text-zinc-800" />
+                    <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2">
+                      <div className="flex items-center gap-2 text-[10px] text-zinc-600 font-black uppercase tracking-[0.1em]">
+                        <Check className="w-3 h-3" />
                         Sem Condições
                       </div>
-                      <div className="flex items-center gap-2 text-[10px] text-zinc-600 font-bold uppercase tracking-widest">
-                        <Check className="w-3 h-3 text-zinc-800" />
+                      <div className="flex items-center gap-2 text-[10px] text-zinc-600 font-black uppercase tracking-[0.1em]">
+                        <Check className="w-3 h-3" />
                         Teste Grátis
                       </div>
-                      <div className="flex items-center gap-2 text-[10px] text-zinc-600 font-bold uppercase tracking-widest">
-                        <Check className="w-3 h-3 text-zinc-800" />
+                      <div className="flex items-center gap-2 text-[10px] text-zinc-600 font-black uppercase tracking-[0.1em]">
+                        <Check className="w-3 h-3" />
                         SSL Seguro
                       </div>
                     </div>

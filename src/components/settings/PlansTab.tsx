@@ -32,12 +32,12 @@ export function PlansTab({ currentPlan, usage }: PlansTabProps) {
       price: "Grátis",
       description: "Para freelancers iniciantes.",
       features: [
-        "2 Projetos Ativos",
+        "1 Projeto Ativo",
         "1GB Armazenamento",
         "Exportação Básica",
         "Suporte por Email",
       ],
-      limit: 2,
+      limit: 1,
       color: "zinc",
     },
     {
@@ -76,7 +76,7 @@ export function PlansTab({ currentPlan, usage }: PlansTabProps) {
   const currentPlanDetails =
     plans.find((p) => p.id === currentPlan) || plans[0];
   const projectPercentage = Math.min(
-    (usage.projects / (currentPlan === "starter" ? 2 : 100)) * 100,
+    (usage.projects / (currentPlan === "starter" ? 1 : 100)) * 100,
     100,
   );
 
@@ -222,7 +222,7 @@ export function PlansTab({ currentPlan, usage }: PlansTabProps) {
               <div className="flex justify-between text-xs font-medium">
                 <span className="text-zinc-400">Projetos Ativos</span>
                 <span className="text-white">
-                  {usage.projects} / {currentPlan === "starter" ? "2" : "∞"}
+                  {usage.projects} / {currentPlan === "starter" ? "1" : "∞"}
                 </span>
               </div>
               <Progress value={projectPercentage} className="h-2 bg-zinc-900" />

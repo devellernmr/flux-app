@@ -170,7 +170,7 @@ export function Sidebar({
             <span className="text-zinc-500">{t("sidebar.activity_fluxs")}</span>
             <span className="text-blue-500">
               {plan === "starter"
-                ? `${usage.projects}/2`
+                ? `${usage.projects}/1`
                 : `∞ ${t("sidebar.level")}`}
             </span>
           </div>
@@ -179,7 +179,7 @@ export function Sidebar({
               <motion.div
                 initial={{ width: 0 }}
                 animate={{
-                  width: `${Math.min((usage.projects / 2) * 100, 100)}%`,
+                  width: `${Math.min((usage.projects / 1) * 100, 100)}%`,
                 }}
                 className="h-full bg-gradient-to-r from-blue-600 to-blue-400 rounded-full"
               />

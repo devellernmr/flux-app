@@ -74,10 +74,17 @@
     box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
     animation: glow-pulse 4s ease-in-out infinite;
   }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
 @keyframes glow-pulse {
-
   0%,
   100% {
     opacity: 0.5;
@@ -135,7 +142,7 @@
   padding: 32px !important;
   /* Generous padding */
   max-width: 400px !important;
-  font-family: 'Inter', sans-serif !important;
+  font-family: "Inter", sans-serif !important;
 
   /* Initial State for Custom Animation */
   opacity: 0;
@@ -149,14 +156,22 @@
 
 /* Gradient Border Glow (Pseudo-element) */
 .driver-popover.fluxo-tour-popover::after {
-  content: '';
+  content: "";
   position: absolute;
   inset: -1px;
   border-radius: 24px;
   padding: 1px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0));
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.15),
+    rgba(255, 255, 255, 0)
+  );
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
@@ -302,7 +317,6 @@
 }
 
 @keyframes subtleFloat {
-
   0%,
   100% {
     transform: translateY(0);

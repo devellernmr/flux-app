@@ -2,7 +2,7 @@ export const PLANS = {
   starter: {
     label: "Starter",
     limits: {
-      projects: 2,         // Limite de 2 projetos
+      projects: 1,         // Limite de 1 projeto
       storageMB: 1024,     // 1GB
       features: []         // Sem features extras
     }

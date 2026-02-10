@@ -155,7 +155,7 @@ export function PublicBriefing() {
             </div>
           )}
           <div className="space-y-2">
-            <h1 className="text-4xl font-black text-white tracking-tighter leading-none">
+            <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tighter leading-none">
               {briefing?.projects?.name}
             </h1>
             <p className="text-zinc-500 font-medium tracking-tight">

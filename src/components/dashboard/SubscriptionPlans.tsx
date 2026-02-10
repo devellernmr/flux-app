@@ -27,7 +27,7 @@ export const PLANS: {
     period: "/mês",
     description: "Para quem está começando a organizar freelas.",
     features: [
-      "Até 2 Projetos",
+      "Até 1 Projeto",
       "Briefing Básico",
       "1GB de Armazenamento",
       "Suporte por Email",
