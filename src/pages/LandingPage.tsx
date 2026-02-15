@@ -177,33 +177,51 @@ const Testimonials = () => (
   </section>
 );
 
-const TrustBar = () => (
-  <div className="border-y border-white/5 bg-zinc-950/50 backdrop-blur-sm">
-    <div className="max-w-7xl mx-auto px-6 py-10">
-      <p className="text-center text-xs font-bold text-zinc-600 uppercase tracking-widest mb-8">
-        Mais de 500 designers e agências já abandonaram o WhatsApp com o Fluxs.
-      </p>
-      <div className="flex flex-wrap justify-center gap-12 md:gap-20 opacity-30 grayscale mix-blend-screen">
-        {/* Placeholder Logos */}
-        <div className="text-xl font-black text-white flex items-center gap-2">
-          <div className="w-6 h-6 bg-white rounded-full" /> STUDIO ALPHA
-        </div>
-        <div className="text-xl font-black text-white flex items-center gap-2">
-          <div className="w-6 h-6 bg-white rounded-md" /> VANGUARDA
-        </div>
-        <div className="text-xl font-black text-white flex items-center gap-2">
-          <div className="w-6 h-6 bg-white rotate-45" /> ELEVATE
-        </div>
-        <div className="text-xl font-black text-white flex items-center gap-2">
-          <div className="w-6 h-6 bg-white rounded-sm" /> PIXEL PUSH
-        </div>
-        <div className="text-xl font-black text-white flex items-center gap-2">
-          <div className="w-6 h-6 bg-white rounded-tr-lg" /> CREATIVE LABS
-        </div>
+const InfoTicker = () => {
+  const items = [
+    "Aprovação 3x mais rápida",
+    "Fim do caos no WhatsApp",
+    "Centralização de arquivos",
+    "Branding profissional",
+    "Briefings inteligentes",
+    "Feedbacks interativos",
+    "Gestão simplificada",
+    "White-label completo",
+    "Mais de 500 agências já usam",
+  ];
+
+  return (
+    <div className="border-y border-white/5 bg-zinc-950/20 backdrop-blur-sm overflow-hidden py-6 relative">
+      {/* Edge Fades */}
+      <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
+      <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
+
+      <div className="flex whitespace-nowrap">
+        <motion.div
+          animate={{ x: [0, -2000] }}
+          transition={{
+            x: {
+              repeat: Infinity,
+              repeatType: "loop",
+              duration: 50,
+              ease: "linear",
+            },
+          }}
+          className="flex gap-16 items-center pr-16"
+        >
+          {[...items, ...items, ...items, ...items, ...items].map((item, i) => (
+            <div key={i} className="flex items-center gap-6">
+              <div className="w-1 h-1 bg-blue-500/50 rounded-full" />
+              <span className="text-[10px] md:text-xs font-bold text-zinc-400/60 uppercase tracking-[0.2em] hover:text-white transition-colors cursor-default whitespace-nowrap">
+                {item}
+              </span>
+            </div>
+          ))}
+        </motion.div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 const ProblemAgitation = () => (
   <section className="py-24 md:py-32 relative">
@@ -643,7 +661,7 @@ export function LandingPage() {
 
       <Navbar />
       <Hero />
-      <TrustBar />
+      <InfoTicker />
       <ProblemAgitation />
       <ValuePillars />
       <FeatureHighlight />
