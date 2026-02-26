@@ -15,8 +15,14 @@ import {
   MessageSquare,
   FileBox,
   Star,
+  Mail,
+  Instagram,
+  Phone,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
 
 // --- COMPONENTS ---
 
@@ -58,6 +64,12 @@ const Navbar = () => {
             className="text-sm font-medium text-zinc-400 hover:text-white transition-colors"
           >
             Preços
+          </a>
+          <a
+            href="#contact"
+            className="text-sm font-medium text-zinc-400 hover:text-white transition-colors"
+          >
+            Contato
           </a>
         </div>
         <div className="flex items-center gap-4">
@@ -573,6 +585,174 @@ const Pricing = () => (
   </section>
 );
 
+const Contact = () => {
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const formData = new FormData(e.currentTarget);
+
+    try {
+      const { error } = await supabase.from("contact_messages").insert([
+        {
+          name: formData.get("name"),
+          email: formData.get("email"),
+          message: formData.get("message"),
+        },
+      ]);
+
+      if (!error) {
+        toast.success("Mensagem enviada com sucesso!", {
+          description: "Entraremos em contato em breve.",
+        });
+        (e.target as HTMLFormElement).reset();
+      } else {
+        console.error("Supabase Error:", error);
+        toast.error("Erro ao enviar mensagem", {
+          description: "Por favor, tente novamente ou use o WhatsApp.",
+        });
+      }
+    } catch (error) {
+      console.error("Submission Error:", error);
+      toast.error("Erro de conexão", {
+        description: "Verifique sua internet e tente novamente.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <section id="contact" className="py-32 relative overflow-hidden">
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+          <div className="space-y-8">
+            <div>
+              <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter mb-6">
+                Vamos elevar o <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-600">
+                  nível do seu jogo?
+                </span>
+              </h2>
+              <p className="text-lg text-zinc-400 leading-relaxed max-w-md">
+                Tire suas dúvidas, peça uma demo ou apenas diga oi. Estamos
+                prontos para transformar sua agência.
+              </p>
+            </div>
+
+            <div className="space-y-6">
+              <a
+                href="https://wa.me/5532998833302"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center gap-4 p-4 rounded-2xl bg-zinc-900/30 border border-white/5 hover:border-blue-500/30 transition-all"
+              >
+                <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center group-hover:bg-blue-500/20 transition-colors">
+                  <Phone className="w-6 h-6 text-blue-400" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-zinc-500 uppercase tracking-widest">
+                    WhatsApp
+                  </div>
+                  <div className="text-white font-bold">
+                    +55 (32) 99883-3302
+                  </div>
+                </div>
+              </a>
+
+              <a
+                href="mailto:fluxs.company@gmail.com"
+                className="group flex items-center gap-4 p-4 rounded-2xl bg-zinc-900/30 border border-white/5 hover:border-purple-500/30 transition-all"
+              >
+                <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center group-hover:bg-purple-500/20 transition-colors">
+                  <Mail className="w-6 h-6 text-purple-400" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-zinc-500 uppercase tracking-widest">
+                    E-mail
+                  </div>
+                  <div className="text-white font-bold">
+                    fluxs.company@gmail.com
+                  </div>
+                </div>
+              </a>
+
+              <a
+                href="https://www.instagram.com/fluxs.company/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center gap-4 p-4 rounded-2xl bg-zinc-900/30 border border-white/5 hover:border-pink-500/30 transition-all"
+              >
+                <div className="w-12 h-12 rounded-xl bg-pink-500/10 flex items-center justify-center group-hover:bg-pink-500/20 transition-colors">
+                  <Instagram className="w-6 h-6 text-pink-400" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-zinc-500 uppercase tracking-widest">
+                    Instagram
+                  </div>
+                  <div className="text-white font-bold">@fluxs.company</div>
+                </div>
+              </a>
+            </div>
+          </div>
+
+          <div className="relative">
+            <div className="absolute inset-0 bg-blue-600/10 blur-[100px] rounded-full pointer-events-none" />
+            <form
+              onSubmit={handleSubmit}
+              className="relative p-8 rounded-3xl bg-zinc-900/50 border border-white/10 backdrop-blur-xl space-y-6"
+            >
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-zinc-400 uppercase tracking-widest ml-1">
+                  Nome Completo
+                </label>
+                <Input
+                  required
+                  name="name"
+                  placeholder="Seu nome..."
+                  className="bg-black/50 border-white/5 h-12 rounded-xl focus:border-blue-500/50 transition-colors"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-zinc-400 uppercase tracking-widest ml-1">
+                  E-mail Profissional
+                </label>
+                <Input
+                  required
+                  name="email"
+                  type="email"
+                  placeholder="seu@email.com"
+                  className="bg-black/50 border-white/5 h-12 rounded-xl focus:border-blue-500/50 transition-colors"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-zinc-400 uppercase tracking-widest ml-1">
+                  Como podemos ajudar?
+                </label>
+                <Textarea
+                  required
+                  name="message"
+                  placeholder="Conte-nos um pouco sobre seu desafio..."
+                  className="bg-black/50 border-white/5 min-h-[150px] rounded-xl focus:border-blue-500/50 transition-colors resize-none"
+                />
+              </div>
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full h-14 bg-blue-600 hover:bg-blue-500 text-white font-bold text-lg rounded-xl shadow-xl shadow-blue-600/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              >
+                {loading ? "Enviando..." : "Enviar Mensagem"}
+              </Button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
 const Footer = () => (
   <footer className="py-20 border-t border-white/5 bg-black">
     <div className="max-w-7xl mx-auto px-6">
@@ -628,7 +808,7 @@ const Footer = () => (
               </a>
             </li>
             <li>
-              <a href="#" className="hover:text-blue-400">
+              <a href="#contact" className="hover:text-blue-400">
                 Contato
               </a>
             </li>
@@ -688,6 +868,7 @@ export function LandingPage() {
       </section>
 
       <Pricing />
+      <Contact />
       <Footer />
     </div>
   );
