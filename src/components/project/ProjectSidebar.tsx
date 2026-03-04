@@ -1,6 +1,7 @@
 import { memo } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 import {
   ArrowLeft,
   LayoutDashboard,
@@ -36,7 +37,6 @@ interface ProjectSidebarProps {
   isOwner: boolean;
   className?: string;
   mobileMode?: boolean;
-  desktopMode?: boolean;
 }
 
 export const ProjectSidebar = memo(function ProjectSidebar({
@@ -50,7 +50,6 @@ export const ProjectSidebar = memo(function ProjectSidebar({
   isOwner,
   className,
   mobileMode,
-  desktopMode,
 }: ProjectSidebarProps) {
   const { isAdmin } = useAdmin();
   const { t } = useTranslation();
@@ -207,58 +206,39 @@ export const ProjectSidebar = memo(function ProjectSidebar({
   );
 
   return (
-    <div className={className}>
-      {/* Desktop Sidebar */}
-      {(!mobileMode || desktopMode) && (
-        <aside className="w-72 bg-[#030303] border-r border-zinc-900/50 hidden md:flex flex-col sticky top-0 h-screen z-20">
-          <div className="p-8 pb-2">
-            <div className="flex items-center gap-3 px-2">
-              {customLogoUrl ? (
-                <img
-                  src={customLogoUrl}
-                  alt="Logo"
-                  className="h-6 max-w-[140px] object-contain rounded"
-                />
-              ) : (
-                <div className="flex items-center gap-2 font-black text-white text-xl tracking-tighter">
-                  <div className="h-8 w-8 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/20">
-                    <Sparkles className="h-4 w-4 text-white" />
-                  </div>
-                  FLUXS.
-                </div>
-              )}
-            </div>
-          </div>
-          <NavLinks />
-          <UserProfileFooter />
-        </aside>
-      )}
-
-      {/* Mobile Sidebar Content */}
-      {(!desktopMode || mobileMode) && (
-        <div className="bg-[#030303] h-full flex flex-col">
-          <div className="p-8 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-8 bg-blue-600 rounded-xl flex items-center justify-center">
+    <div className={cn("bg-[#030303] flex flex-col h-full", className)}>
+      <div className="p-8 flex items-center justify-between">
+        <div className="flex items-center gap-3 px-2">
+          {customLogoUrl ? (
+            <img
+              src={customLogoUrl}
+              alt="Logo"
+              className="h-6 max-w-[140px] object-contain rounded"
+            />
+          ) : (
+            <div className="flex items-center gap-2 font-black text-white text-xl tracking-tighter">
+              <div className="h-8 w-8 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/20">
                 <Sparkles className="h-4 w-4 text-white" />
               </div>
-              <span className="text-xl font-black text-white tracking-tighter">
-                FLUXS.
-              </span>
+              FLUXS.
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="bg-zinc-900 border border-zinc-800 rounded-xl hover:bg-zinc-800 transition-all h-10 w-10"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              <X className="h-5 w-5 text-zinc-400" />
-            </Button>
-          </div>
-          <NavLinks />
-          <UserProfileFooter />
+          )}
         </div>
-      )}
+
+        {mobileMode && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="bg-zinc-900 border border-zinc-800 rounded-xl hover:bg-zinc-800 transition-all h-10 w-10 md:hidden"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            <X className="h-5 w-5 text-zinc-400" />
+          </Button>
+        )}
+      </div>
+
+      <NavLinks />
+      <UserProfileFooter />
     </div>
   );
 });

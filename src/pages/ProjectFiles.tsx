@@ -724,7 +724,10 @@ export function ProjectFiles({ projectId }: { projectId: string }) {
 
       {/* MODAL ADICIONAR LINK */}
       <Dialog open={isAddLinkOpen} onOpenChange={setIsAddLinkOpen}>
-        <DialogContent className="bg-[#0A0A0A] border-zinc-800 text-white">
+        <DialogContent
+          className="bg-[#0A0A0A] border-zinc-800 text-white"
+          aria-describedby={undefined}
+        >
           <DialogHeader>
             <DialogTitle>Adicionar Link Externo</DialogTitle>
           </DialogHeader>

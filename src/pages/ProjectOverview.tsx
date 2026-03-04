@@ -203,18 +203,19 @@ export function ProjectOverviewContent() {
         )}
       </AnimatePresence>
 
-      <ProjectSidebar
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        user={user}
-        customLogoUrl={customLogoUrl}
-        pendingApprovalsCount={pendingApprovalsCount}
-        handleLogout={handleLogout}
-        setIsMobileMenuOpen={setIsMobileMenuOpen}
-        isOwner={project?.user_id === user?.id}
-        desktopMode={true}
-        className="shrink-0"
-      />
+      <aside className="w-72 bg-[#030303] border-r border-zinc-900/50 hidden md:flex flex-col sticky top-0 h-screen z-20">
+        <ProjectSidebar
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          user={user}
+          customLogoUrl={customLogoUrl}
+          pendingApprovalsCount={pendingApprovalsCount}
+          handleLogout={handleLogout}
+          setIsMobileMenuOpen={setIsMobileMenuOpen}
+          isOwner={project?.user_id === user?.id}
+          className="shrink-0"
+        />
+      </aside>
 
       <main className="flex-1 flex flex-col h-screen overflow-hidden relative z-10">
         <ProjectHeader

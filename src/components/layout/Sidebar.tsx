@@ -18,6 +18,7 @@ import { UpgradeModal } from "@/components/UpgradeModal";
 import type { User, PlanType } from "@/types";
 import { useTranslation } from "react-i18next";
 import { LanguageSelector } from "@/components/LanguageSelector";
+import { NotificationSystem } from "@/components/NotificationSystem";
 
 interface SidebarProps {
   user: User | null;
@@ -125,7 +126,7 @@ export function Sidebar({
   );
 
   return (
-    <aside className="w-80 bg-[#030303] border-r border-zinc-900/50 hidden md:flex flex-col sticky top-0 h-screen z-20">
+    <div className="w-full bg-[#030303] flex flex-col h-full">
       <div className="p-8 pb-2">
         <div className="flex items-center justify-between px-2">
           <div className="flex items-center gap-3">
@@ -136,7 +137,10 @@ export function Sidebar({
               FLUXS.
             </span>
           </div>
-          <LanguageSelector />
+          <div className="flex items-center gap-2">
+            <NotificationSystem />
+            <LanguageSelector />
+          </div>
         </div>
       </div>
 
@@ -237,6 +241,6 @@ export function Sidebar({
         featureName="Analytics Avançado"
         currentPlan={plan}
       />
-    </aside>
+    </div>
   );
 }

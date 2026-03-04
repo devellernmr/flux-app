@@ -167,7 +167,10 @@ export function UpgradeModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="p-0 border-0 bg-transparent shadow-none w-[95vw] max-w-3xl overflow-hidden rounded-[32px] max-h-[90vh]">
+      <DialogContent
+        className="p-0 border-0 bg-transparent shadow-none w-[95vw] max-w-3xl overflow-hidden rounded-[32px] max-h-[90vh]"
+        aria-describedby={undefined}
+      >
         <AnimatePresence mode="wait">
           {open && (
             <motion.div

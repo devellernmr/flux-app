@@ -66,7 +66,9 @@ export function TeamManager({ projectId }: { projectId: string }) {
   const [invites, setInvites] = useState<TeamInvite[]>([]);
   const [showDialog, setShowDialog] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteRole, setInviteRole] = useState<"editor" | "viewer" | "partner">("editor");
+  const [inviteRole, setInviteRole] = useState<"editor" | "viewer" | "partner">(
+    "editor",
+  );
   const [isInviting, setIsInviting] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -96,7 +98,7 @@ export function TeamManager({ projectId }: { projectId: string }) {
           ...m,
           color: (m.color as MemberColor | null) ?? "blue",
           user: { email: m.email ?? "" },
-        }))
+        })),
       );
       setInvites(pendingInvites || []);
     } catch (error) {
@@ -152,7 +154,7 @@ export function TeamManager({ projectId }: { projectId: string }) {
       await logProjectActivity({
         projectId,
         content: `Novo convite enviado para ${inviteEmail}`,
-        type: "member_add"
+        type: "member_add",
       });
 
       toast.success("Convite criado! Copie o link e envie para a pessoa.");
@@ -188,7 +190,7 @@ export function TeamManager({ projectId }: { projectId: string }) {
       await logProjectActivity({
         projectId,
         content: `Membro removido do projeto`,
-        type: "member_remove"
+        type: "member_remove",
       });
 
       toast.success("Membro removido");
@@ -210,7 +212,7 @@ export function TeamManager({ projectId }: { projectId: string }) {
     }
 
     setTeamMembers((prev) =>
-      prev.map((m) => (m.id === memberId ? { ...m, color } : m))
+      prev.map((m) => (m.id === memberId ? { ...m, color } : m)),
     );
     toast.success("Cor atualizada.");
   };
@@ -245,8 +247,9 @@ export function TeamManager({ projectId }: { projectId: string }) {
           <p className="text-[11px] text-zinc-500">
             {teamMembers.length === 0
               ? "Nenhum membro adicionado ainda."
-              : `${teamMembers.length} membro${teamMembers.length > 1 ? "s" : ""
-              } com acesso a este projeto.`}
+              : `${teamMembers.length} membro${
+                  teamMembers.length > 1 ? "s" : ""
+                } com acesso a este projeto.`}
           </p>
         </div>
         <Button
@@ -271,8 +274,9 @@ export function TeamManager({ projectId }: { projectId: string }) {
               {/* ESQUERDA: avatar + email + role */}
               <div className="flex items-center gap-3 min-w-0">
                 <div
-                  className={`h-8 w-8 rounded-full flex items-center justify-center text-[11px] font-semibold text-zinc-50 ${colorMap[(member.color || "blue") as MemberColor].bg
-                    }`}
+                  className={`h-8 w-8 rounded-full flex items-center justify-center text-[11px] font-semibold text-zinc-50 ${
+                    colorMap[(member.color || "blue") as MemberColor].bg
+                  }`}
                 >
                   {(member.email || member.user?.email || "??")
                     .substring(0, 2)
@@ -284,7 +288,9 @@ export function TeamManager({ projectId }: { projectId: string }) {
                     {member.email || member.user?.email || "Email indisponível"}
                   </span>
                   <div className="flex items-center gap-1.5 mt-1">
-                    <span className={`text-[8px] px-1.5 py-0.5 rounded-md border font-black uppercase tracking-widest ${roleColorMap[member.role] || "bg-zinc-800 text-zinc-400 border-zinc-700"}`}>
+                    <span
+                      className={`text-[8px] px-1.5 py-0.5 rounded-md border font-black uppercase tracking-widest ${roleColorMap[member.role] || "bg-zinc-800 text-zinc-400 border-zinc-700"}`}
+                    >
                       {roleLabelMap[member.role] || member.role}
                     </span>
                   </div>
@@ -302,10 +308,11 @@ export function TeamManager({ projectId }: { projectId: string }) {
                         key={c}
                         type="button"
                         onClick={() => updateMemberColor(member.id, c)}
-                        className={`h-3 w-3 rounded-full transition-all hover:scale-125 ${bg} ${isActive
-                          ? "ring-2 ring-white ring-offset-1 ring-offset-zinc-950 scale-110"
-                          : "opacity-40"
-                          }`}
+                        className={`h-3 w-3 rounded-full transition-all hover:scale-125 ${bg} ${
+                          isActive
+                            ? "ring-2 ring-white ring-offset-1 ring-offset-zinc-950 scale-110"
+                            : "opacity-40"
+                        }`}
                       />
                     );
                   })}
@@ -332,7 +339,9 @@ export function TeamManager({ projectId }: { projectId: string }) {
               Convites Pendentes
             </p>
             <div className="h-4 w-4 bg-amber-500/10 rounded flex items-center justify-center border border-amber-500/20">
-              <span className="text-[8px] font-black text-amber-500">{invites.length}</span>
+              <span className="text-[8px] font-black text-amber-500">
+                {invites.length}
+              </span>
             </div>
           </div>
           {invites.map((invite) => (
@@ -384,9 +393,14 @@ export function TeamManager({ projectId }: { projectId: string }) {
 
       {/* Dialog de Convite */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="bg-zinc-950 border-white/5 rounded-[32px] p-8 max-w-md shadow-2xl">
+        <DialogContent
+          className="bg-zinc-950 border-white/5 rounded-[32px] p-8 max-w-md shadow-2xl"
+          aria-describedby={undefined}
+        >
           <DialogHeader className="mb-6">
-            <DialogTitle className="text-2xl font-black text-white tracking-tighter">Convidar Colaborador</DialogTitle>
+            <DialogTitle className="text-2xl font-black text-white tracking-tighter">
+              Convidar Colaborador
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-6">
             <div className="space-y-2">
@@ -414,10 +428,11 @@ export function TeamManager({ projectId }: { projectId: string }) {
                   <button
                     key={role.id}
                     onClick={() => setInviteRole(role.id as any)}
-                    className={`h-11 rounded-xl border text-[10px] font-black uppercase tracking-widest transition-all ${inviteRole === role.id
-                      ? "bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-900/20"
-                      : "bg-zinc-900 border-zinc-800 text-zinc-500 hover:border-white/10"
-                      }`}
+                    className={`h-11 rounded-xl border text-[10px] font-black uppercase tracking-widest transition-all ${
+                      inviteRole === role.id
+                        ? "bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-900/20"
+                        : "bg-zinc-900 border-zinc-800 text-zinc-500 hover:border-white/10"
+                    }`}
                   >
                     {role.label}
                   </button>

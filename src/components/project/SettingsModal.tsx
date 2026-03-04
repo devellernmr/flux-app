@@ -94,7 +94,7 @@ export function SettingsModal({
     } catch (error: any) {
       console.error("Erro no upload do logo:", error);
       toast.error(
-        "Erro ao enviar o logo. Verifique as configurações do bucket 'project-assets'."
+        "Erro ao enviar o logo. Verifique as configurações do bucket 'project-assets'.",
       );
     } finally {
       setIsUploading(false);
@@ -107,7 +107,10 @@ export function SettingsModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[#0A0A0A] border-zinc-800 text-white max-w-lg">
+      <DialogContent
+        className="bg-[#0A0A0A] border-zinc-800 text-white max-w-lg"
+        aria-describedby={undefined}
+      >
         <DialogHeader>
           <DialogTitle className="text-xl">
             Configurações do Projeto
@@ -229,8 +232,8 @@ export function SettingsModal({
               </div>
             )}
             <p className="text-[10px] text-zinc-500">
-              Este logo substituirá o padrão do FLUXS. nas visualizações enviadas
-              para os clientes.
+              Este logo substituirá o padrão do FLUXS. nas visualizações
+              enviadas para os clientes.
             </p>
           </div>
         </div>

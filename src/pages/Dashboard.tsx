@@ -11,7 +11,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus, Loader2, Menu, Sparkles, AlertTriangle } from "lucide-react";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
+import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { NotificationSystem } from "@/components/NotificationSystem";
 
 // --- HOOKS E COMPONENTES ---
@@ -191,23 +197,32 @@ function DashboardContent() {
       <TutorialOverlay />
 
       {/* --- SIDEBAR --- */}
-      <Sidebar
-        activeMenu={activeMenu}
-        setActiveMenu={setActiveMenu}
-        plan={plan}
-        usage={usage}
-        onLogout={handleLogout}
-        user={user}
-        onShowTutorial={() => startTutorial("dashboard")}
-        canAccessAnalytics={can("analytics")}
-      />
+      <aside className="w-80 bg-[#030303] border-r border-zinc-900/50 hidden md:flex flex-col sticky top-0 h-screen z-20">
+        <Sidebar
+          activeMenu={activeMenu}
+          setActiveMenu={setActiveMenu}
+          plan={plan}
+          usage={usage}
+          onLogout={handleLogout}
+          user={user}
+          onShowTutorial={() => startTutorial("dashboard")}
+          canAccessAnalytics={can("analytics")}
+        />
+      </aside>
 
       {/* --- SIDEBAR MOBILE --- */}
       <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
         <SheetContent
           side="left"
           className="p-0 bg-black border-r border-zinc-900 w-80"
+          aria-describedby={undefined}
         >
+          <VisuallyHidden>
+            <SheetTitle>Menu de Navegação</SheetTitle>
+            <SheetDescription>
+              Acesse as diferentes seções da plataforma
+            </SheetDescription>
+          </VisuallyHidden>
           <Sidebar
             activeMenu={activeMenu}
             setActiveMenu={(menu) => {
@@ -239,14 +254,18 @@ function DashboardContent() {
             </div>
             <span className="font-bold text-white tracking-tight">Fluxs.</span>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsMobileMenuOpen(true)}
-            className="text-zinc-400 hover:text-white"
-          >
-            <Menu className="h-6 w-6" />
-          </Button>
+
+          <div className="flex items-center gap-2">
+            <NotificationSystem />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="text-zinc-400 hover:text-white"
+            >
+              <Menu className="h-6 w-6" />
+            </Button>
+          </div>
         </header>
 
         <div className="p-4 md:p-8 lg:p-12 mb-20 max-w-[1600px] mx-auto w-full">
@@ -258,7 +277,10 @@ function DashboardContent() {
 
       {/* MODAL: NOVO PROJETO */}
       <Dialog open={isNewProjectOpen} onOpenChange={setIsNewProjectOpen}>
-        <DialogContent className="bg-zinc-950/90 border-zinc-800 backdrop-blur-xl sm:max-w-[500px] gap-6 p-0 overflow-hidden rounded-3xl">
+        <DialogContent
+          className="bg-zinc-950/90 border-zinc-800 backdrop-blur-xl sm:max-w-[500px] gap-6 p-0 overflow-hidden rounded-3xl"
+          aria-describedby={undefined}
+        >
           <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 via-purple-600/5 to-transparent pointer-events-none" />
 
           <DialogHeader className="p-8 pb-0">
@@ -368,7 +390,10 @@ function DashboardContent() {
         open={!!projectToDelete}
         onOpenChange={(open) => !open && setProjectToDelete(null)}
       >
-        <DialogContent className="bg-[#0A0A0A] border-zinc-800 text-white">
+        <DialogContent
+          className="bg-[#0A0A0A] border-zinc-800 text-white"
+          aria-describedby={undefined}
+        >
           <DialogHeader>
             <div className="mx-auto bg-red-500/10 p-3 rounded-full w-fit mb-2">
               <AlertTriangle className="h-6 w-6 text-red-500" />
@@ -404,7 +429,9 @@ function DashboardContent() {
         </DialogContent>
       </Dialog>
 
-      <NotificationSystem />
+      <div className="hidden md:block">
+        <NotificationSystem />
+      </div>
     </div>
   );
 }
