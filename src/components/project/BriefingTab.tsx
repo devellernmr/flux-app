@@ -146,6 +146,8 @@ interface BriefingTabProps {
   onAddBlock: (block?: BriefingBlock) => void;
   setBlocks: (blocks: BriefingBlock[]) => void;
   can: (feature: string) => boolean;
+  /** `true` enquanto o plano/uso ainda não foram resolvidos (evita upsell indevido). */
+  isPlanLoading?: boolean;
   onShowUpgrade: (feature?: string) => void;
   containerVariants: any;
   itemVariants: any;
@@ -159,6 +161,7 @@ export const BriefingTab = memo(
     blocks,
     setBlocks,
     can,
+    isPlanLoading = false,
     onShowUpgrade,
     onCopyLink,
     onApprove,
@@ -497,6 +500,7 @@ export const BriefingTab = memo(
                           onShowUpgrade("Assistente IA");
                         }
                       }}
+                      disabled={isPlanLoading}
                       className="border-blue-600/30 bg-blue-600/5 text-blue-400 hover:bg-blue-600/10 w-full md:w-auto"
                     >
                       <Sparkles className="mr-2 h-4 w-4" /> Gerar com IA

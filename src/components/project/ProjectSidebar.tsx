@@ -18,6 +18,7 @@ import {
   Zap,
   HelpCircle as HelpIcon,
   Shield,
+  Bot,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -64,6 +65,7 @@ export const ProjectSidebar = memo(function ProjectSidebar({
       { id: "files", label: t("sidebar.files"), icon: Folder },
       { id: "members", label: t("sidebar.team"), icon: Users },
       { id: "finance", label: t("sidebar.finance"), icon: DollarSign },
+      { id: "ai-chat", label: "IA Chat", icon: Bot },
       { id: "help", label: t("sidebar.help"), icon: HelpIcon },
     ];
 

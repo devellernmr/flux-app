@@ -35,7 +35,22 @@ export function AIBriefingGenerator({
     if (isOpen) {
       setNiche(initialNiche);
       setProjectType(initialType);
-      setResult(null); // Reseta resultado anterior ao abrir
+      
+      // Tenta recuperar do cache de sessão se houver briefing gerado recentemente para este nicho/tipo
+      const cacheKey = `briefing_cache_${(initialNiche || '').trim().toLowerCase()}_${(initialType || '').trim().toLowerCase()}`;
+      try {
+        const cached = sessionStorage.getItem(cacheKey);
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed && parsed.title && Array.isArray(parsed.questions)) {
+            setResult(parsed);
+          }
+        } else {
+          setResult(null);
+        }
+      } catch {
+        setResult(null);
+      }
       setError(null);
     }
   }, [isOpen, initialNiche, initialType]);
@@ -47,6 +62,8 @@ export function AIBriefingGenerator({
       setError("Por favor, preencha ambos os campos.");
       return;
     }
+
+    const cacheKey = `briefing_cache_${niche.trim().toLowerCase()}_${projectType.trim().toLowerCase()}`;
 
     setLoading(true);
     setError(null);
@@ -62,6 +79,11 @@ export function AIBriefingGenerator({
       // Validação de segurança para garantir que o formato veio certo
       if (data && data.title && Array.isArray(data.questions)) {
         setResult(data);
+        try {
+          sessionStorage.setItem(cacheKey, JSON.stringify(data));
+        } catch {
+          // sessionStorage quota safe
+        }
       } else {
         throw new Error("Formato de resposta inválido da IA");
       }
@@ -73,6 +95,7 @@ export function AIBriefingGenerator({
       setLoading(false);
     }
   };
+
 
   // A FUNÇÃO QUE FALTAVA
   const handleUseBriefing = () => {

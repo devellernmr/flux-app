@@ -32,8 +32,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { NotificationSystem } from "@/components/NotificationSystem";
+import { LanguageSelector } from "@/components/LanguageSelector";
 import type { User } from "@/types";
 import { AnalyticsCharts } from "@/components/analytics/AnalyticsCharts";
+import { DashboardShellSkeleton } from "@/components/dashboard/Skeleton";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -124,11 +126,7 @@ export function Analytics() {
   };
 
   if (loading) {
-    return (
-      <div className="h-screen bg-[#050505] flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-      </div>
-    );
+    return <DashboardShellSkeleton />;
   }
 
   const kpis = [
@@ -335,7 +333,10 @@ export function Analytics() {
             <Sparkles className="h-4 w-4 text-blue-500" /> FLUXS.
           </div>
           <div className="flex items-center gap-2">
-            <NotificationSystem />
+            <div className="flex items-center gap-1 bg-white/5 p-1 rounded-xl border border-white/5">
+              <NotificationSystem />
+              <LanguageSelector compact />
+            </div>
             <Button
               variant="ghost"
               size="icon"

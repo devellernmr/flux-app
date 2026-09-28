@@ -206,7 +206,7 @@ export function UpgradeModal({
                       transition={{ duration: 0.5, ease: "easeOut" }}
                       className={`absolute inset-0 bg-gradient-to-br ${activeContent.gradient} p-6 md:p-12 flex flex-col items-center justify-center text-center`}
                     >
-                      <div className="absolute inset-0 opacity-10 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay"></div>
+                      <div className="absolute inset-0 opacity-10 bg-[url('/noise.svg')] mix-blend-overlay"></div>
 
                       <div className="relative z-10 flex flex-col items-center max-w-xl">
                         <div className="inline-flex items-center justify-center w-16 h-16 bg-white/10 rounded-2xl border border-white/20 backdrop-blur-xl shadow-2xl mb-6">

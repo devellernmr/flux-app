@@ -15,6 +15,7 @@ import { motion } from "framer-motion";
 import { LegalModals } from "@/components/LegalModals";
 import { useTranslation } from "react-i18next";
 import { LanguageSelector } from "@/components/LanguageSelector";
+import { track } from "@/lib/tracking";
 
 export function Login() {
   const { t } = useTranslation();
@@ -46,6 +47,7 @@ export function Login() {
     setLoading(true);
 
     const redirectTo = resolveRedirect();
+    track.completeRegistration("google_oauth");
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
@@ -71,6 +73,7 @@ export function Login() {
             description: error.message,
           });
         } else {
+          track.completeRegistration("email_signup");
           toast.success(t("login.auth_success_signup"));
         }
       } else {
@@ -84,6 +87,7 @@ export function Login() {
             description: error.message,
           });
         } else {
+          track.completeRegistration("email_signin");
           const redirectTo = resolveRedirect();
           window.location.href = redirectTo;
         }

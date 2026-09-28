@@ -39,7 +39,7 @@ serve(async (req) => {
       Certifique-se de que a primeira etapa seja relacionada ao setup/briefing e a última à entrega final.
     `;
 
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`;
 
         const response = await fetch(url, {
             method: "POST",

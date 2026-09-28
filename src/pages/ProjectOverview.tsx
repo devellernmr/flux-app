@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, X, Zap } from "lucide-react";
+import { X, Zap } from "lucide-react";
 
 import { useProject } from "@/hooks/useProject";
 import { usePlan } from "@/hooks/usePlan";
@@ -15,9 +15,11 @@ import { ProjectFiles } from "./ProjectFiles";
 import { BriefingTab } from "@/components/project/BriefingTab";
 import { FinanceTab } from "@/components/project/FinanceTab";
 import { HelpTab } from "@/components/project/HelpTab";
+import { AIChatTab } from "@/components/project/AIChatTab";
 import { TeamManager } from "@/components/TeamManager";
 import { ProjectActivity } from "@/components/ProjectActivity";
 import { SettingsModal } from "@/components/project/SettingsModal";
+import { ContentPanelSkeleton, ProjectShellSkeleton } from "@/components/dashboard/Skeleton";
 import { Button } from "@/components/ui/button";
 import { UpgradeModal } from "@/components/UpgradeModal";
 
@@ -39,7 +41,7 @@ import { TutorialOverlay } from "@/components/tutorial/TutorialOverlay";
 export function ProjectOverviewContent() {
   const { id } = useParams();
   const { setNavigationHandler } = useTutorial();
-  const { can, plan } = usePlan();
+  const { can, plan, planReady } = usePlan();
   const {
     user,
     project,
@@ -104,15 +106,7 @@ export function ProjectOverviewContent() {
     setNavigationHandler(setActiveTab);
   }, [setActiveTab]);
 
-  if (loading)
-    return (
-      <div className="h-screen bg-[#030303] flex items-center justify-center">
-        <div className="relative">
-          <div className="absolute inset-0 bg-blue-600/20 blur-3xl rounded-full animate-pulse" />
-          <Loader2 className="h-10 w-10 animate-spin text-blue-600 relative z-10" />
-        </div>
-      </div>
-    );
+  if (loading) return <ProjectShellSkeleton />;
 
   return (
     <div className="min-h-screen bg-black text-zinc-100 flex font-sans overflow-hidden selection:bg-blue-500/30 relative">
@@ -238,6 +232,7 @@ export function ProjectOverviewContent() {
             { id: "files", label: "Cloud" },
             { id: "finance", label: "Fin" },
             { id: "members", label: "Team" },
+            { id: "ai-chat", label: "IA" },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -294,6 +289,7 @@ export function ProjectOverviewContent() {
                       onRemoveBlock={removeBlock}
                       setIsEditing={setIsEditing}
                       can={can}
+                      isPlanLoading={!planReady}
                       onShowUpgrade={(feat) => {
                         setUpgradeFeatureName(feat || "Assistente IA");
                         setShowUpgradeModal(true);
@@ -315,7 +311,11 @@ export function ProjectOverviewContent() {
                     <TeamManager key="members" projectId={id!} />
                   )}
                   {activeTab === "finance" &&
-                    (can("finance") ? (
+                    (!planReady ? (
+                      // Enquanto o plano não resolve, mostramos skeleton em vez da
+                      // tela de upgrade (evita upsell indevido para plano Agency).
+                      <ContentPanelSkeleton />
+                    ) : can("finance") ? (
                       <FinanceTab
                         key="finance"
                         projectId={id!}
@@ -354,6 +354,13 @@ export function ProjectOverviewContent() {
                       </div>
                     ))}
                   {activeTab === "help" && <HelpTab key="help" />}
+                  {activeTab === "ai-chat" && (
+                    <AIChatTab
+                      key="ai-chat"
+                      projectName={projectName}
+                      projectDescription={projectDescription}
+                    />
+                  )}
                 </motion.div>
               </AnimatePresence>
             </div>

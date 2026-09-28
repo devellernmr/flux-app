@@ -14,15 +14,14 @@ serve(async (req) => {
   try {
     const { niche, projectType } = await req.json();
 
-    // Sua chave deve estar configurada no .env ou hardcoded aqui
     const geminiKey = Deno.env.get("GEMINI_API_KEY");
     if (!geminiKey) throw new Error("GEMINI_API_KEY faltando");
 
     const prompt = `
-      Aja como um gerente de projetos. Crie um briefing para um projeto de "${projectType}" no nicho de "${niche}".
-      Retorne APENAS um JSON válido com esta estrutura exata, sem markdown:
+      Aja como um gerente de projetos sênior. Crie um briefing estratégico para um projeto de "${projectType}" no nicho de "${niche}".
+      Retorne APENAS um JSON válido com esta estrutura exata, sem blocos de markdown ou formatação adicional:
       {
-        "title": "Título curto para o projeto",
+        "title": "Título curto e profissional para o projeto",
         "questions": [
            "Pergunta estratégica 1?",
            "Pergunta estratégica 2?",
@@ -33,8 +32,6 @@ serve(async (req) => {
       }
     `;
 
-    // USANDO O MODELO QUE APARECEU NA SUA LISTA: gemini-2.0-flash
-    // No fetch, use exatamente esta URL:
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`;
 
     const response = await fetch(url, {
@@ -45,23 +42,28 @@ serve(async (req) => {
       }),
     });
 
-
     const data = await response.json();
 
-    if (data.error) throw new Error(data.error.message);
-    if (!data.candidates) throw new Error("IA não respondeu nada.");
+    if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+    if (!data.candidates || !data.candidates[0]?.content?.parts?.[0]?.text) {
+      throw new Error("IA não retornou uma resposta válida.");
+    }
 
     let text = data.candidates[0].content.parts[0].text;
-    text = text.replace(/``````/g, "").trim();
+    text = text.replace(/```json/gi, "").replace(/```/g, "").trim();
 
-    return new Response(JSON.stringify(JSON.parse(text)), {
+    const parsed = JSON.parse(text);
+
+    return new Response(JSON.stringify(parsed), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
 
   } catch (error: any) {
+    console.error("Erro no generate-briefing:", error);
     return new Response(JSON.stringify({
       title: "Erro na Geração",
       questions: ["Erro: " + error.message]
-    }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }), { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 });
   }
 });
+

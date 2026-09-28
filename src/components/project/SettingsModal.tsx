@@ -93,9 +93,11 @@ export function SettingsModal({
       toast.success("Logo enviado com sucesso!");
     } catch (error: any) {
       console.error("Erro no upload do logo:", error);
-      toast.error(
-        "Erro ao enviar o logo. Verifique as configurações do bucket 'project-assets'.",
-      );
+      toast.error("Erro ao enviar o logo", {
+        description: `${
+          error?.message || "Falha desconhecida"
+        } — verifique o bucket 'project-assets' (pasta project-logos/).`,
+      });
     } finally {
       setIsUploading(false);
     }

@@ -72,7 +72,7 @@ export const PROJECT_TOUR: TutorialConfig = {
       description:
         "Acesse todos os detalhes técnicos e aprovações do briefing nesta aba.",
       position: "right",
-      action: (handler: any) => handler?.("briefing"),
+      action: (handler) => handler?.("briefing"),
     },
     {
       target: "#project-tab-identidade",
@@ -80,7 +80,7 @@ export const PROJECT_TOUR: TutorialConfig = {
       description:
         "Ativos de marca sempre à mão. Cores, logos e fontes extraídos automaticamente para consistência visual.",
       position: "right",
-      action: (handler: any) => handler?.("identidade"),
+      action: (handler) => handler?.("identidade"),
     },
     {
       target: "#project-tab-approvals",
@@ -88,7 +88,7 @@ export const PROJECT_TOUR: TutorialConfig = {
       description:
         "Gerencie aprovações e ajustes em um só lugar. Menos vai-e-vem, mais entregas aprovadas.",
       position: "right",
-      action: (handler: any) => handler?.("approvals"),
+      action: (handler) => handler?.("approvals"),
     },
     {
       target: "#project-tab-files",
@@ -96,7 +96,7 @@ export const PROJECT_TOUR: TutorialConfig = {
       description:
         "Todos os assets e entregas organizados e versionados automaticamente.",
       position: "right",
-      action: (handler: any) => handler?.("files"),
+      action: (handler) => handler?.("files"),
     },
     {
       target: "#project-tab-finance",
@@ -104,7 +104,7 @@ export const PROJECT_TOUR: TutorialConfig = {
       description:
         "Controle orçamentos, horas trabalhadas e margem de lucro em tempo real.",
       position: "right",
-      action: (handler: any) => handler?.("finance"),
+      action: (handler) => handler?.("finance"),
     },
     {
       target: "#project-tab-members",
@@ -112,7 +112,7 @@ export const PROJECT_TOUR: TutorialConfig = {
       description:
         "Gerencie quem tem acesso a este projeto e suas respectivas permissões.",
       position: "right",
-      action: (handler: any) => handler?.("members"),
+      action: (handler) => handler?.("members"),
     },
   ],
 };
@@ -135,12 +135,18 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const location = useLocation();
 
+  const endTutorial = useCallback(() => {
+    setIsActive(false);
+    setTargetRect(null);
+    setCurrentStepIndex(0);
+  }, []);
+
   // Reset when route changes if needed, or persist
   useEffect(() => {
     if (isActive) {
       endTutorial();
     }
-  }, [location.pathname]);
+  }, [location.pathname, isActive, endTutorial]);
 
   const updateTargetRect = useCallback(() => {
     if (!isActive) return;
@@ -175,13 +181,12 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({
     if (isActive) {
       const step = activeConfig.steps[currentStepIndex];
       if (step?.action) {
-        // @ts-ignore - passing handler to action
-        step.action(navigationHandler);
+        step.action(navigationHandler ?? undefined);
         // Re-calculate rect after action (give slight delay for UI update)
         setTimeout(updateTargetRect, 500);
       }
     }
-  }, [currentStepIndex, isActive, activeConfig, navigationHandler]);
+  }, [currentStepIndex, isActive, activeConfig, navigationHandler, updateTargetRect]);
 
   const startTutorial = (configId: string = "dashboard") => {
     setIsActive(true);
@@ -192,12 +197,6 @@ export const TutorialProvider: React.FC<{ children: React.ReactNode }> = ({
     } else {
       setActiveConfig(DASHBOARD_TOUR);
     }
-  };
-
-  const endTutorial = () => {
-    setIsActive(false);
-    setTargetRect(null);
-    setCurrentStepIndex(0);
   };
 
   const nextStep = () => {

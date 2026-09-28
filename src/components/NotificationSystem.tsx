@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import {
   Bell,
@@ -40,6 +40,26 @@ export function NotificationSystem() {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
 
+  const fetchNotifications = useCallback(async (userId: string) => {
+    const { data, error } = await supabase
+      .from("notifications")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(20);
+
+    if (error) return;
+
+    // Normalizando o campo read/is_read dependendo do que vem do banco
+    const normalizedData = (data || []).map((n) => ({
+      ...n,
+      read: n.read !== undefined ? n.read : n.is_read,
+    }));
+
+    setNotifications(normalizedData);
+    setUnreadCount(normalizedData.filter((n) => !n.read).length);
+  }, []);
+
   useEffect(() => {
     let mounted = true;
 
@@ -76,27 +96,7 @@ export function NotificationSystem() {
     return () => {
       mounted = false;
     };
-  }, []);
-
-  const fetchNotifications = async (userId: string) => {
-    const { data, error } = await supabase
-      .from("notifications")
-      .select("*")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false })
-      .limit(20);
-
-    if (error) return;
-
-    // Normalizando o campo read/is_read dependendo do que vem do banco
-    const normalizedData = (data || []).map((n) => ({
-      ...n,
-      read: n.read !== undefined ? n.read : n.is_read,
-    }));
-
-    setNotifications(normalizedData);
-    setUnreadCount(normalizedData.filter((n) => !n.read).length);
-  };
+  }, [fetchNotifications]);
 
   const markAsRead = async (id: string, link?: string) => {
     // Optimistic update

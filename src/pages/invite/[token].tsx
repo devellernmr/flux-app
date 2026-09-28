@@ -12,6 +12,11 @@ type Invite = {
   role: string;
   token: string;
   accepted_at: string | null;
+  projects?: {
+    name?: string;
+    agency_name?: string;
+    custom_logo_url?: string;
+  };
 };
 
 export function InvitePage() {
@@ -26,31 +31,44 @@ export function InvitePage() {
     if (!token) return;
 
     const loadInvite = async () => {
-      // Fetch Invite with Project and Owner details
-      const { data, error } = await supabase
-        .from("team_invites")
-        .select(
-          `
+      // Leitura via RPC: valida token e expiração no servidor e devolve apenas
+      // o necessário para a tela (sem `email` e sem o próprio `token`, que
+      // antes ficavam legíveis na tabela por qualquer visitante anônimo).
+      // Fallback direto para a query antiga enquanto a migration não existir.
+      const { data: rpcData, error: rpcError } = await supabase.rpc(
+        "get_invite_by_token",
+        { p_token: token },
+      );
+
+      let data: Invite | null = !rpcError ? (rpcData as Invite) : null;
+
+      if (rpcError) {
+        const res = await supabase
+          .from("team_invites")
+          .select(
+            `
             *,
             projects (
                 name,
                 agency_name,
-                custom_logo_url,
-                user_id
+                custom_logo_url
             )
-        `
-        )
-        .eq("token", token)
-        .is("accepted_at", null)
-        .maybeSingle();
+        `,
+          )
+          .eq("token", token)
+          .is("accepted_at", null)
+          .maybeSingle();
 
-      if (error || !data) {
-        toast.error("Convite inválido ou já utilizado.");
+        data = res.data as Invite | null;
+      }
+
+      if (!data) {
+        toast.error("Convite inválido, expirado ou já utilizado.");
         navigate("/");
         return;
       }
 
-      setInvite(data as any);
+      setInvite(data);
       setLoading(false);
     };
 
@@ -78,31 +96,50 @@ export function InvitePage() {
         return;
       }
 
-      // 1) Garante que existe uma linha em team_members, sem duplicar
-      const { error: memberError } = await supabase.from("team_members").upsert(
-        {
-          project_id: invite.project_id,
-          user_id: user.id,
-          role: invite.role ?? "editor",
-        },
-        {
-          onConflict: "project_id,user_id", // nomes das colunas da UNIQUE
-          ignoreDuplicates: true, // se sua versão suportar
-        }
+      // Aceite via RPC: valida `expires_at` (o app antes só checava
+      // `accepted_at IS NULL`), cria/atualiza o vínculo em team_members e
+      // consome o convite. Fallback direto para o fluxo antigo.
+      const { data: rpcData, error: rpcError } = await supabase.rpc(
+        "accept_invite",
+        { p_token: token },
       );
 
-      if (memberError) throw memberError;
+      let acceptedProjectId: string | number | null = null;
 
-      // 2) Marca convite como aceito
-      const { error: updateError } = await supabase
-        .from("team_invites")
-        .update({ accepted_at: new Date().toISOString() })
-        .eq("id", invite.id);
+      if (!rpcError && rpcData) {
+        acceptedProjectId = (rpcData as { project_id: string | number })
+          .project_id;
+      } else {
+        // 1) Garante que existe uma linha em team_members, sem duplicar
+        const { error: memberError } = await supabase
+          .from("team_members")
+          .upsert(
+            {
+              project_id: invite.project_id,
+              user_id: user.id,
+              role: invite.role ?? "editor",
+            },
+            {
+              onConflict: "project_id,user_id", // nomes das colunas da UNIQUE
+              ignoreDuplicates: true, // se a sua versão suportar
+            },
+          );
 
-      if (updateError) throw updateError;
+        if (memberError) throw memberError;
+
+        // 2) Marca convite como aceito
+        const { error: updateError } = await supabase
+          .from("team_invites")
+          .update({ accepted_at: new Date().toISOString() })
+          .eq("id", invite.id);
+
+        if (updateError) throw updateError;
+
+        acceptedProjectId = invite.project_id;
+      }
 
       toast.success("Convite aceito! Você agora faz parte do projeto.");
-      navigate(`/project/${invite.project_id}`);
+      navigate(`/project/${acceptedProjectId}`);
     } catch (error) {
       console.error(error);
       const message =
@@ -121,7 +158,6 @@ export function InvitePage() {
     );
   }
 
-  // @ts-ignore
   const project = invite?.projects;
 
   return (

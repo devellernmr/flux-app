@@ -61,7 +61,7 @@ export function ProjectFiles({ projectId }: { projectId: string }) {
   );
 
   // --- TRAVAS DE PLANO ---
-  const { can } = usePlan();
+  const { can, planReady } = usePlan();
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [upgradeFeature, setUpgradeFeature] = useState("");
 
@@ -195,7 +195,9 @@ export function ProjectFiles({ projectId }: { projectId: string }) {
         .from("project-files")
         .upload(fileName, file);
 
-      if (uploadError) throw new Error("Erro no upload.");
+      if (uploadError) {
+        throw new Error(`Erro no upload: ${uploadError.message}`);
+      }
 
       const {
         data: { publicUrl },
@@ -223,6 +225,12 @@ export function ProjectFiles({ projectId }: { projectId: string }) {
   };
 
   const copyReviewLink = (fileId: string) => {
+    // Plano ainda carregando: não abrimos upsell sem saber o plano real.
+    if (!planReady) {
+      toast.loading("Carregando seu plano...", { id: "plan-loading" });
+      return;
+    }
+
     if (!can("share_client")) {
       setUpgradeFeature("Compartilhamento com Cliente");
       setShowUpgrade(true);
@@ -639,7 +647,9 @@ export function ProjectFiles({ projectId }: { projectId: string }) {
                                 size="icon"
                                 className="h-8 w-8 bg-zinc-800/60 hover:bg-zinc-700/80 text-white border border-white/10 rounded-lg backdrop-blur-md shadow-lg active:scale-95 transition-all"
                               >
-                                {!can("share_client") ? (
+                                {!planReady ? (
+                                  <Loader2 className="w-3.5 h-3.5 text-zinc-500 animate-spin" />
+                                ) : !can("share_client") ? (
                                   <Lock className="w-3.5 h-3.5 text-zinc-400" />
                                 ) : (
                                   <Share2 className="w-3.5 h-3.5" />

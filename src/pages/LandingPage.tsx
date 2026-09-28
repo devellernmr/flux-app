@@ -18,16 +18,20 @@ import {
   Mail,
   Instagram,
   Phone,
+  Menu,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { track } from "@/lib/tracking";
 
 // --- COMPONENTS ---
 
 const Navbar = () => {
   const [session, setSession] = useState<any>(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -38,14 +42,16 @@ const Navbar = () => {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-black/80 backdrop-blur-xl">
       <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="h-8 w-8 bg-blue-600 rounded-lg flex items-center justify-center">
+        <Link to="/" className="flex items-center gap-2.5">
+          <div className="h-9 w-9 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/30">
             <span className="font-black text-white text-xs">F.</span>
           </div>
-          <span className="text-xl font-bold tracking-tight text-white">
-            Fluxs.
+          <span className="text-xl font-black tracking-tight text-white">
+            FLUXS<span className="text-blue-500">.</span>
           </span>
-        </div>
+        </Link>
+
+        {/* Desktop Navigation Links */}
         <div className="hidden md:flex items-center gap-8">
           <a
             href="#features"
@@ -72,10 +78,12 @@ const Navbar = () => {
             Contato
           </a>
         </div>
-        <div className="flex items-center gap-4">
+
+        {/* Desktop CTA */}
+        <div className="hidden md:flex items-center gap-4">
           <Link
             to={session ? "/dashboard" : "/login"}
-            className="text-sm font-medium text-zinc-300 hover:text-white transition-colors hidden sm:block"
+            className="text-sm font-medium text-zinc-300 hover:text-white transition-colors"
           >
             {session ? "Dashboard" : "Entrar"}
           </Link>
@@ -85,7 +93,73 @@ const Navbar = () => {
             </Button>
           </Link>
         </div>
+
+        {/* Mobile Menu Toggle Button */}
+        <div className="flex md:hidden items-center gap-3">
+          <Link to={session ? "/dashboard" : "/login"}>
+            <Button size="sm" className="bg-white text-black font-bold text-xs rounded-lg">
+              {session ? "App" : "Entrar"}
+            </Button>
+          </Link>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="text-zinc-400 hover:text-white hover:bg-white/5 h-10 w-10 rounded-xl"
+          >
+            {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </Button>
+        </div>
       </div>
+
+      {/* Mobile Menu Dropdown */}
+      {isMobileMenuOpen && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          exit={{ opacity: 0, height: 0 }}
+          className="md:hidden border-b border-white/10 bg-black/95 backdrop-blur-2xl px-6 py-6 space-y-4"
+        >
+          <a
+            href="#features"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="block text-base font-semibold text-zinc-300 hover:text-white py-2"
+          >
+            Recursos
+          </a>
+          <a
+            href="#benefits"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="block text-base font-semibold text-zinc-300 hover:text-white py-2"
+          >
+            Benefícios
+          </a>
+          <a
+            href="#pricing"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="block text-base font-semibold text-zinc-300 hover:text-white py-2"
+          >
+            Preços
+          </a>
+          <a
+            href="#contact"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="block text-base font-semibold text-zinc-300 hover:text-white py-2"
+          >
+            Contato
+          </a>
+          <div className="pt-4 border-t border-white/10">
+            <Link
+              to={session ? "/dashboard" : "/login"}
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              <Button className="w-full h-12 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg shadow-blue-600/20">
+                {session ? "Acessar Dashboard" : "Criar Conta Grátis"}
+              </Button>
+            </Link>
+          </div>
+        </motion.div>
+      )}
     </nav>
   );
 };
@@ -604,6 +678,7 @@ const Contact = () => {
       ]);
 
       if (!error) {
+        track.lead("landing_contact_form");
         toast.success("Mensagem enviada com sucesso!", {
           description: "Entraremos em contato em breve.",
         });
@@ -647,6 +722,7 @@ const Contact = () => {
                 href="https://wa.me/5532998833302"
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => track.contact("whatsapp")}
                 className="group flex items-center gap-4 p-4 rounded-2xl bg-zinc-900/30 border border-white/5 hover:border-blue-500/30 transition-all"
               >
                 <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center group-hover:bg-blue-500/20 transition-colors">
@@ -664,6 +740,7 @@ const Contact = () => {
 
               <a
                 href="mailto:fluxs.company@gmail.com"
+                onClick={() => track.contact("email")}
                 className="group flex items-center gap-4 p-4 rounded-2xl bg-zinc-900/30 border border-white/5 hover:border-purple-500/30 transition-all"
               >
                 <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center group-hover:bg-purple-500/20 transition-colors">
@@ -683,6 +760,7 @@ const Contact = () => {
                 href="https://www.instagram.com/fluxs.company/"
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => track.contact("instagram")}
                 className="group flex items-center gap-4 p-4 rounded-2xl bg-zinc-900/30 border border-white/5 hover:border-pink-500/30 transition-all"
               >
                 <div className="w-12 h-12 rounded-xl bg-pink-500/10 flex items-center justify-center group-hover:bg-pink-500/20 transition-colors">
@@ -773,22 +851,22 @@ const Footer = () => (
           <h4 className="font-bold text-white mb-6">Produto</h4>
           <ul className="space-y-4 text-sm text-zinc-500">
             <li>
-              <a href="#" className="hover:text-blue-400">
+              <a href="#briefing" className="hover:text-blue-400 transition-colors">
                 Briefing IA
               </a>
             </li>
             <li>
-              <a href="#" className="hover:text-blue-400">
+              <a href="#gestao" className="hover:text-blue-400 transition-colors">
                 Gestão Visual
               </a>
             </li>
             <li>
-              <a href="#" className="hover:text-blue-400">
+              <a href="#white-label" className="hover:text-blue-400 transition-colors">
                 White-Label
               </a>
             </li>
             <li>
-              <a href="#" className="hover:text-blue-400">
+              <a href="#pricing" className="hover:text-blue-400 transition-colors">
                 Preços
               </a>
             </li>
@@ -798,17 +876,17 @@ const Footer = () => (
           <h4 className="font-bold text-white mb-6">Legal</h4>
           <ul className="space-y-4 text-sm text-zinc-500">
             <li>
-              <a href="#" className="hover:text-blue-400">
+              <Link to="/termos" className="hover:text-blue-400 transition-colors">
                 Termos de Uso
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="#" className="hover:text-blue-400">
-                Privacidade
-              </a>
+              <Link to="/privacidade" className="hover:text-blue-400 transition-colors">
+                Política de Privacidade
+              </Link>
             </li>
             <li>
-              <a href="#contact" className="hover:text-blue-400">
+              <a href="#contact" className="hover:text-blue-400 transition-colors">
                 Contato
               </a>
             </li>
@@ -837,7 +915,7 @@ export function LandingPage() {
   return (
     <div className="min-h-screen bg-black text-zinc-100 font-sans selection:bg-blue-500/30 overflow-x-hidden">
       {/* Global Noise Overlay */}
-      <div className="pointer-events-none fixed inset-0 z-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
+      <div className="pointer-events-none fixed inset-0 z-0 bg-[url('/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
 
       <Navbar />
       <Hero />

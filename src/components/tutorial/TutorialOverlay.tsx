@@ -32,7 +32,7 @@ export const TutorialOverlay = () => {
             {/* Use a massive div with a clip-path or mask-image might be tricky for smooth transition of the hole coordinates. */}
             {/* Alternative: SVG overlay covering the screen with a 'hole' */}
 
-            <svg className="absolute inset-0 w-full h-full pointer-events-none transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]">
+            <svg className="absolute inset-0 w-full h-full pointer-events-none transition-all duration-700 ease-out">
                 <defs>
                     <mask id="spotlight-mask">
                         {/* White rect covers everything (visible) */}

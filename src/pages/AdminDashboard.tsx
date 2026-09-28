@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { TicketListSkeleton } from "@/components/dashboard/Skeleton";
 import type { SupportTicket } from "@/types";
 
 export function AdminDashboard() {
@@ -78,31 +79,48 @@ export function AdminDashboard() {
     async function fetchTickets() {
         setLoading(true);
         try {
-            // Tenta buscar com o perfil (JOIN)
-            console.log("Iniciando busca de tickets...");
             const { data, error } = await supabase
                 .from("support_tickets")
-                .select("*, profiles(full_name, avatar_url)")
+                .select("*")
                 .order("created_at", { ascending: false });
 
-            if (error) {
-                console.warn("Erro ao buscar com perfis, tentando busca simples:", error);
+            if (error) throw error;
 
-                // Fallback: Busca apenas os tickets se o JOIN falhar
-                const { data: fallbackData, error: fallbackError } = await supabase
-                    .from("support_tickets")
-                    .select("*")
-                    .order("created_at", { ascending: false });
+            const rows = (data || []) as SupportTicket[];
 
-                if (fallbackError) throw fallbackError;
-                setTickets(fallbackData || []);
-                toast.info("Tickets carregados sem dados de perfil (Erro 400 resolvido via fallback)");
-            } else {
-                console.log("Tickets carregados com sucesso:", data);
-                setTickets(data || []);
+            // Enriquecimento opcional: o embed `profiles(...)` não é confiável porque
+            // `support_tickets.user_id` aponta para auth.users (não há FK para public.profiles).
+            // Buscamos os perfis em uma segunda consulta e mesclamos no cliente.
+            const userIds = Array.from(
+                new Set(rows.map((t) => t.user_id).filter(Boolean)),
+            );
+
+            if (userIds.length > 0) {
+                const { data: profiles, error: profilesError } = await supabase
+                    .from("profiles")
+                    .select("id, full_name, avatar_url")
+                    .in("id", userIds);
+
+                if (profilesError) {
+                    // Perfis são apenas decorativos: falha aqui não deve quebrar a listagem.
+                    console.warn("Não foi possível carregar perfis dos tickets:", profilesError.message);
+                } else if (profiles) {
+                    const byId = new Map(profiles.map((p) => [p.id, p]));
+                    rows.forEach((t) => {
+                        const profile = byId.get(t.user_id);
+                        if (profile) {
+                            t.profiles = {
+                                full_name: profile.full_name,
+                                avatar_url: profile.avatar_url,
+                            };
+                        }
+                    });
+                }
             }
+
+            setTickets(rows);
         } catch (err: any) {
-            console.error("Erro fatal ao carregar tickets:", err);
+            console.error("Erro ao carregar tickets:", err);
             toast.error("Erro ao carregar tickets: " + err.message);
         } finally {
             setLoading(false);
@@ -299,10 +317,7 @@ export function AdminDashboard() {
                     {/* Main Content */}
                     <main className="lg:col-span-9">
                         {loading ? (
-                            <div className="glass-card h-96 rounded-[40px] flex flex-col items-center justify-center gap-4">
-                                <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
-                                <p className="text-zinc-500 animate-pulse font-medium">Carregando tickets...</p>
-                            </div>
+                            <TicketListSkeleton items={5} />
                         ) : filteredTickets.length === 0 ? (
                             <div className="glass-card h-96 rounded-[40px] flex flex-col items-center justify-center text-center p-8">
                                 <div className="w-16 h-16 bg-zinc-900 rounded-3xl flex items-center justify-center mb-6 border border-zinc-800">

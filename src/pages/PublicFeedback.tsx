@@ -15,6 +15,7 @@ import confetti from "canvas-confetti";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { LanguageSelector } from "@/components/LanguageSelector";
+import { PublicReviewSkeleton } from "@/components/dashboard/Skeleton";
 
 interface FileData {
   id: string;
@@ -54,14 +55,44 @@ export function PublicFeedback() {
     if (fileId) fetchFileAndComments();
   }, [fileId]);
 
+  /**
+   * Leitura pública segura.
+   * Usa as RPCs `SECURITY DEFINER` criadas em
+   * supabase/migrations/20260228_public_share_secure_access.sql e mantém
+   * fallback para as queries diretas enquanto a migration não for aplicada.
+   */
+  const fetchPublicFile = async (): Promise<FileData> => {
+    const { data, error } = await supabase.rpc("get_public_file", {
+      p_file_id: fileId,
+    });
+    if (!error && data) return data as FileData;
+
+    const { data: legacyData, error: legacyError } = await supabase
+      .from("files")
+      .select("*, projects(name, custom_logo_url, agency_name)")
+      .eq("id", fileId)
+      .single();
+    if (legacyError) throw legacyError;
+    return legacyData as FileData;
+  };
+
+  const fetchPublicComments = async (): Promise<CommentData[]> => {
+    const { data, error } = await supabase.rpc("get_public_file_comments", {
+      p_file_id: fileId,
+    });
+    if (!error) return (data || []) as CommentData[];
+
+    const { data: legacyData } = await supabase
+      .from("comments")
+      .select("*")
+      .eq("file_id", fileId)
+      .order("created_at", { ascending: true });
+    return (legacyData || []) as CommentData[];
+  };
+
   const fetchFileAndComments = async () => {
     try {
-      const { data: fileData, error } = await supabase
-        .from("files")
-        .select("*, projects(name, custom_logo_url, agency_name)")
-        .eq("id", fileId)
-        .single();
-      if (error) throw error;
+      const fileData = await fetchPublicFile();
 
       setFile(fileData);
       if (fileData?.projects?.name) {
@@ -69,12 +100,7 @@ export function PublicFeedback() {
       }
       if (fileData?.status === "approved") setApproved(true);
 
-      const { data: commentsData } = await supabase
-        .from("comments")
-        .select("*")
-        .eq("file_id", fileId)
-        .order("created_at", { ascending: true });
-      setComments(commentsData || []);
+      setComments(await fetchPublicComments());
     } catch (error) {
       console.error("Error loading file:", error);
       toast.error(t("public_feedback.toast.not_found"));
@@ -114,21 +140,38 @@ export function PublicFeedback() {
     setIsSubmitting(true);
 
     try {
-      const { data, error } = await supabase
-        .from("comments")
-        .insert({
-          file_id: fileId,
-          position_x: tempPin.x,
-          position_y: tempPin.y,
-          content: commentText,
-          user_name: guestName,
-        })
-        .select()
-        .single();
+      const { data: rpcComment, error: rpcCommentError } = await supabase.rpc(
+        "add_public_comment",
+        {
+          p_file_id: fileId,
+          p_content: commentText,
+          p_position_x: tempPin.x,
+          p_position_y: tempPin.y,
+          p_user_name: guestName,
+        },
+      );
 
-      if (error) throw error;
+      let inserted = (rpcComment || null) as CommentData | null;
 
-      setComments([...comments, data]);
+      if (rpcCommentError || !inserted) {
+        // Fallback: inserção direta (enquanto a migration não está aplicada).
+        const { data, error } = await supabase
+          .from("comments")
+          .insert({
+            file_id: fileId,
+            position_x: tempPin.x,
+            position_y: tempPin.y,
+            content: commentText,
+            user_name: guestName,
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+        inserted = data as CommentData;
+      }
+
+      setComments((prev) => [...prev, inserted as CommentData]);
       setTempPin(null);
       setCommentText("");
       toast.success(t("public_feedback.toast.comment_added"));
@@ -143,12 +186,26 @@ export function PublicFeedback() {
   const handleApprove = async () => {
     if (!confirm(t("public_feedback.confirm.approve"))) return;
 
-    const { error } = await supabase
-      .from("files")
-      .update({ status: "approved" })
-      .eq("id", fileId);
+    // Aprovação via RPC `SECURITY DEFINER` (sem UPDATE direto na tabela).
+    const { data: rpcApproved, error: rpcApproveError } = await supabase.rpc(
+      "approve_public_file",
+      { p_file_id: fileId },
+    );
 
-    if (!error) {
+    let approvedOk = false;
+
+    if (!rpcApproveError) {
+      approvedOk = rpcApproved === true;
+    } else {
+      // Fallback: UPDATE direto (enquanto a migration não está aplicada).
+      const { error } = await supabase
+        .from("files")
+        .update({ status: "approved" })
+        .eq("id", fileId);
+      approvedOk = !error;
+    }
+
+    if (approvedOk) {
       setApproved(true);
       confetti({
         particleCount: 150,
@@ -162,12 +219,7 @@ export function PublicFeedback() {
     }
   };
 
-  if (loading)
-    return (
-      <div className="h-screen bg-[#050505] flex items-center justify-center text-white">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-      </div>
-    );
+  if (loading) return <PublicReviewSkeleton />;
   if (!file)
     return (
       <div className="h-screen bg-[#050505] flex items-center justify-center text-zinc-500">
@@ -178,7 +230,7 @@ export function PublicFeedback() {
   return (
     <div className="h-screen bg-black flex flex-col text-white overflow-hidden font-sans selection:bg-blue-500/30 relative">
       {/* GLOBAL OVERLAYS */}
-      <div className="pointer-events-none fixed inset-0 z-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
+      <div className="pointer-events-none fixed inset-0 z-0 bg-[url('/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
 
       {/* HEADER (Minimalista) */}
       <header className="h-16 border-b border-zinc-800/50 bg-black/60 backdrop-blur-xl flex items-center px-6 justify-between z-50 sticky top-0 relative">

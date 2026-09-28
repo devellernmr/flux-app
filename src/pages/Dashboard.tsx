@@ -17,8 +17,9 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet";
-import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { NotificationSystem } from "@/components/NotificationSystem";
+import { LanguageSelector } from "@/components/LanguageSelector";
+import { VisuallyHidden } from "@/components/ui/visually-hidden";
 
 // --- HOOKS E COMPONENTES ---
 import { UpgradeModal } from "@/components/UpgradeModal";
@@ -27,6 +28,7 @@ import { DashboardStats } from "@/components/dashboard/Stats";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { ProjectList } from "@/components/dashboard/ProjectList";
 import {
+  DashboardShellSkeleton,
   DashboardStatsSkeleton,
   ProjectCardSkeleton,
 } from "@/components/dashboard/Skeleton";
@@ -93,12 +95,10 @@ function DashboardContent() {
     setNavigationHandler(setActiveMenu);
   }, [setActiveMenu]);
 
+  // Enquanto o plano (billing) não resolve, renderizamos o shell completo em skeleton:
+  // evita mostrar travas de "Starter" (e upsells indevidos) para usuários pagos.
   if (planLoading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <Loader2 className="h-8 w-8 text-blue-500 animate-spin" />
-      </div>
-    );
+    return <DashboardShellSkeleton />;
   }
 
   // --- RENDERIZADORES DO CONTEÚDO PRINCIPAL ---
@@ -191,7 +191,7 @@ function DashboardContent() {
   return (
     <div className="flex min-h-screen w-full bg-black text-white overflow-hidden relative selection:bg-blue-500/30">
       {/* GLOBAL OVERLAYS */}
-      <div className="pointer-events-none fixed inset-0 z-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
+      <div className="pointer-events-none fixed inset-0 z-0 bg-[url('/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
 
       {/* Tutorial Overlay */}
       <TutorialOverlay />
@@ -256,7 +256,10 @@ function DashboardContent() {
           </div>
 
           <div className="flex items-center gap-2">
-            <NotificationSystem />
+            <div className="flex items-center gap-1 bg-white/5 p-1 rounded-xl border border-white/5">
+              <NotificationSystem />
+              <LanguageSelector compact />
+            </div>
             <Button
               variant="ghost"
               size="icon"
@@ -428,10 +431,6 @@ function DashboardContent() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      <div className="hidden md:block">
-        <NotificationSystem />
-      </div>
     </div>
   );
 }

@@ -10,6 +10,7 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 import { NotificationSystem } from "@/components/NotificationSystem";
+import { LanguageSelector } from "@/components/LanguageSelector";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -87,7 +88,10 @@ export const ProjectHeader = memo(function ProjectHeader({
         <div className="h-8 w-px bg-zinc-900 mx-2 hidden md:block" />
 
         <div className="flex items-center gap-2">
-          <NotificationSystem />
+          <div className="flex items-center gap-1 bg-white/5 p-1 rounded-xl border border-white/5">
+            <NotificationSystem />
+            <LanguageSelector compact />
+          </div>
 
           <Button
             variant="ghost"

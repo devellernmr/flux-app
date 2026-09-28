@@ -71,7 +71,7 @@ export function Sidebar({
     });
   }
 
-  const handleNavigation = (item: any) => {
+  const handleNavigation = (item: MenuItem) => {
     if (item.id === "admin") {
       navigate("/admin");
       return;
@@ -94,57 +94,56 @@ export function Sidebar({
     }
   };
 
-  const NavLinks = () => (
-    <nav className="flex-1 px-4 space-y-1.5 mt-10">
-      {menuItems.map((item) => (
-        <button
-          key={item.id}
-          id={`sidebar-nav-${item.id}`}
-          onClick={() => handleNavigation(item)}
-          className={`w-full group flex items-center gap-4 px-4 py-3.5 rounded-2xl text-[13px] font-bold transition-all duration-300 relative overflow-hidden ${
-            activeMenu === item.id
-              ? "bg-white text-black shadow-2xl shadow-white/5"
-              : "text-zinc-500 hover:text-zinc-200 hover:bg-zinc-900/50"
-          }`}
-        >
-          {activeMenu === item.id && (
-            <motion.div
-              layoutId="main-menu-active"
-              className="absolute inset-0 bg-white"
-              transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-            />
-          )}
-          <item.icon
-            className={`h-4 w-4 relative z-10 ${activeMenu === item.id ? "text-black" : "group-hover:text-blue-400 transition-colors"}`}
-          />
-          <span className="relative z-10 uppercase tracking-tight">
-            {item.label}
-          </span>
-        </button>
-      ))}
-    </nav>
-  );
-
   return (
     <div className="w-full bg-[#030303] flex flex-col h-full">
-      <div className="p-8 pb-2">
-        <div className="flex items-center justify-between px-2">
-          <div className="flex items-center gap-3">
-            <div className="h-9 w-9 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/20">
-              <Sparkles className="h-5 w-5 text-white" />
+      <div className="p-8 pb-4">
+        <div className="flex flex-col gap-8">
+          <div className="flex items-center justify-between px-2">
+            <div className="flex items-center gap-3 group cursor-pointer">
+              <div className="h-10 w-10 bg-blue-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-blue-600/40 group-hover:scale-110 transition-all duration-500">
+                <Sparkles className="h-6 w-6 text-white" />
+              </div>
+              <span className="text-2xl font-black tracking-tighter text-white">
+                FLUXS<span className="text-blue-500">.</span>
+              </span>
             </div>
-            <span className="text-xl font-black tracking-tighter text-white">
-              FLUXS.
-            </span>
+            <div className="flex items-center gap-1.5 bg-white/[0.03] p-1.5 rounded-2xl border border-white/5 backdrop-blur-md">
+              <NotificationSystem />
+              <LanguageSelector compact />
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <NotificationSystem />
-            <LanguageSelector />
-          </div>
+          <div className="h-px w-full bg-gradient-to-r from-transparent via-white/5 to-transparent" />
         </div>
       </div>
 
-      <NavLinks />
+      <nav className="flex-1 px-4 space-y-1.5 mt-10">
+        {menuItems.map((item) => (
+          <button
+            key={item.id}
+            id={`sidebar-nav-${item.id}`}
+            onClick={() => handleNavigation(item)}
+            className={`w-full group flex items-center gap-4 px-4 py-3.5 rounded-2xl text-[13px] font-bold transition-all duration-300 relative overflow-hidden ${
+              activeMenu === item.id
+                ? "bg-white text-black shadow-2xl shadow-white/5"
+                : "text-zinc-500 hover:text-zinc-200 hover:bg-zinc-900/50"
+            }`}
+          >
+            {activeMenu === item.id && (
+              <motion.div
+                layoutId="main-menu-active"
+                className="absolute inset-0 bg-white"
+                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+              />
+            )}
+            <item.icon
+              className={`h-4 w-4 relative z-10 ${activeMenu === item.id ? "text-black" : "group-hover:text-blue-400 transition-colors"}`}
+            />
+            <span className="relative z-10 uppercase tracking-tight">
+              {item.label}
+            </span>
+          </button>
+        ))}
+      </nav>
 
       {/* HELP BUTTON */}
       <div className="px-5 mt-auto mb-6">

@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Check, CreditCard, Loader2 } from "lucide-react";
 import type { PlanType } from "@/types";
+import { track } from "@/lib/tracking";
 
 export const PLANS: {
   id: PlanType;
@@ -91,11 +92,9 @@ export function SubscriptionPlans({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {PLANS.map((p) => {
             const isActive = p.id === currentPlan;
-            const planOrder = { starter: 0, pro: 1, agency: 2 };
-            // @ts-ignore
-            const currentLevel = planOrder[currentPlan] || 0;
-            // @ts-ignore
-            const cardLevel = planOrder[p.id];
+            const planOrder: Record<PlanType, number> = { starter: 0, pro: 1, agency: 2 };
+            const currentLevel = planOrder[currentPlan] ?? 0;
+            const cardLevel = planOrder[p.id] ?? 0;
             const isDowngrade = cardLevel < currentLevel;
 
             return (
@@ -199,6 +198,7 @@ export function SubscriptionPlans({
                   <Button
                     onClick={() => {
                       if (!isActive && !isDowngrade) {
+                        track.initiateCheckout(p.id, p.id === "pro" ? 49 : 149);
                         onSubscribe(p.id);
                       }
                     }}

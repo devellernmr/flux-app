@@ -75,13 +75,24 @@ export function BriefingFileUploader({
             data: { publicUrl },
           } = supabase.storage.from("project-files").getPublicUrl(storagePath);
 
-          // Register in database
-          await supabase.from("files").insert({
-            project_id: projectId,
-            name: finalFileName,
-            url: publicUrl,
-            status: "pending",
+          // Register in database (RPC SECURITY DEFINER; fallback direto para
+          // enquanto a migration 20260228 não estiver aplicada)
+          const { error: rpcError } = await supabase.rpc("add_public_file", {
+            p_project_id: projectId,
+            p_name: finalFileName,
+            p_url: publicUrl,
           });
+
+          if (rpcError) {
+            const { error: insertError } = await supabase.from("files").insert({
+              project_id: projectId,
+              name: finalFileName,
+              url: publicUrl,
+              status: "pending",
+            });
+
+            if (insertError) throw insertError;
+          }
 
           newUrls.push(publicUrl);
         } catch (error) {

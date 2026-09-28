@@ -93,11 +93,24 @@ export function FeedbackView() {
       data: { user },
     } = await supabase.auth.getUser();
     setUser(user);
-    const { data: fileData } = await supabase
-      .from("files")
-      .select("*, projects(name, custom_logo_url, agency_name)")
-      .eq("id", fileId)
-      .single();
+
+    // Leitura pública segura (RPC SECURITY DEFINER) com fallback direto.
+    const { data: rpcFile, error: rpcFileError } = await supabase.rpc(
+      "get_public_file",
+      { p_file_id: fileId },
+    );
+
+    let fileData: any = !rpcFileError ? rpcFile : null;
+
+    if (rpcFileError || !fileData) {
+      const { data } = await supabase
+        .from("files")
+        .select("*, projects(name, custom_logo_url, agency_name)")
+        .eq("id", fileId)
+        .single();
+      fileData = data;
+    }
+
     setFile(fileData);
 
     if (fileData?.project_id) {
@@ -108,10 +121,19 @@ export function FeedbackView() {
       if (membersData) setMembers(membersData);
     }
 
-    // CORREÇÃO DO ERRO 400: Removido o join complexo 'profiles:user_id(email)'
+    const { data: rpcComments, error: rpcCommentsError } = await supabase.rpc(
+      "get_public_file_comments",
+      { p_file_id: fileId },
+    );
+
+    if (!rpcCommentsError) {
+      setComments(rpcComments || []);
+      return;
+    }
+
     const { data: commentsData } = await supabase
       .from("comments")
-      .select("*") // Busca simples para evitar erro de Foreign Key
+      .select("*")
       .eq("file_id", fileId)
       .order("created_at", { ascending: true });
 
@@ -176,55 +198,86 @@ export function FeedbackView() {
     setNewComment("");
     setTempPin(null);
 
-    const { data, error } = await supabase
-      .from("comments")
-      .insert({
-        file_id: fileId,
-        user_id: user?.id,
-        content: temp.content,
-        position_x: temp.x || null,
-        position_y: temp.y || null,
-      })
-      .select()
-      .single();
+    // Comentário via RPC (funciona logado e como convidado) com fallback direto.
+    const { data: rpcComment, error: rpcCommentError } = await supabase.rpc(
+      "add_public_comment",
+      {
+        p_file_id: fileId,
+        p_content: temp.content,
+        p_position_x: temp.x ?? null,
+        p_position_y: temp.y ?? null,
+        p_user_name: user?.user_metadata?.full_name || user?.email || null,
+        p_user_id: user?.id ?? null,
+      },
+    );
 
-    if (!error) {
-      setComments((prev) => {
-        // Evita duplicatas do Realtime
-        if (prev.some((c) => c.id === data.id)) return prev;
-        return [...prev, data];
-      });
+    let data: any = !rpcCommentError ? rpcComment : null;
 
-      // Notificar outros membros sobre o novo feedback
-      const otherMembers = members.filter((m) => m.user_id !== user?.id);
-      for (const member of otherMembers) {
-        await sendNotification({
-          userId: member.user_id,
-          title: "Novo feedback no design",
-          message: `${user?.user_metadata?.full_name || "Alguém"
-            } deixou um comentário em ${file.name}`,
-          type: "comment",
-          link: `/feedback/${fileId}`,
-        });
+    if (!data) {
+      // Fallback: insert direto (enquanto a migration não está aplicada).
+      const res = await supabase
+        .from("comments")
+        .insert({
+          file_id: fileId,
+          user_id: user?.id,
+          content: temp.content,
+          position_x: temp.x || null,
+          position_y: temp.y || null,
+        })
+        .select()
+        .single();
+
+      if (res.error) {
+        console.error(res.error);
+        toast.error("Erro ao enviar");
+        return;
       }
 
-      toast.success("Enviado!");
-    } else {
-      console.error(error);
-      toast.error("Erro ao enviar");
+      data = res.data;
     }
+
+    setComments((prev) => {
+      // Evita duplicatas do Realtime
+      if (prev.some((c) => c.id === data.id)) return prev;
+      return [...prev, data];
+    });
+
+    // Notificar outros membros sobre o novo feedback
+    const otherMembers = members.filter((m) => m.user_id !== user?.id);
+    for (const member of otherMembers) {
+      await sendNotification({
+        userId: member.user_id,
+        title: "Novo feedback no design",
+        message: `${user?.user_metadata?.full_name || "Alguém"
+          } deixou um comentário em ${file.name}`,
+        type: "comment",
+        link: `/feedback/${fileId}`,
+      });
+    }
+
+    toast.success("Enviado!");
   };
 
   const updateFileStatus = async (newStatus: "approved" | "rejected") => {
     if (!fileId) return;
     setIsUpdatingStatus(true);
     try {
-      const { error } = await supabase
-        .from("files")
-        .update({ status: newStatus })
-        .eq("id", fileId);
+      // RPC `SECURITY DEFINER` (funciona para convidados sem login) + fallback.
+      const { data: rpcStatus, error: rpcStatusError } = await supabase.rpc(
+        "set_public_file_status",
+        { p_file_id: fileId, p_status: newStatus },
+      );
 
-      if (error) throw error;
+      if (rpcStatusError) {
+        const { error } = await supabase
+          .from("files")
+          .update({ status: newStatus })
+          .eq("id", fileId);
+
+        if (error) throw error;
+      } else if (rpcStatus === false) {
+        throw new Error("Arquivo não encontrado");
+      }
 
       setFile((prev: any) => ({ ...prev, status: newStatus }));
 
