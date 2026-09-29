@@ -4,6 +4,7 @@ import { supabase } from "@/lib/supabase";
 import { Loader2 } from "lucide-react";
 import { Toaster } from "@/components/ui/sonner";
 import { useAdmin } from "@/hooks/useAdmin";
+import { Analytics as VercelAnalytics } from "@vercel/analytics/react";
 
 // Lazy-loaded pages for optimized bundle splitting & faster first paint
 const LandingPage = lazy(() => import("@/pages/LandingPage").then(m => ({ default: m.LandingPage })));
@@ -188,9 +189,11 @@ function App() {
 
       {/* Toast Notifications */}
       <Toaster richColors theme="dark" />
+      
+      {/* Vercel Web Analytics */}
+      <VercelAnalytics />
     </BrowserRouter>
   );
 }
 
 export default App;
-
